@@ -68,25 +68,37 @@ const preview_style = {
   pointerEvents: 'none'
 }
 
-import card_image from './img_test.png'
+const cardImages = import.meta.glob('./assets/cards/*.png', { eager: true });
+
 
 const App = () => {
-  const [cards, setCards] = useState([0, 1, 2, 3, 4, 4, 4, 4]);
+  const imageArray = Object.values(cardImages).map(module => module.default);
+  const [cards, setCards] = useState(Array.from({ length: imageArray.length }, (_, i) => i));
   const [previewPos, setPreviewPos] = useState(null);
   const [draggedCard, setDraggedCard] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previewCard, setPreviewCard] = useState(null);
 
   const debouncedSetPreview = useCallback((e, cardIndex) => {
-    if (!e) {
+    if (!e || isDragging) {
       setPreviewPos(null);
+      setPreviewCard(null);
       return;
     }
     const rect = e.currentTarget.getBoundingClientRect();
     setPreviewPos(rect.left + rect.width / 2);
-  }, []);
+    setPreviewCard(cards[cardIndex]);
+  }, [isDragging, cards]);
+
+
+
+
 
   const handleDragStart = (e, index) => {
     setDraggedCard(index);
+    setIsDragging(true);
+    setPreviewPos(null);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -95,13 +107,13 @@ const App = () => {
     setDragOverIndex(index);
   };
 
-  const handleDrop = (e, dropIndex) => {
+  const handleDrop = (e, index) => {
     e.preventDefault();
     if (draggedCard === null) return;
 
     const newCards = [...cards];
     const [draggedItem] = newCards.splice(draggedCard, 1);
-    newCards.splice(dropIndex, 0, draggedItem);
+    newCards.splice(index, 0, draggedItem);
     
     setCards(newCards);
     setDraggedCard(null);
@@ -111,16 +123,17 @@ const App = () => {
   const handleDragEnd = () => {
     setDraggedCard(null);
     setDragOverIndex(null);
+    setIsDragging(false);
   };
 
-  return (
+return (
     <div style={container_style}>
       <div style={top_style}>
         Top Region
       </div>
       <div style={bot_style}>
         <img
-          src={card_image}
+          src={previewCard !== null ? imageArray[previewCard] : ''}
           alt="preview"
           style={{
             ...preview_style,
@@ -129,7 +142,7 @@ const App = () => {
             pointerEvents: 'none'
           }}
         />
-        {cards.map((_, index) => (
+        {cards.map((cardIndex, index) => (
           <div
             key={index}
             style={card_style(index, cards.length, index === draggedCard, index === dragOverIndex)}
@@ -141,13 +154,14 @@ const App = () => {
             onMouseMove={(e) => debouncedSetPreview(e, index)}
             onMouseLeave={() => debouncedSetPreview(null)}
           >
-            <img src={card_image} alt="card" style={card_image_style} />
+            <img src={imageArray[cardIndex]} alt={`card ${cardIndex}`} style={card_image_style} />
           </div>
         ))}
       </div>
     </div>
   );
 }
+
 
 export default App
 
