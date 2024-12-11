@@ -1,10 +1,12 @@
 import './App.css'
-
+import { useState, useCallback, useEffect } from 'react';
+import debounce from 'lodash/debounce';
 
 const container_style = {
 	height: '100%', 
 	display: 'flex', 
-	flexDirection: 'column' 
+	flexDirection: 'column',
+	position: 'relative'
 }
 
 const top_style = {
@@ -12,7 +14,6 @@ const top_style = {
 	backgroundColor: '#f0f0f0'
 }
 
-const card_width = 200;
 
 const bot_style = {
 	flex: '1',
@@ -22,8 +23,9 @@ const bot_style = {
 	backgroundColor: '#e0e0e0',
 	justifyContent: 'center',
 	alignItems: 'flex-end',
-	overflow: 'hidden'
 }
+
+const card_width = 200;
 
 const card_style = (index, total_cards) => {
   const position = index - (total_cards - 1) / 2;
@@ -54,8 +56,31 @@ const card_image_style = {
 
 import card_image from './img_test.png'
 
+const preview_style = {
+  position: 'fixed',
+  bottom: '20px',
+  width: '300px',
+  height: '420px',
+  transform: 'translateX(-50%)',
+  zIndex: 1000,
+  borderRadius: '12px',
+  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+	pointerEvents: 'none'
+}
+
+
 const App = () => {
 	const cards = [0, 1, 2, 3, 4, 4, 4, 4];
+  const [previewPos, setPreviewPos] = useState(null);
+
+	const debouncedSetPreview = useCallback((e, cardIndex) => {
+    if (!e) {
+      setPreviewPos(null);
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPreviewPos(rect.left + rect.width / 2);
+  }, []);
 
   return (
     <div style={container_style}>
@@ -64,14 +89,28 @@ const App = () => {
         Top Region
       </div>
 
-      <div style={bot_style}>
-				{cards.map((_, index) => (
-          <div key={index} style={card_style(index, cards.length)}>
+<div style={bot_style}>
+        <img
+          src={card_image}
+          alt="preview"
+          style={{
+            ...preview_style,
+            left: previewPos || 0,
+            opacity: previewPos ? 1 : 0,
+            pointerEvents: 'none'
+          }}
+        />
+        {cards.map((_, index) => (
+          <div
+            key={index}
+            style={card_style(index, cards.length)}
+            onMouseMove={(e) => debouncedSetPreview(e, index)}
+            onMouseLeave={() => debouncedSetPreview(null)}
+          >
             <img src={card_image} alt="card" style={card_image_style} />
           </div>
         ))}
       </div>
-
     </div>
   );
 }
