@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import './App.css';
 
-const card_width = 180;
-const card_preview_multiplier = 2.2;
 
 
 /**
@@ -20,45 +18,13 @@ const bot_style = {
 };
 
 
-
-/**
- * card preview styling
- *
- */
-const preview_style = {
-	/* preview is at the bottom, 20px above the window */
-  position: 'fixed',
-  bottom: '20px',
-
-	/* sizing of the preview */
-  width: `${card_preview_multiplier * card_width}px`,
-  height: `${(card_preview_multiplier * card_width) / 0.714}px`,
-
-	/* use center of the card being hovered for left calculation */
-  transform: 'translateX(-50%)',
-
-	/* position this in front of other elements */
-  zIndex: 1000,
-
-	/* add subtle shadow effect */
-  borderRadius: '16px',
-  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-
-	/* don't intercept mouse events so cards below it in the hand can still be interacted with */
-  pointerEvents: 'none',
-
-	/* horizontal position calcualted/set by other functions */
-	left: '0'
-};
-
-
-
 /**
  * card in hand styling
  *
  * 2024.12.11
  * still need to handle card density when hand becomes very large
  */
+const card_width = 180;
 const card_style = (index, total_cards, isDragging, isDragOver, isHovered) => {
 	/* position is relative to center */
   const position = index - (total_cards - 1) / 2;
@@ -117,11 +83,58 @@ const card_image_style = {
   borderRadius: 'inherit'
 };
 
-const cardImages = import.meta.glob('./assets/cards/*.png', { eager: true });
+const card_hand_images = import.meta.glob('./assets/hand/*.png', { eager: true });
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * card preview styling
+ *
+ */
+const card_preview_multiplier = 2.2;
+const preview_style = {
+	/* preview is at the bottom, 20px above the window */
+  position: 'fixed',
+  bottom: '20px',
+
+	/* sizing of the preview */
+  width: `${card_preview_multiplier * card_width}px`,
+  height: `${(card_preview_multiplier * card_width) / 0.714}px`,
+
+	/* use center of the card being hovered for left calculation */
+  transform: 'translateX(-50%)',
+
+	/* position this in front of other elements */
+  zIndex: 1000,
+
+	/* add subtle shadow effect */
+  borderRadius: '16px',
+  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+
+	/* don't intercept mouse events so cards below it in the hand can still be interacted with */
+  pointerEvents: 'none',
+
+	/* horizontal position calcualted/set by other functions */
+	left: '0'
+};
+
+
 
 const CardHand = () => {
-  const imageArray = Object.values(cardImages).map(module => module.default);
-  const [cards, setCards] = useState(Array.from({ length: imageArray.length }, (_, i) => i));
+  const card_hand_image_array = Object.values(card_hand_images).map(module => module.default);
+
+
+  const [cards, setCards] = useState(Array.from({ length: card_hand_image_array.length }, (_, i) => i));
   const [previewPos, setPreviewPos] = useState(null);
   const [draggedCard, setDraggedCard] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -191,7 +204,7 @@ const CardHand = () => {
 			
 			{/* card previewing */}
       {previewPos && <img
-          src={previewCard !== null ? imageArray[previewCard] : ''}
+          src={previewCard !== null ? card_hand_image_array[previewCard] : ''}
           alt="preview"
           style={{
             ...preview_style,
@@ -218,7 +231,7 @@ const CardHand = () => {
           onMouseLeave={() => debouncedSetPreview(null)}
         >
 					{/* set card object's image */}
-          <img src={imageArray[cardIndex]} alt={`card ${cardIndex}`} style={card_image_style} />
+          <img src={card_hand_image_array[cardIndex]} alt={`card ${cardIndex}`} style={card_image_style} />
         </div>
       ))}
 
