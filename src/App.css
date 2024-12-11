@@ -1,0 +1,8 @@
+/* get rid of vertical scroll bar caused by default margin */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+
+
