@@ -10,7 +10,7 @@ const container_style = {
 }
 
 const top_style = {
-  flex: '4',
+  flex: '6',
   backgroundColor: '#f0f0f0'
 }
 
@@ -24,7 +24,6 @@ const bot_style = {
   alignItems: 'flex-end',
 }
 
-const card_width = 200;
 
 const card_style = (index, total_cards, isDragging, isDragOver) => {
   const position = index - (total_cards - 1) / 2;
@@ -56,11 +55,14 @@ const card_image_style = {
   borderRadius: 'inherit'
 }
 
+const card_width = 180;
+const card_preview_multiplier = 2.2;
+
 const preview_style = {
   position: 'fixed',
   bottom: '20px',
-  width: '300px',
-  height: '420px',
+  width: `${card_preview_multiplier * card_width}px`,
+  height: `${(card_preview_multiplier * card_width) / 0.714}px`,
   transform: 'translateX(-50%)',
   zIndex: 1000,
   borderRadius: '12px',
@@ -131,6 +133,7 @@ return (
       <div style={top_style}>
         Top Region
       </div>
+
       <div style={bot_style}>
         <img
           src={previewCard !== null ? imageArray[previewCard] : ''}
@@ -158,6 +161,7 @@ return (
           </div>
         ))}
       </div>
+
     </div>
   );
 }
