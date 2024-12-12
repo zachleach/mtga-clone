@@ -39,9 +39,6 @@ const App = () => {
       <div style={zone}>
         Top Region
       </div>
-      <div style={zone}>
-        Top Region
-      </div>
       <CardHand />
     </div>
   );

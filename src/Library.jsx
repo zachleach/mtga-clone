@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const card_width = 250;
+const card_width = 220;
 const gap = 10;
 const card_images = import.meta.glob('./assets/deck/*.png', { eager: true });
 
@@ -91,6 +91,7 @@ const Library = ({ isOpen, onClose }) => {
             />
           </div>
         ))}
+
       </div>
     </div>
   );
