@@ -8,13 +8,12 @@ import './App.css'
  * blank card object for testing purposes
  */
 const Card = ({ content, h }) => {
-	const s = {
-		flex: '0 0 auto',
-		height: '80%',
-		minWidth: '0px',
-		minHeight: '0px',
-		aspectRatio: '0.714',
 
+	const s = {
+		flex: '0 1 auto',
+		height: '60%',
+		aspectRatio: '0.714',
+		minWidth: 0,
 
 		margin: '0pt 1pt',
 		border: '1px solid black',
@@ -36,10 +35,8 @@ const Card = ({ content, h }) => {
 
 
 const Cards = ({ N, h }) => {
-
-
 	return (
-		<div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+		<div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center',   }}>
 			{Array(N).fill(null).map((_, index) => (
 					<Card key={index} />
 			))}
@@ -56,6 +53,7 @@ const CardRow = ({ children, w, h }) => {
 	const s = {
 		display: 'flex',
 		width: `${w}%`, 
+		maxWidth: `${w}%`, 
 		height: `${h}%`,
 
 		boxSizing: 'border-box',
@@ -64,7 +62,6 @@ const CardRow = ({ children, w, h }) => {
 
 		alignItems: 'center',
 		justifyContent: 'center',
-
 		overflow: 'hidden',
 	}
 
@@ -79,22 +76,21 @@ const CardRow = ({ children, w, h }) => {
 const Board = () => {
 
 	return (
-		<div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+		<div style={{ height: '100%', width: '100%', display: 'flex',  minWidth: 0, flexDirection: 'column' }}>
 
 			<CardRow w={100} h={50}>
 				<Cards N={1} />
 			</CardRow>
 
-
 			<CardRow w={100} h={25}>
 
 				<CardRow w={50} h={100}>
-					<Cards N={5}/>
-				</CardRow> 
+					<Cards N={6} />
+				</CardRow>
 
 				<CardRow w={50} h={100}>
 					Artifacts / Enchantments
-				</CardRow> 
+				</CardRow>
 
 			</CardRow>
 
@@ -115,13 +111,13 @@ const Board = () => {
 const App = () => {
 	return (
 		<div>
-			<div style={{ height: '30vh', display: 'flex', transform: 'rotate(180deg)' }}>
+			<div style={{ height: '40vh', display: 'flex', transform: 'rotate(180deg)' }}>
 				<Board/>
 				<Board/>
 				<Board/>
 			</div>
 
-			<div style={{ height: '70vh', display: 'flex', flexDirection: 'column' }}>
+			<div style={{ height: '60vh', display: 'flex', flexDirection: 'column' }}>
 				<Board/>
 			</div>
 		</div>
