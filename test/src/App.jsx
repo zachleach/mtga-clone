@@ -7,10 +7,14 @@ import './App.css'
 /**
  * blank card object for testing purposes
  */
-const Card = ({ content }) => {
+const Card = ({ content, h }) => {
 	const s = {
-		flex: '0 1 100px',
+		flex: '0 1 auto',
+		height: '80%',
+		minWidth: '0px',
+		minHeight: '0px',
 		aspectRatio: '0.714',
+
 
 		margin: '0pt 1pt',
 		border: '1px solid black',
@@ -31,11 +35,11 @@ const Card = ({ content }) => {
 
 
 
-const Cards = ({ N, w }) => {
+const Cards = ({ N, h }) => {
 	return (
-		<div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center' }}>
+		<div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
 			{Array(N).fill(null).map((_, index) => (
-					<Card key={index} w={w} />
+					<Card key={index} />
 			))}
 		</div>
 	)
@@ -76,7 +80,7 @@ const Board = () => {
 		<div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
 
 			<CardRow w={100} h={50}>
-				<Cards N={9}/>
+				<Cards N={1} />
 			</CardRow>
 
 
