@@ -9,7 +9,7 @@ import './App.css'
  */
 const Card = ({ content, h }) => {
 	const s = {
-		flex: '0 1 auto',
+		flex: '0 0 auto',
 		height: '80%',
 		minWidth: '0px',
 		minHeight: '0px',
@@ -36,6 +36,8 @@ const Card = ({ content, h }) => {
 
 
 const Cards = ({ N, h }) => {
+
+
 	return (
 		<div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
 			{Array(N).fill(null).map((_, index) => (
