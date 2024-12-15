@@ -5,51 +5,37 @@ import './App.css'
 
 
 /**
- * not really sure about the inner-style thing, need to look into it later
+ * blank card object for testing purposes
  */
 const Card = ({ content }) => {
 	const s = {
-		width: '100%',
-		height: '0',
-		paddingBottom: '140%', 
-		position: 'relative',
+		flex: '0 1 100px',
+		aspectRatio: '0.714',
+
+		margin: '0pt 1pt',
 		border: '1px solid black',
 		borderRadius: '12px',
 		backgroundColor: 'white',
-	}
 
-	const innerStyle = {
-		position: 'absolute',
-		top: '0',
-		left: '0',
-		width: '100%',
-		height: '100%',
-		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
+
 	}
 
 	return (
 		<div style={s}>
-			<div style={innerStyle}>
-				{content}
-			</div>
+			{content}
 		</div>
 	)
 }
 
 
 
-/**
- * don't know how, but it makes the cards appear centered with the correct aspect ratio 
- */
 const Cards = ({ N, w }) => {
 	return (
-		<div style={{ display: 'flex', height: '100%', width: '100%' }}>
+		<div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center' }}>
 			{Array(N).fill(null).map((_, index) => (
-				<div style={{ flex: `0 1 ${100/N}%`, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 					<Card key={index} w={w} />
-				</div>
 			))}
 		</div>
 	)
@@ -57,22 +43,22 @@ const Cards = ({ N, w }) => {
 
 
 
-
 /** 
  * horizontal container
  */
-const Container = ({ children, w, h, vertical }) => {
+const CardRow = ({ children, w, h }) => {
 	const s = {
 		display: 'flex',
 		width: `${w}%`, 
 		height: `${h}%`,
 
 		boxSizing: 'border-box',
-
 		backgroundColor: 'grey',
 		border: '1px solid red',
+
 		alignItems: 'center',
 		justifyContent: 'center',
+
 		overflow: 'hidden',
 	}
 
@@ -84,34 +70,31 @@ const Container = ({ children, w, h, vertical }) => {
 }
 
 
-
-
 const Board = () => {
 
 	return (
 		<div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
 
-			{/* creature zone */}
-			<Container w={100} h={50}>
-				<Cards N={10} w={90}/>
-			</Container>
+			<CardRow w={100} h={50}>
+				<Cards N={9}/>
+			</CardRow>
 
 
-			<Container w={100} h={25}>
+			<CardRow w={100} h={25}>
 
-				<Container w={50} h={100}>
-					Lands
-				</Container> 
+				<CardRow w={50} h={100}>
+					<Cards N={5}/>
+				</CardRow> 
 
-				<Container w={50} h={100}>
+				<CardRow w={50} h={100}>
 					Artifacts / Enchantments
-				</Container> 
+				</CardRow> 
 
-			</Container>
+			</CardRow>
 
-			<Container w={100} h={25}>
+			<CardRow w={100} h={25}>
 				Hand
-			</Container>
+			</CardRow>
 
 		</div>
 	)
