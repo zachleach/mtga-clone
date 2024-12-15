@@ -1,31 +1,5 @@
 import './App.css'
 
-/** 
- * horizontal container
- */
-const Container = ({ children, w, h }) => {
-	const s = {
-		display: 'flex',
-		flex: '1 0 auto',
-		width: `${w}vw`,
-		height: h ? `${h}vh` : '100%', // Add conditional height
-
-		boxSizing: 'border-box',
-
-		backgroundColor: 'grey',
-		border: '1px solid red',
-		alignItems: 'center',
-		justifyContent: 'center',
-		overflow: 'hidden',
-	}
-
-	return (
-		<div style={s}>
-			{children}
-		</div>
-	)
-}
-
 
 
 
@@ -56,58 +30,78 @@ const Card = ({ w, content }) => {
 
 
 
+const Cards = ({ N, w }) => {
+	return (
+		<>
+			{Array(N).fill(null).map((_, index) => (
+				<div>
+					<Card key={index} w={w} />
+				</div>
+			))}
+		</>
+	)
+}
 
 
 
 
 
-const Board_2 = () => {
 
+
+
+
+/** 
+ * horizontal container
+ */
+const Container = ({ children, w, h, vertical }) => {
 	const s = {
 		display: 'flex',
-		flexDirection: 'column'
+		width: w ? `${w}%` : '100%',
+		height: `${h}%`,
+
+		boxSizing: 'border-box',
+
+		flexDirection: vertical ? 'column' : 'row',
+
+		backgroundColor: 'grey',
+		border: '1px solid red',
+		alignItems: 'center',
+		justifyContent: 'center',
+		overflow: 'hidden',
 	}
 
 	return (
 		<div style={s}>
-
-			<Container h={100/6}>
-				{Array(1).fill(null).map((_, index) => (
-					<div style={{
-						transform: 'rotate(90deg)'
-					}}>
-						<Card key={index} w={80} />
-					</div>
-				))}
-			</Container>
-
-			<Container h={100/3 + 100/6}>
-				{Array(3).fill(null).map((_, index) => (
-					<Card key={index} w={250} />
-				))}
-			</Container>
+			{children}
+		</div>
+	)
+}
 
 
+const Board = () => {
 
-			<Container h={100/6}>
-				<Container w={50}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
+	return (
+		<div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
 
-				<Container w={50}>
-					{Array(4).fill(null).map((_, index) => (
-						<Card key={index} w={80}/>
-					))}
-				</Container>
+			<Container w={100} h={50}>
+				Creatures
 			</Container>
 
 
-			<Container h={100/6}>
-				{Array(7).fill(null).map((_, index) => (
-					<Card key={index} w={80}/>
-				))}
+			<Container w={100} h={25}>
+
+				<Container w={50} h={100}>
+					Lands
+				</Container> 
+
+				<Container w={50} h={100}>
+					Artifacts / Enchantments
+				</Container> 
+
+			</Container>
+
+			<Container w={100} h={25}>
+				Hand
 			</Container>
 
 		</div>
@@ -117,103 +111,21 @@ const Board_2 = () => {
 
 
 
-
-
-
-
-const Board_1 = () => {
-
-	const s = {
-		display: 'flex',
-		flexDirection: 'column'
-	}
-
-	return (
-		<div style={s}>
-			<Container h={100/6}>
-
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-				<Container w={100/7}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-
-			</Container>
-
-
-
-			<Container h={100/3 + 100/6}>
-				{Array(3).fill(null).map((_, index) => (
-					<Card key={index} w={250} />
-				))}
-			</Container>
-
-
-
-			<Container h={100/6}>
-				<Container w={50}>
-					{Array(1).fill(null).map((_, index) => (
-						<Card key={index} w={80} />
-					))}
-				</Container>
-
-				<Container w={50}>
-					{Array(4).fill(null).map((_, index) => (
-						<Card key={index} w={80}/>
-					))}
-				</Container>
-			</Container>
-
-
-			<Container h={100/6}>
-				{Array(7).fill(null).map((_, index) => (
-					<Card key={index} w={80}/>
-				))}
-			</Container>
-
-		</div>
-	)
-
-}
 
 
 
 const App = () => {
 	return (
 		<div>
+			<div style={{ height: '30vh', display: 'flex', transform: 'rotate(180deg)' }}>
+					<Board/>
+					<Board/>
+					<Board/>
+			</div>
 
-			<Board_1 />
-
+			<div style={{ height: '70vh', display: 'flex', flexDirection: 'column' }}>
+				<Board/>
+			</div>
 		</div>
 	)
 }
