@@ -1,67 +1,28 @@
 import { useState } from 'react'
 import './App.css'
 
-
-/**
- * card stack should just render an array
- * card row should manage card stacks
- * (and board manages card rows? we'll see.)
- *
- * no, you need drag and drop on the cardstack level, how else can you change the cards
- *
- */
-const CardStack = ({ card_arr }) => {
-  const [cards, setCards] = useState(card_arr || []);
+const CardStack = ({ rowId, card_arr, onDragStart, onDrop }) => {
   const cardHeight = 140;
   const overlap = 0.15;
   const visibleHeight = cardHeight * overlap;
-
-	/**
-	 * this should probably go into state for css related stuff
-	 *
-	 */
-  const handleDragStart = (e, index) => {
-    e.dataTransfer.setData('cardIndex', index.toString());
-  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
   };
 
-  const handleDrop = (e, targetIndex) => {
-    e.preventDefault();
-    const draggedIndex = parseInt(e.dataTransfer.getData('cardIndex'));
-    
-    if (draggedIndex === targetIndex) return;
-
-    setCards(prev => {
-      const copy = [...prev];
-      const draggedCard = copy[draggedIndex];
-			/* remove dragged card */
-			copy.splice(draggedIndex, 1);
-			/* then insert it at target index */
-      copy.splice(targetIndex, 0, draggedCard);
-
-      return copy;
-    });
-  };
-
   return (
     <div style={{
       position: 'relative',
-      height: `${cardHeight + (cards.length - 1) * visibleHeight}px`,
+      height: `${cardHeight + (card_arr.length - 1) * visibleHeight}px`,
       width: '100px',
     }}>
-      {cards.map((card, index) => (
+      {card_arr.map((card, index) => (
         <div
           key={index}
-					
-					/* drag and drop */
           draggable
-          onDragStart={(e) => handleDragStart(e, index)}
+          onDragStart={(e) => onDragStart(e, rowId, index)}
           onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, index)}
-
+          onDrop={(e) => onDrop(e, rowId, index)}
           style={{
             position: 'absolute',
             top: `${index * visibleHeight}px`,
@@ -71,10 +32,7 @@ const CardStack = ({ card_arr }) => {
             cursor: 'move',
           }}
         >
-
           <Card {...card} />
-
-
         </div>
       ))}
     </div>
@@ -97,47 +55,92 @@ const Card = ({ color }) => (
 
 
 
-const CardRow = () => {
-  const cardData = [
-    { color: 'red' },
-    { color: 'blue' },
-    { color: 'green' },
-    { color: 'yellow' },
-  ];
-
-	return (
-		<div style={{ 
-			height: '20%',
-			width: '100%',
-			background: 'grey',
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'center',
-		}}>
-
-      <CardStack card_arr={cardData} />
-
-		</div>
-	)
-
+const CardRow = ({ rowId, cards, onDragStart, onDrop }) => {
+  return (
+    <div style={{ 
+      height: '20%',
+      width: '100%',
+      background: 'grey',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <CardStack 
+        rowId={rowId}
+        card_arr={cards}
+        onDragStart={onDragStart}
+        onDrop={onDrop}
+      />
+    </div>
+  )
 }
 
 
 
 
-
 const App = () => {
+  const [rows, setRows] = useState([
+    {
+      id: 'row1',
+      cards: [
+        { color: 'red' },
+        { color: 'blue' },
+        { color: 'green' },
+        { color: 'yellow' },
+      ]
+    },
+    {
+      id: 'row2',
+      cards: [
+        { color: 'red' },
+        { color: 'blue' },
+        { color: 'green' },
+        { color: 'yellow' },
+      ]
+    }
+  ]);
+
+  const handleDragStart = (e, sourceRowId, cardIndex) => {
+    e.dataTransfer.setData('sourceRowId', sourceRowId);
+    e.dataTransfer.setData('cardIndex', cardIndex.toString());
+  };
+
+  const handleDrop = (e, targetRowId, targetIndex) => {
+    e.preventDefault();
+    const sourceRowId = e.dataTransfer.getData('sourceRowId');
+    const cardIndex = parseInt(e.dataTransfer.getData('cardIndex'));
+
+    setRows(prev => {
+      const newRows = [...prev];
+      const sourceRowIndex = newRows.findIndex(row => row.id === sourceRowId);
+      const targetRowIndex = newRows.findIndex(row => row.id === targetRowId);
+
+			if (sourceRowIndex !== targetRowIndex) {
+				targetIndex++
+			}
+      const [movedCard] = newRows[sourceRowIndex].cards.splice(cardIndex, 1);
+      newRows[targetRowIndex].cards.splice(targetIndex, 0, movedCard);
+      return newRows;
+    });
+  };
 
   return (
     <div style={{  
-			display: 'flex',  
-			height: '100vh',
-			alignItems: 'center',
-			justifyContent: 'center',
-				flexDirection: 'column',
-		}}>
-			<CardRow/>
-			<CardRow/>
+      display: 'flex',  
+      height: '100vh',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+    }}>
+      {rows.map(row => (
+        <CardRow 
+          key={row.id}
+          rowId={row.id}
+          cards={row.cards}
+          onDragStart={handleDragStart}
+          onDrop={handleDrop}
+        />
+      ))}
     </div>
   );
 };
