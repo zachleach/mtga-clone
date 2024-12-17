@@ -49,9 +49,12 @@ const CardStack = ({ card_arr, card_row_props, app_props }) => {
 	/* actually call the dnd handlers defined in parent components */
   const get_dnd_props = (index) => ({
 		draggable: true,
-    onDragStart: (e) => app_props.onDragStart(e, card_row_props.row_id, card_row_props.stack_id, index),
-    onDragOver: (e) => e.preventDefault(),
-    onDrop: (e) => app_props.onDrop(e, card_row_props.row_id, card_row_props.stack_id, index)
+    onDragStart: (e) => app_props.card_stack.onDragStart(e, card_row_props.row_id, card_row_props.stack_id, index),
+    onDragOver: (e) => { 
+			e.preventDefault()
+			e.stopPropagation()
+		},
+    onDrop: (e) => app_props.card_stack.onDrop(e, card_row_props.row_id, card_row_props.stack_id, index)
   })
 
 
@@ -78,6 +81,8 @@ const CardStack = ({ card_arr, card_row_props, app_props }) => {
  */
 const CardRow = ({ card_row_obj, app_props }) => {
 
+	const row_id = card_row_obj.id
+
 	const container_style = {
 		height: '20%', 
 		width: '100%', 
@@ -92,16 +97,28 @@ const CardRow = ({ card_row_obj, app_props }) => {
 
 	const card_stack_props = (stack_id) => {
 		return {
-			row_id: card_row_obj.id,
+			row_id: row_id,
 			stack_id
 		}
 	}
+
+
+
+	const row_dnd_props = {
+		onDragOver: (e) => e.preventDefault(),
+		onDrop: (e) => app_props.card_row.onDrop(e, row_id)
+	}
+
+
+
 
 	/**
 	 * rendering each cardstack and passing it row/stack information for drag and drop events
 	 */
 	return (
-    <div style={container_style}>
+		/* handle dropping onto the row */
+    <div style={container_style} {...row_dnd_props}>
+
 			{/* render CardStack component for each stack in card_row_obj.stacks  */}
       {card_row_obj.stacks.map(stack => (
         <CardStack
@@ -140,45 +157,100 @@ const App = () => {
     }
   ]);
 
+	const getUniqueStackId = (row) => {
+    const existingIds = row.stacks.map(stack => parseInt(stack.id));
+    let newId = 0;
+    while (existingIds.includes(newId)) {
+      newId++;
+    }
+    return String(newId);
+  };
 
 
 
 
-	const card_stack_dnd_handlers = {
+	const dnd_handlers = {
 
-		/* dragging from a card_stack */
-		onDragStart: (e, row_id, stack_id, cardIndex) => {
-			e.dataTransfer.setData('sourceRowId', row_id);
-			e.dataTransfer.setData('sourceStackId', stack_id);
-			e.dataTransfer.setData('cardIndex', cardIndex.toString());
+		/* CARD STACK */
+		card_stack: {
+			/* dragging from a card_stack */
+			onDragStart: (e, row_id, stack_id, cardIndex) => {
+				e.dataTransfer.setData('sourceRowId', row_id);
+				e.dataTransfer.setData('sourceStackId', stack_id);
+				e.dataTransfer.setData('cardIndex', cardIndex.toString());
+			},
+
+			/* dropping onto a card_stack */
+			onDrop: (e, targetRowId, targetStackId, targetIndex) => {
+				e.preventDefault();
+				e.stopPropagation()
+
+				const sourceRowId = e.dataTransfer.getData('sourceRowId');
+				const sourceStackId = e.dataTransfer.getData('sourceStackId');
+				const cardIndex = parseInt(e.dataTransfer.getData('cardIndex'));
+
+				setRows(prev => {
+					const newRows = [...prev];
+					const sourceRow = newRows.find(row => row.id === sourceRowId);
+					const targetRow = newRows.find(row => row.id === targetRowId);
+					const sourceStack = sourceRow.stacks.find(stack => stack.id === sourceStackId);
+					const targetStack = targetRow.stacks.find(stack => stack.id === targetStackId);
+
+					if (sourceRowId !== targetRowId || sourceStackId !== targetStackId) {
+						targetIndex++;
+					}
+
+					const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
+					targetStack.cards.splice(targetIndex, 0, movedCard);
+					
+					if (sourceStack.cards.length === 0) {
+							const stackIndex = sourceRow.stacks.findIndex(stack => stack.id === sourceStackId);
+							sourceRow.stacks.splice(stackIndex, 1);
+					}
+
+
+					return newRows;
+				})
+			}
 		},
 
-		/* dropping onto a card_stack */
-		onDrop: (e, targetRowId, targetStackId, targetIndex) => {
-			e.preventDefault();
-			const sourceRowId = e.dataTransfer.getData('sourceRowId');
-			const sourceStackId = e.dataTransfer.getData('sourceStackId');
-			const cardIndex = parseInt(e.dataTransfer.getData('cardIndex'));
+		/* CARD ROW */
+		card_row:  {
+			/* remove the card from the cardstack it came from 
+			 * add card to row's stacks array
+			 */
+			onDrop: (e, targetRowId) => {
+				e.preventDefault();
+				const sourceRowId = e.dataTransfer.getData('sourceRowId');
+				const sourceStackId = e.dataTransfer.getData('sourceStackId');
+				const cardIndex = parseInt(e.dataTransfer.getData('cardIndex'));
 
-			setRows(prev => {
-				const newRows = [...prev];
-				const sourceRow = newRows.find(row => row.id === sourceRowId);
-				const targetRow = newRows.find(row => row.id === targetRowId);
-				const sourceStack = sourceRow.stacks.find(stack => stack.id === sourceStackId);
-				const targetStack = targetRow.stacks.find(stack => stack.id === targetStackId);
+				setRows(prev => {
+					const newRows = [...prev];
+					const sourceRow = newRows.find(row => row.id === sourceRowId);
+					const targetRow = newRows.find(row => row.id === targetRowId);
+					const sourceStack = sourceRow.stacks.find(stack => stack.id === sourceStackId);
 
-				if (sourceRowId !== targetRowId || sourceStackId !== targetStackId) {
-					targetIndex++;
-				}
+					const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
 
-				const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
-				targetStack.cards.splice(targetIndex, 0, movedCard);
-				
-				return newRows;
-			})
+					if (sourceStack.cards.length === 0) {
+							const stackIndex = sourceRow.stacks.findIndex(stack => stack.id === sourceStackId);
+							sourceRow.stacks.splice(stackIndex, 1);
+					}
+
+					const newStackId = getUniqueStackId(targetRow)
+					targetRow.stacks.push({
+							id: newStackId,
+							cards: [movedCard]
+					});
+
+					console.log(rows)
+
+					return newRows;
+				})
+			}
 		}
 	}
-
 
 
 	const container_style = {
@@ -196,12 +268,12 @@ const App = () => {
       <CardRow 
 				key={rows[0].id}
 				card_row_obj={rows[0]}
-				app_props={card_stack_dnd_handlers}
+				app_props={dnd_handlers}
 			/>
       <CardRow 
 				key={rows[1].id}
 				card_row_obj={rows[1]}
-				app_props={card_stack_dnd_handlers}
+				app_props={dnd_handlers}
 			/>
     </div>
   );
