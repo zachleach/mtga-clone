@@ -54,7 +54,8 @@ const CardStack = ({ card_arr, card_row_props, app_props }) => {
 			e.preventDefault()
 			e.stopPropagation()
 		},
-    onDrop: (e) => app_props.card_stack.onDrop(e, card_row_props.row_id, card_row_props.stack_id, index)
+    onDrop: (e) => app_props.card_stack.onDrop(e, card_row_props.row_id, card_row_props.stack_id, index),
+
   })
 
 
@@ -106,7 +107,7 @@ const CardRow = ({ card_row_obj, app_props }) => {
 
 	const row_dnd_props = {
 		onDragOver: (e) => e.preventDefault(),
-		onDrop: (e) => app_props.card_row.onDrop(e, row_id)
+		onDrop: (e) => app_props.card_row.onDrop(e, row_id),
 	}
 
 
@@ -203,16 +204,15 @@ const App = () => {
 					const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
 					targetStack.cards.splice(targetIndex, 0, movedCard);
 					
-					if (sourceStack.cards.length === 0) {
-							const stackIndex = sourceRow.stacks.findIndex(stack => stack.id === sourceStackId);
-							sourceRow.stacks.splice(stackIndex, 1);
-					}
-
+					newRows.forEach(row => {
+						row.stacks = row.stacks.filter(stack => stack.cards.length > 0);
+					});
 
 					return newRows;
 				})
-			}
+			},
 		},
+
 
 		/* CARD ROW */
 		card_row:  {
@@ -233,10 +233,6 @@ const App = () => {
 
 					const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
 
-					if (sourceStack.cards.length === 0) {
-							const stackIndex = sourceRow.stacks.findIndex(stack => stack.id === sourceStackId);
-							sourceRow.stacks.splice(stackIndex, 1);
-					}
 
 					const newStackId = getUniqueStackId(targetRow)
 					targetRow.stacks.push({
@@ -244,6 +240,9 @@ const App = () => {
 							cards: [movedCard]
 					});
 
+					newRows.forEach(row => {
+						row.stacks = row.stacks.filter(stack => stack.cards.length > 0);
+					});
 					console.log(rows)
 
 					return newRows;
