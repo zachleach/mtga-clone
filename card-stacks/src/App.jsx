@@ -8,9 +8,6 @@ import './App.css'
  * as the index increases, the cards shift downward slightly
  * cards higher in the stack have a higher z-index
  *
- * the drag and drop logic
- * cards can be moved across rows, so 
- * 
  */
 const CardStack = ({ rowId, stackId, card_arr, onDragStart, onDrop }) => {
   const card_height = 140;
@@ -40,19 +37,18 @@ const CardStack = ({ rowId, stackId, card_arr, onDragStart, onDrop }) => {
 		}
 	}
 
+	const drag = (rowId, stackId, index) => ({
+		draggable: true,
+		onDragStart: (e) => onDragStart(e, rowId, stackId, index),
+		onDragOver: (e) => e.preventDefault(),
+		onDrop: (e) => onDrop(e, rowId, stackId, index),
+	})
+
 	return (
     <div style={container_style}>
 			{/* draggable */}
       {card_arr.map((card, index) => (
-        <div
-          key={index}
-          draggable
-					/* capture drag onto cardstack events */
-          onDragStart={(e) => onDragStart(e, rowId, stackId, index)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => onDrop(e, rowId, stackId, index)}
-          style={card_style(index)}
-        >
+        <div key={index} {...drag(rowId, stackId, index)} style={card_style(index)} >
           <Card {...card} />
         </div>
       ))}
@@ -64,16 +60,21 @@ const CardStack = ({ rowId, stackId, card_arr, onDragStart, onDrop }) => {
 
 
 
-const Card = ({ color }) => (
-  <div style={{
+const Card = ({ color }) => {
+
+	const card_style = {
     width: '100%',
     height: '100%',
     aspectRatio: '0.714',
     backgroundColor: color || 'white',
     border: '1px solid black',
     borderRadius: '12px',
-  }} />
-);
+	}
+
+	return (
+		<div style={card_style}/>
+	)
+}
 
 
 
