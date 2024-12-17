@@ -42,10 +42,12 @@ const CardStack = ({ rowId, stackId, card_arr, onDragStart, onDrop }) => {
 
 	return (
     <div style={container_style}>
+			{/* draggable */}
       {card_arr.map((card, index) => (
         <div
           key={index}
           draggable
+					/* capture drag onto cardstack events */
           onDragStart={(e) => onDragStart(e, rowId, stackId, index)}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => onDrop(e, rowId, stackId, index)}
@@ -76,9 +78,7 @@ const Card = ({ color }) => (
 
 
 /**
- * this needs to be refactored to be able to contain 0 to N cardstacks
- * 
- *
+ * renders an array of card arrays (stacks of cards)
  *
  */
 const CardRow = ({ rowId, stacks, onDragStart, onDrop }) => {
@@ -95,11 +95,16 @@ const CardRow = ({ rowId, stacks, onDragStart, onDrop }) => {
 		justifyContent: 'center',
 	}
 
+	/**
+	 * rendering each cardstack and passing it row/stack information for drag and drop events
+	 */
 	return (
     <div style={container_style}>
+			{/* for each stack in stacks: render CardStack component */}
       {stacks.map(stack => (
         <CardStack
           key={stack.id}
+					/* prop drilling to cardstack */
           rowId={rowId}
           stackId={stack.id}
           card_arr={stack.cards}
@@ -150,7 +155,7 @@ const App = () => {
 
 
 	/**
-	 * so is this
+	 * this is also being passed down to cardstack
 	 *
 	 */
 	const handleDrop = (e, targetRowId, targetStackId, targetIndex) => {
@@ -187,7 +192,9 @@ const App = () => {
 		flexDirection: 'column',
 	}
 
-return (
+
+
+	return (
     <div style={container_style}>
       <CardRow 
 				key={rows[0].id}
