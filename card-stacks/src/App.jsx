@@ -3,52 +3,6 @@ import './App.css'
 
 
 
-/**
- * layout component that also handles drag/drop of cards to/from it 
- *
- */
-const CardStack = ({ rowId, stackId, card_arr, dnd }) => {
-  const card_height = 140;
-  const overlap = 0.15;
-  const visible_height = card_height * overlap;
-  
-  const stack_container_styling = {
-    position: 'relative',
-    height: `${((card_arr.length - 1) * visible_height) + card_height}px`,
-    width: '100px',
-  };
-
-  const get_position_styling = (index) => ({
-    position: 'absolute',
-    height: `${card_height}px`,
-    width: '100%',
-    top: `${index * card_height * overlap}px`,
-    zIndex: index,
-  })
-
-  const get_dnd_props = (index) => ({
-		draggable: true,
-    onDragStart: (e) => dnd.onDragStart(e, rowId, stackId, index),
-    onDragOver: (e) => e.preventDefault(),
-    onDrop: (e) => dnd.onDrop(e, rowId, stackId, index)
-  })
-
-  return (
-    <div style={stack_container_styling}>
-      {card_arr.map((card, index) => (
-				/* draggable container */
-        <div key={index} style={get_position_styling(index)} {...get_dnd_props(index)}>
-          <Card 
-            {...card}
-          />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-
-
 const Card = ({ color }) => {
 
   const card_style = {
@@ -67,10 +21,62 @@ const Card = ({ color }) => {
 
 
 /**
+ * layout component that also handles drag/drop of cards to/from it 
+ *
+ */
+const CardStack = ({ card_arr, card_row_props, app_props }) => {
+  const card_height = 140;
+  const overlap = 0.15;
+  const visible_height = card_height * overlap;
+  
+  const stack_container_styling = {
+    position: 'relative',
+    height: `${((card_arr.length - 1) * visible_height) + card_height}px`,
+    width: '100px',
+  };
+
+
+  const get_position_styling = (index) => ({
+    position: 'absolute',
+    height: `${card_height}px`,
+    width: '100%',
+    top: `${index * card_height * overlap}px`,
+    zIndex: index,
+  })
+
+
+
+	/* actually call the dnd handlers defined in parent components */
+  const get_dnd_props = (index) => ({
+		draggable: true,
+    onDragStart: (e) => app_props.onDragStart(e, card_row_props.row_id, card_row_props.stack_id, index),
+    onDragOver: (e) => e.preventDefault(),
+    onDrop: (e) => app_props.onDrop(e, card_row_props.row_id, card_row_props.stack_id, index)
+  })
+
+
+
+  return (
+    <div style={stack_container_styling}>
+      {card_arr.map((card, index) => (
+				/* draggable container */
+        <div key={index} style={get_position_styling(index)} {...get_dnd_props(index)}>
+          <Card 
+            {...card}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+
+/**
  * renders an array of card arrays (stacks of cards)
  *
  */
-const CardRow = ({ rowId, stacks, dnd }) => {
+const CardRow = ({ card_row_obj, app_props }) => {
 
 	const container_style = {
 		height: '20%', 
@@ -84,22 +90,26 @@ const CardRow = ({ rowId, stacks, dnd }) => {
 		justifyContent: 'center',
 	}
 
-
+	const card_stack_props = (stack_id) => {
+		return {
+			row_id: card_row_obj.id,
+			stack_id
+		}
+	}
 
 	/**
 	 * rendering each cardstack and passing it row/stack information for drag and drop events
 	 */
 	return (
     <div style={container_style}>
-			{/* for each stack in stacks: render CardStack component */}
-      {stacks.map(stack => (
+			{/* render CardStack component for each stack in card_row_obj.stacks  */}
+      {card_row_obj.stacks.map(stack => (
         <CardStack
           key={stack.id}
 					/* prop drilling to cardstack */
-          rowId={rowId}
-          stackId={stack.id}
           card_arr={stack.cards}
-					dnd={dnd}
+					card_row_props={card_stack_props(stack.id)}
+					app_props={app_props}
         />
       ))}
     </div>
@@ -134,12 +144,12 @@ const App = () => {
 
 
 
-	const dnd_listeners = {
+	const card_stack_dnd_handlers = {
 
 		/* dragging from a card_stack */
-		onDragStart: (e, rowId, stackId, cardIndex) => {
-			e.dataTransfer.setData('sourceRowId', rowId);
-			e.dataTransfer.setData('sourceStackId', stackId);
+		onDragStart: (e, row_id, stack_id, cardIndex) => {
+			e.dataTransfer.setData('sourceRowId', row_id);
+			e.dataTransfer.setData('sourceStackId', stack_id);
 			e.dataTransfer.setData('cardIndex', cardIndex.toString());
 		},
 
@@ -185,18 +195,14 @@ const App = () => {
     <div style={container_style}>
       <CardRow 
 				key={rows[0].id}
-				rowId={rows[0].id}
-				stacks={rows[0].stacks}  
-				dnd={dnd_listeners}
+				card_row_obj={rows[0]}
+				app_props={card_stack_dnd_handlers}
 			/>
-
       <CardRow 
 				key={rows[1].id}
-				rowId={rows[1].id}
-				stacks={rows[1].stacks}  
-				dnd={dnd_listeners}
+				card_row_obj={rows[1]}
+				app_props={card_stack_dnd_handlers}
 			/>
-
     </div>
   );
 };
