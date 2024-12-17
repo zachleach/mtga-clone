@@ -4,76 +4,64 @@ import './App.css'
 
 
 /**
- * index 0 is at the bottom of the stack
- * as the index increases, the cards shift downward slightly
- * cards higher in the stack have a higher z-index
+ * layout component that also handles drag/drop of cards to/from it 
  *
  */
-const CardStack = ({ rowId, stackId, card_arr, onDragStart, onDrop }) => {
+const CardStack = ({ rowId, stackId, card_arr, dnd }) => {
   const card_height = 140;
   const overlap = 0.15;
   const visible_height = card_height * overlap;
-
-  const handle_drag_over = (e) => {
-    e.preventDefault();
-  };
-
-  const container_style = {
+  
+  const stack_container_styling = {
     position: 'relative',
-		/* card_stack height = overlapping regions + top card on stack */
     height: `${((card_arr.length - 1) * visible_height) + card_height}px`,
     width: '100px',
   };
 
-	/* compute the position of the top of the card in the stack relative to the container */
-  const card_style = (index) => {
-		const top_loc = card_height * overlap;
-		return {
-			position: 'absolute',
-			height: `${card_height}px`,
-			width: '100%',
-			top: `${index * top_loc}px`,
-			zIndex: index,
-		}
-	}
+  const get_position_styling = (index) => ({
+    position: 'absolute',
+    height: `${card_height}px`,
+    width: '100%',
+    top: `${index * card_height * overlap}px`,
+    zIndex: index,
+  })
 
-	const drag = (rowId, stackId, index) => ({
+  const get_dnd_props = (index) => ({
 		draggable: true,
-		onDragStart: (e) => onDragStart(e, rowId, stackId, index),
-		onDragOver: (e) => e.preventDefault(),
-		onDrop: (e) => onDrop(e, rowId, stackId, index),
-	})
+    onDragStart: (e) => dnd.onDragStart(e, rowId, stackId, index),
+    onDragOver: (e) => e.preventDefault(),
+    onDrop: (e) => dnd.onDrop(e, rowId, stackId, index)
+  })
 
-	return (
-    <div style={container_style}>
-			{/* draggable */}
+  return (
+    <div style={stack_container_styling}>
       {card_arr.map((card, index) => (
-        <div key={index} {...drag(rowId, stackId, index)} style={card_style(index)} >
-          <Card {...card} />
+				/* draggable container */
+        <div key={index} style={get_position_styling(index)} {...get_dnd_props(index)}>
+          <Card 
+            {...card}
+          />
         </div>
       ))}
     </div>
-	)
-
-};
-
+  )
+}
 
 
 
 const Card = ({ color }) => {
 
-	const card_style = {
+  const card_style = {
     width: '100%',
     height: '100%',
-    aspectRatio: '0.714',
     backgroundColor: color || 'white',
     border: '1px solid black',
     borderRadius: '12px',
-	}
+  }
 
-	return (
-		<div style={card_style}/>
-	)
+  return (
+    <div style={card_style}/>
+  )
 }
 
 
@@ -82,7 +70,7 @@ const Card = ({ color }) => {
  * renders an array of card arrays (stacks of cards)
  *
  */
-const CardRow = ({ rowId, stacks, onDragStart, onDrop }) => {
+const CardRow = ({ rowId, stacks, dnd }) => {
 
 	const container_style = {
 		height: '20%', 
@@ -95,6 +83,8 @@ const CardRow = ({ rowId, stacks, onDragStart, onDrop }) => {
 		alignItems: 'center',
 		justifyContent: 'center',
 	}
+
+
 
 	/**
 	 * rendering each cardstack and passing it row/stack information for drag and drop events
@@ -109,8 +99,7 @@ const CardRow = ({ rowId, stacks, onDragStart, onDrop }) => {
           rowId={rowId}
           stackId={stack.id}
           card_arr={stack.cards}
-          onDragStart={onDragStart}
-          onDrop={onDrop}
+					dnd={dnd}
         />
       ))}
     </div>
@@ -144,44 +133,41 @@ const App = () => {
 
 
 
-	/**
-	 * this is being passed down all the way to card stack
-	 */
-	const handleDragStart = (e, rowId, stackId, cardIndex) => {
-		e.dataTransfer.setData('sourceRowId', rowId);
-		e.dataTransfer.setData('sourceStackId', stackId);
-		e.dataTransfer.setData('cardIndex', cardIndex.toString());
-	};
 
+	const dnd_listeners = {
 
+		/* dragging from a card_stack */
+		onDragStart: (e, rowId, stackId, cardIndex) => {
+			e.dataTransfer.setData('sourceRowId', rowId);
+			e.dataTransfer.setData('sourceStackId', stackId);
+			e.dataTransfer.setData('cardIndex', cardIndex.toString());
+		},
 
-	/**
-	 * this is also being passed down to cardstack
-	 *
-	 */
-	const handleDrop = (e, targetRowId, targetStackId, targetIndex) => {
-		e.preventDefault();
-		const sourceRowId = e.dataTransfer.getData('sourceRowId');
-		const sourceStackId = e.dataTransfer.getData('sourceStackId');
-		const cardIndex = parseInt(e.dataTransfer.getData('cardIndex'));
+		/* dropping onto a card_stack */
+		onDrop: (e, targetRowId, targetStackId, targetIndex) => {
+			e.preventDefault();
+			const sourceRowId = e.dataTransfer.getData('sourceRowId');
+			const sourceStackId = e.dataTransfer.getData('sourceStackId');
+			const cardIndex = parseInt(e.dataTransfer.getData('cardIndex'));
 
-		setRows(prev => {
-			const newRows = [...prev];
-			const sourceRow = newRows.find(row => row.id === sourceRowId);
-			const targetRow = newRows.find(row => row.id === targetRowId);
-			const sourceStack = sourceRow.stacks.find(stack => stack.id === sourceStackId);
-			const targetStack = targetRow.stacks.find(stack => stack.id === targetStackId);
+			setRows(prev => {
+				const newRows = [...prev];
+				const sourceRow = newRows.find(row => row.id === sourceRowId);
+				const targetRow = newRows.find(row => row.id === targetRowId);
+				const sourceStack = sourceRow.stacks.find(stack => stack.id === sourceStackId);
+				const targetStack = targetRow.stacks.find(stack => stack.id === targetStackId);
 
-			if (sourceRowId !== targetRowId || sourceStackId !== targetStackId) {
-				targetIndex++;
-			}
+				if (sourceRowId !== targetRowId || sourceStackId !== targetStackId) {
+					targetIndex++;
+				}
 
-			const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
-			targetStack.cards.splice(targetIndex, 0, movedCard);
-			
-			return newRows;
-		});
-	};
+				const [movedCard] = sourceStack.cards.splice(cardIndex, 1);
+				targetStack.cards.splice(targetIndex, 0, movedCard);
+				
+				return newRows;
+			})
+		}
+	}
 
 
 
@@ -201,16 +187,14 @@ const App = () => {
 				key={rows[0].id}
 				rowId={rows[0].id}
 				stacks={rows[0].stacks}  
-				onDragStart={handleDragStart}
-				onDrop={handleDrop}
+				dnd={dnd_listeners}
 			/>
 
       <CardRow 
 				key={rows[1].id}
 				rowId={rows[1].id}
 				stacks={rows[1].stacks}  
-				onDragStart={handleDragStart}
-				onDrop={handleDrop}
+				dnd={dnd_listeners}
 			/>
 
     </div>
