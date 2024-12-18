@@ -32,7 +32,8 @@ const CardStack = ({ card_arr, card_row_props, app_props }) => {
   const stack_container_styling = {
     position: 'relative',
     height: `${((card_arr.length - 1) * visible_height) + card_height}px`,
-    width: '100px',
+    width: `${card_height * 0.714}px`,
+		margin: `${card_height * 0.1}px`,
   };
 
 
@@ -46,7 +47,11 @@ const CardStack = ({ card_arr, card_row_props, app_props }) => {
 
 
 
-	/* actually call the dnd handlers defined in parent components */
+	/**
+	 * captures the index at which the card was actually dropped on
+	 * calls the app level drag and drop functions with said index to change the state 
+	 *
+	 */
   const get_dnd_props = (index) => ({
 		draggable: true,
     onDragStart: (e) => app_props.card_stack.onDragStart(e, card_row_props.row_id, card_row_props.stack_id, index),
@@ -55,7 +60,6 @@ const CardStack = ({ card_arr, card_row_props, app_props }) => {
 			e.stopPropagation()
 		},
     onDrop: (e) => app_props.card_stack.onDrop(e, card_row_props.row_id, card_row_props.stack_id, index),
-
   })
 
 
@@ -96,9 +100,11 @@ const CardRow = ({ card_row_obj, app_props }) => {
 		justifyContent: 'center',
 	}
 
+
+
 	const card_stack_props = (stack_id) => {
 		return {
-			row_id: row_id,
+			row_id,
 			stack_id
 		}
 	}
@@ -158,6 +164,9 @@ const App = () => {
     }
   ]);
 
+
+	
+
 	const getUniqueStackId = (row) => {
     const existingIds = row.stacks.map(stack => parseInt(stack.id));
     let newId = 0;
@@ -212,6 +221,8 @@ const App = () => {
 				})
 			},
 		},
+
+
 
 
 		/* CARD ROW */
