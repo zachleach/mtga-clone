@@ -41,26 +41,54 @@ export const ListenersProvider = ({ children }) => {
   };
 
 
-	/**
-	 * receive events and call handler functions
-	 *
-	 */
 	const listeners = {
+
+		drag_start: {
+			cardstack: (e, src_row_id, src_stack_id, src_index) => {
+				e.dataTransfer.setData('src_row_id', src_row_id)
+				e.dataTransfer.setData('src_stack_id', src_stack_id)
+				e.dataTransfer.setData('src_card_index', src_index.toString())
+			},
+		},
+
+
 		drop: {
-			/* `src` and `dst` are defined in cardstack */
-			cardstack_cardstack: (src, dst) => {
-				move_card(src.row_id, src.stack_id, src.card_index, dst.row_id, dst.stack_id, dst.card_index)
+
+			/* assumes dropped object is a card */
+			cardstack: (e, dst_row_id, dst_stack_id, dst_card_index) => {
+				e.preventDefault()
+				e.stopPropagation()
+
+				const src_row_id = e.dataTransfer.getData('src_row_id')
+				const src_stack_id = e.dataTransfer.getData('src_stack_id')
+				const src_card_index = parseInt(e.dataTransfer.getData('src_card_index'))
+
+				move_card(src_row_id, src_stack_id, src_card_index, dst_row_id, dst_stack_id, dst_card_index)
 			},
 
-			cardstack_cardrow: () => {
+			cardrow: (e, dst_row_id) => {
+				e.preventDefault()
+
+				const src_row_id = e.dataTransfer.getData('src_row_id');
+				const src_stack_id = e.dataTransfer.getData('src_stack_id');
+				const src_card_index = parseInt(e.dataTransfer.getData('src_card_index'));
+
 				/* TODO */
 			},
 
 		},
 
-		drag: {
 
-		},
+		drag_over: {
+			cardstack: (e) => {
+				e.preventDefault()
+				e.stopPropagation()
+			},
+
+			cardrow: (e) => {
+				e.preventDefault()
+			}
+		}
 	}
 
 
@@ -71,6 +99,8 @@ export const ListenersProvider = ({ children }) => {
 	const move_card = (src_row_id, src_stack_id, src_card_index, dst_row_id, dst_stack_id, dst_card_index) => {
 		setRows(curr_state => {
 			const copy = [...curr_state]
+
+			console.log(src_row_id, src_stack_id, src_card_index, dst_row_id, dst_stack_id, dst_card_index)
 
 			/* get the row and stack objects from their ids */
 			const source_row = copy.find(row => row.id === src_row_id)

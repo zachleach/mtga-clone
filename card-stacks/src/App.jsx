@@ -3,7 +3,6 @@ import './remove_scrollbars.css'
 import { ListenersProvider, useListeners } from './Listeners'
 
 
-
 const Card = ({ color }) => {
 
   const card_style = {
@@ -51,44 +50,11 @@ const CardStack = ({ card_arr, row_id, stack_id }) => {
   })
 
 
-	const on_drag_start = (e, index) => {
-		e.dataTransfer.setData('sourceRowId', row_id)
-		e.dataTransfer.setData('sourceStackId', stack_id)
-		e.dataTransfer.setData('cardIndex', index.toString())
-	}
-
-
-	const on_drop = (e, index) => {
-		e.preventDefault()
-		e.stopPropagation()
-
-		const source = {
-			row_id: e.dataTransfer.getData('sourceRowId'),
-			stack_id: e.dataTransfer.getData('sourceStackId'),
-			card_index: e.dataTransfer.getData('cardIndex')
-		}
-
-		const target = {
-			row_id: row_id,
-			stack_id: stack_id,
-			card_index: index
-		}
-
-		listeners.drop.cardstack_cardstack(source, target)
-	}
-
-
-	const on_drag_over = (e, index) => {
-		e.preventDefault()
-		e.stopPropagation()
-	}
-
-
 	const html5_dnd_attributes = (index) => ({
 		draggable: true,
-		onDragStart: (e) => on_drag_start(e, index),
-		onDrop: (e) => on_drop(e, index),
-		onDragOver: (e) => on_drag_over(e, index)
+		onDragStart: (e) => listeners.drag_start.cardstack(e, row_id, stack_id, index),
+		onDrop: (e) => listeners.drop.cardstack(e, row_id, stack_id, index),
+		onDragOver: (e) => listeners.drag_over.cardstack(e, index)
 	})
 
 
@@ -125,29 +91,9 @@ const CardRow = ({ row }) => {
 		justifyContent: 'center',
 	}
 
-	const row_dnd_props = {
-		onDragOver: (e) => e.preventDefault(),
-		onDrop: (e) => dnd.card_row.onDrop(e, row.id),
-	}
-
-	const on_drop = (e, row_id) => {
-		e.preventDefault()
-
-		const src_row_id = e.dataTransfer.getData('sourceRowId');
-		const src_stack_id = e.dataTransfer.getData('sourceStackId');
-		const src_card_index = parseInt(e.dataTransfer.getData('cardIndex'));
-
-		/* TODO */
-
-	}
-
-	const on_drag_over = (e, row_id) => {
-		e.preventDefault()
-	}
-
 	const html5_dnd_attributes = (row_id) => ({
-		onDragOver: (e) => on_drag_over(e, row_id),
-		onDrop: (e) => on_drop(e, row_id),
+		onDragOver: (e) => listeners.drag_over.cardrow(e, row_id),
+		onDrop: (e) => listeners.drop.cardrow(e, row_id),
 	})
 
 
