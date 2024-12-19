@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useRef } from 'react'
 
 const ListenersContext = createContext(null)
 
@@ -27,7 +27,33 @@ export const ListenersProvider = ({ children }) => {
 				{ id: '0',  cards: [ { color: 'red' }, { color: 'blue' }, { color: 'green' }, { color: 'yellow' } ] },
 			]
     }
-  ]);
+  ])
+
+	const stack_refs = useRef({})
+	const register_stack_ref = (row_id, stack_id, ref) => {
+		const key = `${row_id}-${stack_id}`
+		if (ref === null) {
+			delete stack_refs.current[key]
+		}
+		else {
+			stack_refs.current[key] = ref
+		}
+	}
+
+
+	const get_stack_position = (row_id, stack_id) => {
+    const key = `${row_id}-${stack_id}`
+    const ref = stack_refs.current[key]
+    if (!ref?.current) return null
+    
+    const rect = ref.current.getBoundingClientRect()
+    return {
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      center: rect.left + (rect.width / 2)
+    }
+  }
 
 
 	const get_unique_stack_id = (row) => {
@@ -38,7 +64,7 @@ export const ListenersProvider = ({ children }) => {
     }
 
     return String(newId)
-  };
+  }
 
 
 	const listeners = {
@@ -101,37 +127,77 @@ export const ListenersProvider = ({ children }) => {
 		setRows(curr_state => {
 			const copy = [...curr_state]
 
-			if (dst_stack_id === null) {
-				console.log(dst_card_index)
-				return copy
-			}
-
-			/* get the row and stack objects from their ids */
+			/* get source row and stack */
 			const source_row = copy.find(row => row.id === src_row_id)
-			const target_row = copy.find(row => row.id === dst_row_id)
 			const source_stack = source_row.stacks.find(stack => stack.id === src_stack_id)
-			const target_stack = target_row.stacks.find(stack => stack.id === dst_stack_id)
+			const target_row = copy.find(row => row.id === dst_row_id)
 
-			/* if you move from across cardstacks the size is off by one (in contrast to moving cards within the same stack) */
-			let insertion_index = dst_card_index
-			if (source_row.id !== target_row.id || source_stack.id !== target_stack.id) {
-				insertion_index++
+			/* remove card from source */
+			const [moved_card] = source_stack.cards.splice(src_card_index, 1)
+
+			/* if dropping onto a stack */
+			if (dst_stack_id !== null) {
+				const target_stack = target_row.stacks.find(stack => stack.id === dst_stack_id)
+				const insertion_index = source_row.id !== target_row.id || source_stack.id !== target_stack.id 
+					? dst_card_index + 1 
+					: dst_card_index
+				target_stack.cards.splice(insertion_index, 0, moved_card)
 			}
 
-			/* remove card */
-			const [moved_card] = source_stack.cards.splice(src_card_index, 1);
+			/* if dropping onto a row */
+			else {
+				const drop_x = dst_card_index /* dst_card_index contains clientx in this case */
+				
+				/* if row has no stacks, create first stack */
+				if (target_row.stacks.length === 0) {
+					target_row.stacks.push({
+						id: get_unique_stack_id(target_row),
+						cards: [moved_card]
+					})
+				}
 
-			/* then insert */
-			target_stack.cards.splice(insertion_index, 0, moved_card);
-			
-			/* delete cardstack if it no longer has any cards */
+				/* otherwise find nearest stack and insert relative to it */
+				else {
+					/* get positions of all stacks */
+					const stack_positions = target_row.stacks.map(stack => ({
+						stack,
+						position: get_stack_position(dst_row_id, stack.id)
+					})).filter(item => item.position !== null)
+
+					/* find nearest stack by comparing centers */
+					const nearest = stack_positions.reduce((nearest, current) => {
+						const current_distance = Math.abs(current.position.center - drop_x)
+						const nearest_distance = Math.abs(nearest.position.center - drop_x)
+						return current_distance < nearest_distance ? current : nearest
+					})
+
+					/* create new stack */
+					const new_stack = {
+						id: get_unique_stack_id(target_row),
+						cards: [moved_card]
+					}
+
+					/* insert left or right of nearest stack */
+					const nearest_index = target_row.stacks.findIndex(s => s.id === nearest.stack.id)
+					const insert_index = drop_x > nearest.position.center 
+						? nearest_index + 1  /* insert right */
+						: nearest_index     /* insert left */
+					
+					target_row.stacks.splice(insert_index, 0, new_stack)
+				}
+			}
+
+			/* clean up empty stacks */
 			copy.forEach(row => {
-				row.stacks = row.stacks.filter(stack => stack.cards.length > 0);
-			});
+				row.stacks = row.stacks.filter(stack => stack.cards.length > 0)
+			})
 
-			return copy;
+			return copy
 		})
 	}
+
+
+
 
 
 
@@ -139,7 +205,8 @@ export const ListenersProvider = ({ children }) => {
 	const value = {
     rows,
 		listeners,
-  };
+		register_stack_ref
+  }
 
   return (
 		<ListenersContext.Provider value={value}>

@@ -1,4 +1,4 @@
-import {  useState } from 'react'
+import {  useState, useEffect, useRef } from 'react'
 import './remove_scrollbars.css'
 import { ListenersProvider, useListeners } from './Listeners'
 
@@ -26,13 +26,19 @@ const Card = ({ color }) => {
  */
 const CardStack = ({ card_arr, row_id, stack_id }) => {
 
-	const { listeners } = useListeners()
+	const { listeners, register_stack_ref } = useListeners()
+	const stack_ref = useRef(null)
+
+	/* register ref on mount, clear on unmount */
+	useEffect(() => {
+		register_stack_ref(row_id, stack_id, stack_ref)
+		return () => register_stack_ref(row_id, stack_id, null)
+	}, [row_id, stack_id])
 
   const card_height = 140;
   const overlap = 0.15;
   const visible_height = card_height * overlap;
   
-
   const stack_container_styling = {
     position: 'relative',
     height: `${((card_arr.length - 1) * visible_height) + card_height}px`,
@@ -59,7 +65,7 @@ const CardStack = ({ card_arr, row_id, stack_id }) => {
 
 
   return (
-    <div style={stack_container_styling}>
+    <div ref={stack_ref} style={stack_container_styling}>
       {card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)} >
           <Card {...card} />
