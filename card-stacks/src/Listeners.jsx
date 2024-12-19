@@ -74,6 +74,7 @@ export const ListenersProvider = ({ children }) => {
 				const src_card_index = parseInt(e.dataTransfer.getData('src_card_index'));
 
 				/* TODO */
+				move_card(src_row_id, src_stack_id, src_card_index, dst_row_id, null, e.clientX)
 			},
 
 		},
@@ -100,7 +101,10 @@ export const ListenersProvider = ({ children }) => {
 		setRows(curr_state => {
 			const copy = [...curr_state]
 
-			console.log(src_row_id, src_stack_id, src_card_index, dst_row_id, dst_stack_id, dst_card_index)
+			if (dst_stack_id === null) {
+				console.log(dst_card_index)
+				return copy
+			}
 
 			/* get the row and stack objects from their ids */
 			const source_row = copy.find(row => row.id === src_row_id)
