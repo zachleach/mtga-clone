@@ -51,13 +51,30 @@ const get_fan_position_styling = (index, total_cards) => {
  * Used by CardHand for visual presentation of cards
  */
 const CardFan = ({ card_arr, row_id, stack_id }) => {
-  const { listeners, register_stack_ref } = useListeners()
-  const fan_ref = useRef(null)
 
+
+	const { listeners, register_stack_ref, register_fan_card_ref } = useListeners()
+  const fan_ref = useRef(null)
+  const card_refs = useRef([])
+
+
+  /* register container ref for overall fan positioning */
   useEffect(() => {
     register_stack_ref(row_id, stack_id, fan_ref)
     return () => register_stack_ref(row_id, stack_id, null)
   }, [row_id, stack_id])
+
+ /* register individual card refs for precise fan position calculations */
+  useEffect(() => {
+    card_arr.forEach((_, index) => {
+      register_fan_card_ref(row_id, stack_id, index, card_refs[index])
+    })
+    return () => {
+      card_arr.forEach((_, index) => {
+        register_fan_card_ref(row_id, stack_id, index, null)
+      })
+    }
+  }, [row_id, stack_id, card_arr.length])
 
   const fan_container_styling = {
     position: 'relative',
@@ -77,11 +94,14 @@ const CardFan = ({ card_arr, row_id, stack_id }) => {
     onDragOver: (e) => listeners.drag_over.cardstack(e, index)
   })
 
-  return (
+
+
+	return (
     <div ref={fan_ref} style={fan_container_styling}>
       {card_arr.map((card, index) => (
         <div 
-          key={index} 
+          key={index}
+          ref={card_refs.current[index]}
           style={get_fan_position_styling(index, card_arr.length)}
           {...html5_dnd_attributes(index)}
         >
@@ -97,13 +117,14 @@ const CardFan = ({ card_arr, row_id, stack_id }) => {
  * CardHand component - container for a player's hand of cards
  * Uses CardFan for layout and connects to drag/drop system
  */
+
 const CardHand = ({ row }) => {
   const { listeners } = useListeners()
 
   const container_style = {
     height: '25%',
     width: '100%',
-    background: '#2a2a2a', /* Darker background to distinguish from regular rows */
+    background: '#2a2a2a',
     border: '1px solid black',
     boxSizing: 'border-box',
     display: 'flex',
@@ -111,11 +132,17 @@ const CardHand = ({ row }) => {
     justifyContent: 'center',
   }
 
-  /* Single fan layout - hands don't support multiple stacks */
+  /* single fan layout - hands don't support multiple stacks */
   const stack = row.stacks[0]
 
+  /* mirror cardrow pattern for event handling */
+  const html5_dnd_attributes = {
+    onDragOver: (e) => listeners.drag_over.cardhand(e),
+    onDrop: (e) => listeners.drop.cardhand(e, row.id, stack.id)
+  }
+
   return (
-    <div style={container_style}>
+    <div style={container_style} {...html5_dnd_attributes}>
       <CardFan
         key={stack.id}
         card_arr={stack.cards}
@@ -125,8 +152,6 @@ const CardHand = ({ row }) => {
     </div>
   )
 }
-
-
 
 
 
