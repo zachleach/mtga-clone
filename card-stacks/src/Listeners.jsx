@@ -1,17 +1,17 @@
 import { createContext, useContext, useState } from 'react'
 
-const DndContext = createContext(null)
+const ListenersContext = createContext(null)
 
-export const useDnd = () => {
-  const context = useContext(DndContext);
+export const useListeners = () => {
+  const context = useContext(ListenersContext);
   if (!context) {
-    throw new Error('useDnd must be used within a DndProvider');
+    throw new Error('useListeners must be used within a ListenersProvider');
   }
   return context;
 };
 
 
-export const DndProvider = ({ children }) => {
+export const ListenersProvider = ({ children }) => {
 
 	/* TODO: just rename this to state */
   const [rows, setRows] = useState([
@@ -108,9 +108,9 @@ export const DndProvider = ({ children }) => {
   };
 
   return (
-		<DndContext.Provider value={value}>
+		<ListenersContext.Provider value={value}>
 			{children}
-		</DndContext.Provider>
+		</ListenersContext.Provider>
 	)
 
 

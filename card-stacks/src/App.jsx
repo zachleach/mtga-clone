@@ -1,6 +1,6 @@
 import {  useState } from 'react'
 import './App.css'
-import { DndProvider, useDnd } from './DndContext'
+import { ListenersProvider, useListeners } from './Listeners'
 
 
 
@@ -27,7 +27,7 @@ const Card = ({ color }) => {
  */
 const CardStack = ({ card_arr, row_id, stack_id }) => {
 
-	const { listeners } = useDnd()
+	const { listeners } = useListeners()
 
   const card_height = 140;
   const overlap = 0.15;
@@ -111,7 +111,7 @@ const CardStack = ({ card_arr, row_id, stack_id }) => {
  */
 const CardRow = ({ row }) => {
 
-	const { listeners } = useDnd();
+	const { listeners } = useListeners();
 
 	const container_style = {
 		height: '20%', 
@@ -180,7 +180,7 @@ const CardRow = ({ row }) => {
 
 
 const Board = () => {
-	const { rows } = useDnd()
+	const { rows } = useListeners()
 
 	const container_style = {
 		display: 'flex',  
@@ -209,9 +209,9 @@ const Board = () => {
 
 const App = () => {
 	return (
-		<DndProvider>
+		<ListenersProvider>
 			<Board/>
-		</DndProvider>
+		</ListenersProvider>
   );
 };
 
