@@ -13,3 +13,7 @@ if the cursor is right of the nearest cardstack, place the card on a cardstack t
 if the cursor is left of the nearest cardstack, place the card on a cardstack to the left of the nearest cardstack
 
 
+since a board can only have three rows, it doesn't make sense to have one state object containing an array of rows.
+provide a high level step-by-step approach for refactoring the rows state object in BoardState.jsx to be three distinct state objects represesenting three rows.
+for each step, briefly explain your reasoning, justification, and the impact the changes will have on the rest of the application and on the preceding and subsequent steps during the refactor.
+
