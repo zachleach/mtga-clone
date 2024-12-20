@@ -3,6 +3,14 @@ import { useState, useEffect, useRef } from 'react'
 import './remove_scrollbars.css'
 import { BoardStateProvider, useBoardState } from './BoardState'
 
+/**
+ * Base visual component representing a single card.
+ * Renders as a colored rectangle with rounded corners and border.
+ *
+ * @param {Object} props
+ * @param {string} props.color - Color to fill card background
+ *
+ */
 const Card = ({ color }) => {
   const card_style = {
     width: '100%',
@@ -17,10 +25,24 @@ const Card = ({ color }) => {
   )
 }
 
+
+/**
+ * Manages layout and drag/drop behavior for a vertical stack of cards.
+ * Cards are positioned absolutely with partial overlap based on stack size.
+ * Registers itself with BoardState's ref system for position tracking.
+ * Handles drag/drop events at the card level.
+ *
+ * @param {Object} props
+ * @param {Array} props.card_arr - Array of card objects to display
+ * @param {string} props.row - Row identifier for this stack
+ * @param {string} props.stack_id - Unique identifier for this stack
+ *
+ */
 const CardStack = ({ card_arr, row, stack_id }) => {
   const { handlers, register_stack_ref } = useBoardState()
   const stack_ref = useRef(null)
 
+  /* register ref on mount, clear on unmount */
   useEffect(() => {
     register_stack_ref(row, stack_id, stack_ref)
     return () => register_stack_ref(row, stack_id, null)
@@ -63,6 +85,17 @@ const CardStack = ({ card_arr, row, stack_id }) => {
   )
 }
 
+
+/**
+ * Container component for a horizontal row of card stacks.
+ * Handles drag/drop events at the row level for creating new stacks.
+ * Maintains consistent height and spacing of stacks within row.
+ *
+ * @param {Object} props
+ * @param {Object} props.row - Row state object containing stack data
+ * @param {string} props.row_position - Identifier for row position ('top', 'left', 'right')
+ *
+ */
 const CardRow = ({ row, row_position }) => {
   const { handlers } = useBoardState()
 
@@ -96,6 +129,12 @@ const CardRow = ({ row, row_position }) => {
   )
 }
 
+
+/**
+ * Main layout component organizing three rows of card stacks.
+ * Provides full-height container and centers content vertically and horizontally.
+ * Consumes row data from BoardState context.
+ */
 const Board = () => {
   const { rows } = useBoardState()
   const [top_row, left_row, right_row] = rows
@@ -117,6 +156,11 @@ const Board = () => {
   )
 }
 
+
+/**
+ * Root component wrapping Board with BoardState provider.
+ * Ensures all child components have access to shared state management.
+ */
 const App = () => {
   return (
     <BoardStateProvider>
