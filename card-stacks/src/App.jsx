@@ -127,11 +127,16 @@ const CardRow = ({ row, row_position }) => {
   )
 }
 
+
+
+
 /**
  * Component for displaying a fanned hand of cards at the bottom of the board.
  * Cards are arranged in a curved arc pattern with rotation and vertical offset.
  * Handles drag/drop events at the card level.
  */
+
+
 const CardHand = () => {
   const { hand, handlers } = useBoardState()
   
@@ -182,8 +187,13 @@ const CardHand = () => {
     onDragOver: handlers.drag_over.hand
   })
 
+  const container_dnd_attributes = {
+    onDrop: (e) => handlers.drop.hand_container(e, hand.cards.length, e.clientX),
+    onDragOver: handlers.drag_over.hand_container
+  }
+
   return (
-    <div style={container_style}>
+    <div style={container_style} {...container_dnd_attributes}>
       {hand.cards.map((card, index) => (
         <div
           key={index}
@@ -196,6 +206,10 @@ const CardHand = () => {
     </div>
   )
 }
+
+
+
+
 
 /**
  * Main layout component organizing three rows of card stacks and a card hand.

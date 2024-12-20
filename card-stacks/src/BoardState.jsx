@@ -241,7 +241,27 @@ export const BoardStateProvider = ({ children }) => {
         } else if (source.type === 'stack') {
           move_card_to_hand(source, target_index)
         }
-      }
+      },
+
+			hand_container: (e, total_cards, drop_x) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const source = JSON.parse(e.dataTransfer.getData('source'))
+        const insert_index = calculate_hand_insert_position(total_cards, drop_x)
+        
+        if (source.type === 'hand') {
+          move_card_within_hand(source.card_index, insert_index)
+        } else if (source.type === 'stack') {
+          move_card_to_hand(source, insert_index)
+        }
+      },
+
+
+
+
+
+
     },
 
     /* DRAG OVER */
@@ -258,9 +278,46 @@ export const BoardStateProvider = ({ children }) => {
       hand: (e) => {
         e.preventDefault()
         e.stopPropagation()
+      },
+
+			hand_container: (e) => {
+				e.preventDefault()
+        e.stopPropagation()
       }
+
     }
   }
+
+
+	/**
+   * Calculates the appropriate insertion index for a card dropped into the hand container.
+   * Takes into account the fan layout and horizontal position of the drop.
+   * 
+   * @param {number} total_cards - Current number of cards in hand
+   * @param {number} drop_x - X coordinate where drop occurred
+   * @returns {number} Index where new card should be inserted
+   */
+  const calculate_hand_insert_position = (total_cards, drop_x) => {
+    if (total_cards === 0) return 0
+    
+    const card_height = 200
+    const card_width = card_height * 0.714
+    const hand_density = 120
+    
+    /* calculate center position of hand container */
+    const container_center = window.innerWidth / 2
+    
+    /* Calculate relative position from center */
+    const relative_x = drop_x - container_center
+    
+    /* convert position to card index */
+    const calculated_index = Math.round(relative_x / hand_density + (total_cards - 1) / 2)
+    
+    /* clamp index to valid range */
+    return Math.max(0, Math.min(calculated_index, total_cards))
+  }
+
+
 
   /**
    * Moves a card between stacks, handling both same-row and cross-row transfers.
