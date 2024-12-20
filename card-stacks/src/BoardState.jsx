@@ -3,6 +3,13 @@ import { createContext, useContext, useState, useRef } from 'react'
 
 const BoardStateContext = createContext(null)
 
+/**
+ * Custom hook providing access to board state context.
+ * Throws if used outside of BoardStateProvider.
+ * 
+ * @returns {Object} Context containing board state and handlers
+ * @throws {Error} When used outside of BoardStateProvider
+ */
 export const useBoardState = () => {
   const context = useContext(BoardStateContext)
   if (!context) {
@@ -14,10 +21,17 @@ export const useBoardState = () => {
 /* valid row positions for type checking */
 const ROW_POSITIONS = ['top', 'left', 'right']
 
+/**
+ * Context provider managing state for card rows, hand, and drag/drop interactions.
+ * Maintains stack references and handles all card movement operations.
+ * 
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Child components to wrap with context
+ */
 export const BoardStateProvider = ({ children }) => {
 
-	/* STATE */
-	
+  /* STATE */
+  
   const create_initial_stack = () => ({
     id: '0',
     cards: [
@@ -40,6 +54,21 @@ export const BoardStateProvider = ({ children }) => {
     stacks: [create_initial_stack()]
   })
 
+  const [hand, set_hand] = useState({
+    cards: [
+      { color: 'purple' },
+      { color: 'orange' },
+      { color: 'pink' }
+    ]
+  })
+
+  /**
+   * Retrieves state setter function for specified row.
+   * 
+   * @param {string} row - Row identifier ('top', 'left', 'right')
+   * @returns {Function} State setter function for the specified row
+   * @throws {Error} If row parameter is not a valid row position
+   */
   const get_row_setter = (row) => {
     if (!ROW_POSITIONS.includes(row)) {
       throw new Error(`Invalid row position: ${row}`)
@@ -49,9 +78,17 @@ export const BoardStateProvider = ({ children }) => {
       case 'top': return set_top_row
       case 'left': return set_left_row
       case 'right': return set_right_row
+      default: return null
     }
   }
 
+  /**
+   * Retrieves current state for specified row.
+   * 
+   * @param {string} row - Row identifier ('top', 'left', 'right')
+   * @returns {Object} Current state of the specified row
+   * @throws {Error} If row parameter is not a valid row position
+   */
   const get_row_state = (row) => {
     if (!ROW_POSITIONS.includes(row)) {
       throw new Error(`Invalid row position: ${row}`)
@@ -61,9 +98,16 @@ export const BoardStateProvider = ({ children }) => {
       case 'top': return top_row
       case 'left': return left_row
       case 'right': return right_row
+      default: return null
     }
   }
 
+  /**
+   * Generates unique stack identifier for a row.
+   * 
+   * @param {Object} row_state - Current state of the row
+   * @returns {string} Unique stack identifier
+   */
   const get_unique_stack_id = (row_state) => {
     const used_ids = new Set(row_state.stacks.map(s => s.id))
     let new_id = 0
@@ -71,34 +115,20 @@ export const BoardStateProvider = ({ children }) => {
     return String(new_id)
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-	/* REFS */
+  /* REFS */
 
   const stack_refs = useRef({})
 
-	/**
-	 * Maintains a registry of DOM references to card stacks for position calculations.
-	 * Uses compound keys in format 'row-stackId' to uniquely identify each stack.
-	 * Passing null as ref removes the reference, enabling cleanup on unmount.
-	 *
-	 * @param {string} row - Row identifier ('top', 'left', 'right')
-	 * @param {string} stack_id - Unique identifier for the stack within its row
-	 * @param {React.RefObject|null} ref - React ref object or null for cleanup
-	 *
-	 * @throws {Error} If row parameter is not a valid row position
-	 *
-	 */
+  /**
+   * Maintains registry of DOM references to card stacks for position calculations.
+   * Uses compound keys in format 'row-stackId' to uniquely identify each stack.
+   * Passing null as ref removes the reference, enabling cleanup on unmount.
+   *
+   * @param {string} row - Row identifier ('top', 'left', 'right')
+   * @param {string} stack_id - Unique identifier for the stack within its row
+   * @param {React.RefObject|null} ref - React ref object or null for cleanup
+   * @throws {Error} If row parameter is not a valid row position
+   */
   const register_stack_ref = (row, stack_id, ref) => {
     if (!ROW_POSITIONS.includes(row)) {
       throw new Error(`Invalid row position: ${row}`)
@@ -112,19 +142,15 @@ export const BoardStateProvider = ({ children }) => {
     }
   }
 
-
-	/**
-	 * Retrieves geometric positioning data for a stack using its stored DOM reference.
-	 * Used for calculating drop positions when creating new stacks between existing ones.
-	 * Returns null if reference is not found or invalid.
-	 *
-	 * @param {string} row - Row identifier ('top', 'left', 'right') 
-	 * @param {string} stack_id - Unique identifier for the stack within its row
-	 *
-	 * @returns {Object|null} Object containing left, right, width and center coordinates,
-	 *                        or null if reference not found
-	 *
-	 */
+  /**
+   * Retrieves geometric positioning data for a stack using its stored DOM reference.
+   * Used for calculating drop positions when creating new stacks between existing ones.
+   * 
+   * @param {string} row - Row identifier ('top', 'left', 'right')
+   * @param {string} stack_id - Unique identifier for the stack within its row
+   * @returns {Object|null} Object containing left, right, width and center coordinates,
+   *                        or null if reference not found
+   */
   const get_stack_position = (row, stack_id) => {
     const key = `${row}-${stack_id}`
     const ref = stack_refs.current[key]
@@ -139,50 +165,86 @@ export const BoardStateProvider = ({ children }) => {
     }
   }
 
-
-
-	/* EVENT HANDLING */
+  /* EVENT HANDLING */
 
   const handlers = {
-
-		/* DRAG START */
+    /* DRAG START */
     drag_start: {
       cardstack: (e, row, stack_id, card_index) => {
         e.dataTransfer.setData('source', JSON.stringify({
+          type: 'stack',
           row,
           stack_id,
+          card_index
+        }))
+      },
+      hand: (e, card_index) => {
+        e.dataTransfer.setData('source', JSON.stringify({
+          type: 'hand',
           card_index
         }))
       }
     },
 
-
-		/* DROP EVENTS */
+    /* DROP EVENTS */
     drop: {
       cardstack: (e, target_row, target_stack_id, target_index) => {
         e.preventDefault()
         e.stopPropagation()
 
         const source = JSON.parse(e.dataTransfer.getData('source'))
-        move_card(source, {
-          row: target_row,
-          stack_id: target_stack_id,
-          card_index: target_index
-        })
+        if (source.type === 'stack') {
+          move_card(source, {
+            row: target_row,
+            stack_id: target_stack_id,
+            card_index: target_index
+          })
+        } else if (source.type === 'hand') {
+          move_card_from_hand({
+            card_index: source.card_index
+          }, {
+            type: 'stack',
+            row: target_row,
+            stack_id: target_stack_id,
+            card_index: target_index
+          })
+        }
       },
 
       cardrow: (e, target_row) => {
         e.preventDefault()
         const source = JSON.parse(e.dataTransfer.getData('source'))
-        move_card(source, {
-          row: target_row,
-          stack_id: null,
-          drop_x: e.clientX
-        })
+        if (source.type === 'stack') {
+          move_card(source, {
+            row: target_row,
+            stack_id: null,
+            drop_x: e.clientX
+          })
+        } else if (source.type === 'hand') {
+          move_card_from_hand({
+            card_index: source.card_index
+          }, {
+            type: 'row',
+            row: target_row,
+            drop_x: e.clientX
+          })
+        }
+      },
+
+      hand: (e, target_index) => {
+        e.preventDefault()
+        e.stopPropagation()
+        
+        const source = JSON.parse(e.dataTransfer.getData('source'))
+        if (source.type === 'hand') {
+          move_card_within_hand(source.card_index, target_index)
+        } else if (source.type === 'stack') {
+          move_card_to_hand(source, target_index)
+        }
       }
     },
 
-		/* DRAG OVER */
+    /* DRAG OVER */
     drag_over: {
       cardstack: (e) => {
         e.preventDefault()
@@ -191,42 +253,36 @@ export const BoardStateProvider = ({ children }) => {
 
       cardrow: (e) => {
         e.preventDefault()
+      },
+
+      hand: (e) => {
+        e.preventDefault()
+        e.stopPropagation()
       }
     }
   }
 
-
-
-
-
-	/**
-	 * Moves a card between stacks, handling both same-row and cross-row transfers.
-	 * For same-row moves, updates source row state to remove card and add to target position.
-	 * For cross-row moves, uses two-phase update: first removes from source row while capturing
-	 * moved card in closure, then updates target row after small delay to prevent race conditions.
-	 * Automatically creates new stacks when dropping between existing stacks based on mouse position.
-	 * Cleans up empty stacks after moves complete.
-	 *
-	 * @param {Object} source - Contains row, stack_id, and card_index of dragged card
-	 * @param {Object} target - Contains row, stack_id (or null), and either card_index or drop_x
-	 *
-	 */
+  /**
+   * Moves a card between stacks, handling both same-row and cross-row transfers.
+   * Automatically creates new stacks when dropping between existing stacks.
+   * Cleans up empty stacks after moves complete.
+   * 
+   * @param {Object} source - Contains row, stack_id, and card_index of dragged card
+   * @param {Object} target - Contains row, stack_id (or null), and either card_index or drop_x
+   */
   const move_card = (source, target) => {
     const source_row = get_row_state(source.row)
     const source_setter = get_row_setter(source.row)
     const target_setter = get_row_setter(target.row)
     
-    /* store the moved card so it's available for both state updates */
     let moved_card = null
 
-    /* remove card from source */
     source_setter(curr_state => {
       const updated_state = { ...curr_state }
       const source_stack = updated_state.stacks.find(s => s.id === source.stack_id)
       const [card] = source_stack.cards.splice(source.card_index, 1)
-      moved_card = card  /* store the card for later use */
+      moved_card = card
 
-      /* same row handling */
       if (source.row === target.row) {
         if (target.stack_id) {
           const target_stack = updated_state.stacks.find(s => s.id === target.stack_id)
@@ -239,14 +295,11 @@ export const BoardStateProvider = ({ children }) => {
         }
       }
 
-      /* cleanup empty stacks */
       updated_state.stacks = updated_state.stacks.filter(s => s.cards.length > 0)
       return updated_state
     })
 
-    /* handle different row updates */
     if (source.row !== target.row) {
-      /* ensure we have the card before updating target */
       setTimeout(() => {
         target_setter(curr_state => {
           const updated_state = { ...curr_state }
@@ -262,21 +315,96 @@ export const BoardStateProvider = ({ children }) => {
     }
   }
 
+  /**
+   * Moves a card from the hand to either a stack or a new stack in a row.
+   * 
+   * @param {Object} source - Contains card_index of dragged card from hand
+   * @param {Object} target - Contains type ('stack'|'row'), row, and positioning info
+   */
+  const move_card_from_hand = (source, target) => {
+    let moved_card = null
 
+    set_hand(curr_state => {
+      const updated_state = { ...curr_state }
+      const [card] = updated_state.cards.splice(source.card_index, 1)
+      moved_card = card
+      return updated_state
+    })
 
-	/**
-	 * Creates a new stack and inserts it into the row's stack array at the appropriate position.
-	 * If row is empty, simply adds new stack. Otherwise, calculates insertion position by finding
-	 * nearest existing stack to drop_x coordinate and inserting either before or after based on
-	 * whether drop occurred left or right of stack's center. Uses DOM measurements via stack_refs
-	 * to determine actual screen positions for calculations.
-	 *
-	 * @param {Object} row_state - Current state of the row being updated
-	 * @param {Object} card - Card object to place in new stack
-	 * @param {number} drop_x - X coordinate where drop occurred
-	 * @param {string} row - Row identifier ('top', 'left', 'right') for ref lookup
-	 *
-	 */
+    setTimeout(() => {
+      if (target.type === 'stack') {
+        const target_setter = get_row_setter(target.row)
+        target_setter(curr_state => {
+          const updated_state = { ...curr_state }
+          const target_stack = updated_state.stacks.find(s => s.id === target.stack_id)
+          target_stack.cards.splice(target.card_index + 1, 0, moved_card)
+          return updated_state
+        })
+      } else if (target.type === 'row') {
+        const target_setter = get_row_setter(target.row)
+        target_setter(curr_state => {
+          const updated_state = { ...curr_state }
+          create_new_stack(updated_state, moved_card, target.drop_x, target.row)
+          return updated_state
+        })
+      }
+    }, 0)
+  }
+
+  /**
+   * Moves a card from a stack to the hand.
+   * 
+   * @param {Object} source - Contains row, stack_id, and card_index of dragged card
+   * @param {number} target_index - Index in hand where card should be inserted
+   */
+  const move_card_to_hand = (source, target_index) => {
+    const source_row = get_row_state(source.row)
+    const source_setter = get_row_setter(source.row)
+    let moved_card = null
+
+    source_setter(curr_state => {
+      const updated_state = { ...curr_state }
+      const source_stack = updated_state.stacks.find(s => s.id === source.stack_id)
+      const [card] = source_stack.cards.splice(source.card_index, 1)
+      moved_card = card
+
+      updated_state.stacks = updated_state.stacks.filter(s => s.cards.length > 0)
+      return updated_state
+    })
+
+    setTimeout(() => {
+      set_hand(curr_state => {
+        const updated_state = { ...curr_state }
+        updated_state.cards.splice(target_index + 1, 0, moved_card)
+        return updated_state
+      })
+    }, 0)
+  }
+
+  /**
+   * Reorders cards within the hand.
+   * 
+   * @param {number} source_index - Starting index of card being moved
+   * @param {number} target_index - Destination index for card
+   */
+  const move_card_within_hand = (source_index, target_index) => {
+    set_hand(curr_state => {
+      const updated_state = { ...curr_state }
+      const [card] = updated_state.cards.splice(source_index, 1)
+      updated_state.cards.splice(target_index, 0, card)
+      return updated_state
+    })
+  }
+
+  /**
+   * Creates a new stack and inserts it into the row's stack array.
+   * Calculates insertion position based on drop coordinates.
+   * 
+   * @param {Object} row_state - Current state of the row being updated
+   * @param {Object} card - Card object to place in new stack
+   * @param {number} drop_x - X coordinate where drop occurred
+   * @param {string} row - Row identifier for ref lookup
+   */
   const create_new_stack = (row_state, card, drop_x, row) => {
     if (row_state.stacks.length === 0) {
       row_state.stacks.push({
@@ -307,11 +435,7 @@ export const BoardStateProvider = ({ children }) => {
     row_state.stacks.splice(insert_index, 0, new_stack)
   }
 
-
-
-
-
-	/* CONTEXT/PROVIDER BOILERPLATE */
+  /* CONTEXT/PROVIDER BOILERPLATE */
 
   const value = {
     rows: [
@@ -319,6 +443,7 @@ export const BoardStateProvider = ({ children }) => {
       { id: 'left', ...left_row }, 
       { id: 'right', ...right_row }
     ],
+    hand,
     handlers,
     register_stack_ref
   }
