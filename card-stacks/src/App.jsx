@@ -134,6 +134,7 @@ const CardRow = ({ row, row_position }) => {
  * Main layout component organizing three rows of card stacks.
  * Provides full-height container and centers content vertically and horizontally.
  * Consumes row data from BoardState context.
+ *
  */
 const Board = () => {
   const { rows } = useBoardState()
@@ -160,6 +161,7 @@ const Board = () => {
 /**
  * Root component wrapping Board with BoardState provider.
  * Ensures all child components have access to shared state management.
+ *
  */
 const App = () => {
   return (
