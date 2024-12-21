@@ -196,22 +196,28 @@ the bottom 60% of the viewport should be a singular board
 it will appear as though there were a row of 3 boards facing one bigger board
 this represents one player's perspective -- they see three other player's boards
 other players will see the same layout, except their boardstate will be displayed in the larger bottom region instead
-the height of cards within the rows should be 60% of the height of the row they are in, so cards in the larger top row of the board will appear larger (currently, i think the card heights are hardcoded)
 players will be able to drag and drop cards across different boards
 
 scope:
-focus solely on implementing the multi-board layout, but take into consideration the additional features yet to come
+focus solely on the multi-board layout, but take into consideration the additional features yet to come
 do not implement drag and drop across boards, but ensure the design facilitates its the future implementation 
 
 task:
-identify the singular core intent of the feature request and its scope, then decompose the it into more approachable conceptual units
-explain in paragraph form in natural language, not code
+identify main intent of the feature request and its scope in one sentence, then briefly decompose the it into more approachable logical units; only mention things specifically within the scope of the feateure request (this excludes nice-to-haves)
+respond in paragraph form in natural language, not code
 
 
-outline how you would approach implementing this feature step-by-step in order to maintain consistency with the existing project's control flow and style
-explain in paragraph form in natural language, not code
+outline how you would approach implementing the feature you just mentioned step-by-step in order to maintain consistency with the existing project's control flow and style
+explain in numbered separated paragraph form in natural language, not code
+
+analyze your previous approach for redundancy, unnecessary complexity, and overengineering; then provide your updated approach that optimizes for simplicity, ease, readability
+respond in numbered separated paragraph form in natural language, not code
+
+begin implementing your proposed changes from the [previous response] [step-by-step] 
+respond with artifacts with proper filenames
 
 
-begin implementing the changes, ensuring to document the purpose and intention behind each change made within the artifacts you create
 
 
+outline how you would approach [decomposing boardstate.jsx] step-by-step in order to maintain consistency with the existing project's control flow and style
+explain in numbered separated paragraph form in natural language, not code

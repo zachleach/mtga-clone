@@ -1,6 +1,7 @@
 /* App.jsx */
 import { useState, useEffect, useRef } from 'react'
-import { BoardStateProvider, useBoardState } from './BoardState'
+import { BoardStateProvider, useBoardState } from './BoardContext'  
+
 import './remove_scrollbars.css'
 
 
