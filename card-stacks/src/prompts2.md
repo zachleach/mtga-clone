@@ -201,14 +201,15 @@ players will be able to drag and drop cards across different boards
 
 scope:
 focus solely on implementing the multi-board layout, but take into consideration the additional features yet to come
+do not implement drag and drop across boards, but ensure the design facilitates its the future implementation 
 
 task:
-decompose the given feature request into more approachable conceptual units, then explain what implementing each would entail given the broader context of the application
-explain in natural language, not code
+identify the singular core intent of the feature request and its scope, then decompose the it into more approachable conceptual units
+explain in paragraph form in natural language, not code
 
 
 outline how you would approach implementing this feature step-by-step in order to maintain consistency with the existing project's control flow and style
-explain in natural language, not code
+explain in paragraph form in natural language, not code
 
 
 begin implementing the changes, ensuring to document the purpose and intention behind each change made within the artifacts you create
