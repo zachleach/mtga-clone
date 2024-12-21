@@ -1,22 +1,18 @@
-/* App.jsx */
+/* Board.jsx */
 import { useState, useEffect, useRef } from 'react'
-import { BoardStateProvider, useBoardState } from './BoardState'
-import './remove_scrollbars.css'
-
-
+import { useBoardState } from './BoardState'
+import { useGameState } from './GameState'
 
 /**
  * Base visual component representing a single card.
- * Renders as a colored rectangle with rounded corners and border.
- *
- * @param {Object} props
- * @param {string} props.color - Color to fill card background
- *
+ * Uses relative sizing based on container dimensions.
  */
-const Card = ({ color }) => {
+const Card = ({ color, container_height }) => {
+  const card_height = container_height * 0.6
+  
   const card_style = {
-    width: '100%',
-    height: '100%',
+    width: `${card_height * 0.714}px`,
+    height: `${card_height}px`,
     backgroundColor: color || 'white',
     border: '1px solid black',
     borderRadius: '12px',
@@ -27,33 +23,24 @@ const Card = ({ color }) => {
   )
 }
 
-
-
 /**
  * Manages layout and drag/drop behavior for a vertical stack of cards.
- * Cards are positioned absolutely with partial overlap based on stack size.
- * Registers itself with BoardState's ref system for position tracking.
- *
- * @param {Object} props
- * @param {Array} props.card_arr - Array of card objects to display
- * @param {string} props.row - Row identifier for this stack
- * @param {string} props.stack_id - Unique identifier for this stack
- *
+ * Supports relative sizing and rotated coordinate spaces.
  */
-const CardStack = ({ card_arr, row, stack_id }) => {
+const CardStack = ({ card_arr, row, stack_id, container_height }) => {
   const { handlers, register_stack_ref } = useBoardState()
+  const { active_player } = useGameState()
   const stack_ref = useRef(null)
-
-  /* register ref on mount, clear on unmount */
+  
+  const card_height = container_height * 0.6
+  const overlap = 0.15
+  const visible_height = card_height * overlap
+  
   useEffect(() => {
     register_stack_ref(row, stack_id, stack_ref)
     return () => register_stack_ref(row, stack_id, null)
   }, [row, stack_id])
 
-  const card_height = 140
-  const overlap = 0.15
-  const visible_height = card_height * overlap
-  
   const stack_container_styling = {
     position: 'relative',
     height: `${((card_arr.length - 1) * visible_height) + card_height}px`,
@@ -61,17 +48,20 @@ const CardStack = ({ card_arr, row, stack_id }) => {
     margin: `${card_height * 0.1}px`,
   }
 
+  const is_rotated = active_player !== 0
+
   const get_position_styling = (index) => ({
     position: 'absolute',
     height: `${card_height}px`,
     width: '100%',
     top: `${index * card_height * overlap}px`,
     zIndex: index,
+    transform: is_rotated ? 'rotate(180deg)' : undefined
   })
 
   const html5_dnd_attributes = (index) => ({
     draggable: true,
-    onDragStart: (e) => handlers.drag_start.cardstack(e, row, stack_id, index),
+    onDragStart: (e) => handlers.drag_start.cardstack(e, row, stack_id, index, active_player),
     onDrop: (e) => handlers.drop.cardstack(e, row, stack_id, index),
     onDragOver: (e) => handlers.drag_over.cardstack(e, index)
   })
@@ -80,26 +70,22 @@ const CardStack = ({ card_arr, row, stack_id }) => {
     <div ref={stack_ref} style={stack_container_styling}>
       {card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
-          <Card {...card} />
+          <Card {...card} container_height={container_height} />
         </div>
       ))}
     </div>
   )
 }
 
-
 /**
  * Container component for a row of card stacks.
- * Uses explicit height and width parameters for flexible positioning.
- *
- * @param {Object} props
- * @param {Object} props.row - Row state object containing stack data
- * @param {string} props.row_position - Identifier for row position ('top', 'left', 'right')
- * @param {string} props.height - Height of the container (e.g., '50%', '100%')
- * @param {string} props.width - Width of the container (e.g., '50%', '100%')
+ * Handles relative sizing and rotated drop zones.
  */
-const CardRow = ({ row, row_position, height, width }) => {
+const CardRow = ({ row, row_position, container_height }) => {
   const { handlers } = useBoardState()
+  const { active_player } = useGameState()
+
+  const is_rotated = active_player !== 0
 
   const container_style = {
     background: 'grey',
@@ -108,13 +94,14 @@ const CardRow = ({ row, row_position, height, width }) => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height,
-    width,
+    height: '100%',
+    width: '100%',
+    transform: is_rotated ? 'rotate(180deg)' : undefined
   }
 
   const html5_dnd_attributes = {
     onDragOver: (e) => handlers.drag_over.cardrow(e, row_position),
-    onDrop: (e) => handlers.drop.cardrow(e, row_position),
+    onDrop: (e) => handlers.drop.cardrow(e, row_position)
   }
 
   return (
@@ -125,25 +112,27 @@ const CardRow = ({ row, row_position, height, width }) => {
           card_arr={stack.cards}
           row={row_position}
           stack_id={stack.id}
+          container_height={container_height}
         />
       ))}
     </div>
   )
 }
 
-
-
-
 /**
- * Component for displaying a fanned hand of cards at the bottom of the board.
- * Cards are arranged in a curved arc pattern with rotation and vertical offset.
- * Handles drag/drop events at the card level.
+ * Component for displaying a fanned hand of cards.
+ * Implements relative sizing and rotated coordinate handling.
  */
-const CardHand = () => {
+const CardHand = ({ container_height }) => {
   const { hand, handlers } = useBoardState()
+  const { active_player } = useGameState()
+  
+  const is_rotated = active_player !== 0
+  const card_height = container_height * 0.6
+  const card_width = card_height * 0.714
   
   const container_style = {
-    height: '25%',
+    height: '100%',
     width: '100%',
     background: 'grey',
     border: '1px solid black',
@@ -151,21 +140,17 @@ const CardHand = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    boxSizing: 'border-box',
+    transform: is_rotated ? 'rotate(180deg)' : undefined
   }
 
   const get_card_style = (index, total_cards) => {
-    const card_height = 200
-    const card_width = card_height * 0.714
-    
-    /* position is relative to center */
     const position = index - (total_cards - 1) / 2
     
-    /* card fan parameters */
     const rotation_multiplier = 4
-    const hand_density = 120
+    const hand_density = card_width * 0.6
     const hand_density_multiplier = 1
     
-    /* calculate rotation and offsets */
     const rotation = rotation_multiplier * position
     const lower_by = 0.8 * card_width
     const vertical_offset = (Math.pow(position, 2) * rotation_multiplier) + lower_by
@@ -174,7 +159,10 @@ const CardHand = () => {
       position: 'absolute',
       height: `${card_height}px`,
       width: `${card_width}px`,
-      transform: `rotate(${rotation}deg) translateY(${vertical_offset}px)`,
+      transform: `
+        rotate(${rotation + (is_rotated ? 180 : 0)}deg)
+        translateY(${vertical_offset}px)
+      `,
       transformOrigin: 'bottom center',
       left: `calc(50% - ${card_width / 2}px + ${position * (hand_density / hand_density_multiplier)}px)`,
       backgroundColor: 'transparent',
@@ -202,71 +190,61 @@ const CardHand = () => {
           style={get_card_style(index, hand.cards.length)}
           {...html5_dnd_attributes(index)}
         >
-          <Card {...card} />
+          <Card {...card} container_height={container_height} />
         </div>
       ))}
     </div>
   )
 }
 
-
-
-
-
 /**
- * Main layout component organizing card rows in a T-shaped arrangement.
- * Top row spans full width, left and right rows are positioned horizontally,
- * and hand remains at the bottom.
+ * Main board component managing layout and size calculations.
  */
-
 const Board = () => {
   const { rows } = useBoardState()
+  const [container_height, set_container_height] = useState(0)
+  const board_ref = useRef(null)
+  
+  useEffect(() => {
+    const update_height = () => {
+      if (board_ref.current) {
+        set_container_height(board_ref.current.clientHeight)
+      }
+    }
+    
+    update_height()
+    window.addEventListener('resize', update_height)
+    return () => window.removeEventListener('resize', update_height)
+  }, [])
+
   const [top_row, left_row, right_row] = rows
 
-  const container_style = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  }
-
-  const middle_section_style = {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-    height: '25%',
-    justifyContent: 'space-between',
-    alignItems: 'stretch',
-  }
-
   return (
-    <div style={container_style}>
-      <CardRow row={top_row} row_position="top" height="50%" width="100%" />
-      <div style={middle_section_style}>
-        <CardRow row={left_row} row_position="left" height="100%" width="50%" />
-        <CardRow row={right_row} row_position="right" height="100%" width="50%" />
+    <div ref={board_ref} style={{ height: '100%' }}>
+      <div style={{ height: '50%' }}>
+        <CardRow 
+          row={top_row} 
+          row_position="top" 
+          container_height={container_height * 0.5} 
+        />
       </div>
-      <CardHand />
+      <div style={{ height: '25%', display: 'flex' }}>
+        <CardRow 
+          row={left_row}
+          row_position="left"
+          container_height={container_height * 0.25}
+        />
+        <CardRow 
+          row={right_row}
+          row_position="right"
+          container_height={container_height * 0.25}
+        />
+      </div>
+      <div style={{ height: '25%' }}>
+        <CardHand container_height={container_height * 0.25} />
+      </div>
     </div>
   )
 }
 
-
-
-
-/**
- * Root component wrapping Board with BoardState provider.
- * Ensures all child components have access to shared state management.
- */
-const App = () => {
-  return (
-		<div style={{ height: '100vh' }}>
-			<BoardStateProvider>
-				<Board/>
-			</BoardStateProvider>
-		</div>
-  )
-}
-
-export default App
+export default Board

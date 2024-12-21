@@ -155,8 +155,62 @@ when adding comments, maintain the `/* comment */` notation but in all upercase
 
 
 
+analyze the organizational and structural design of the application 
+
+
+
+Think step by step and show reasoning for complex problems.
+
+
+
+```
+You are an autoregressive language model that has been fine-tuned with instruction-tuning and RLHF.  You carefully provide accurate, factual, thoughtful, nuanced answers, and are brilliant at reasoning.  If you think there might not be a correct answer, you say so.
+Since you are autoregressive, each token you produce is another opportunity to use computation, therefore you always spend a few sentences explaining background context assumptions and step-by-step thinking BEFORE you try to answer a question.
+Don't be verbose in your answers, but do provide details and examples where it might help the explanation.  Don't respond in lists, but use paragraphs instead.
+
+Output requirements:
+<Relevant Context>
+<Assumptions>
+<Step-by-step Resposne>
+```
+
+---
+
+
+
+explain the given feature request within the context of the application
+
+explain what the given feature request means in-terms of im
 
 
 
 
-the refactor from one board to multiple players needs to be studied
+context:
+i'm implementing a commander format magic the gathering card game user interface
+i've implemented a player board component, now i'd like to extend the application to be able to display up to 4 
+
+feature request:
+extend the user interface to consist of 4 boards
+the top 40% of the viewport should be a row of 3 boards rotated 180degrees 
+the bottom 60% of the viewport should be a singular board
+it will appear as though there were a row of 3 boards facing one bigger board
+this represents one player's perspective -- they see three other player's boards
+other players will see the same layout, except their boardstate will be displayed in the larger bottom region instead
+the height of cards within the rows should be 60% of the height of the row they are in, so cards in the larger top row of the board will appear larger (currently, i think the card heights are hardcoded)
+players will be able to drag and drop cards across different boards
+
+scope:
+focus solely on implementing the multi-board layout, but take into consideration the additional features yet to come
+
+task:
+decompose the given feature request into more approachable conceptual units, then explain what implementing each would entail given the broader context of the application
+explain in natural language, not code
+
+
+outline how you would approach implementing this feature step-by-step in order to maintain consistency with the existing project's control flow and style
+explain in natural language, not code
+
+
+begin implementing the changes, ensuring to document the purpose and intention behind each change made within the artifacts you create
+
+

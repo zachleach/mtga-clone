@@ -256,12 +256,6 @@ export const BoardStateProvider = ({ children }) => {
           move_card_to_hand(source, insert_index)
         }
       },
-
-
-
-
-
-
     },
 
     /* DRAG OVER */
