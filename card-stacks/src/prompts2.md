@@ -17,10 +17,10 @@ respond with artifacts with proper filenames
 ```
 
 ```feature request
-outline how you would approach [decomposing boardstate.jsx] step-by-step in order to maintain consistency with the existing project's control flow and style
+outline how you would approach [] step-by-step in order to maintain consistency with the existing project's control flow and style
 respond in numbered separated paragraph form in natural language, not code
 
-analyze your [previous approach] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
+analyze your [previous response] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
 respond in numbered separated paragraph form in natural language, not code
 
 begin implementing your proposed changes from the [previous response] [step-by-step] 
@@ -30,10 +30,9 @@ respond with artifacts with proper filenames
 
 
 
-the next step is what
+you will be given a feature request in xml tags followed by a task
 
-
-feature request:
+<feature request>
 extend the user interface to consist of 4 boards
 the top 40% of the viewport should be a row of 3 boards rotated 180degrees 
 the bottom 60% of the viewport should be a singular board
@@ -41,8 +40,109 @@ it will appear as though there were a row of 3 boards facing one bigger board
 this represents one player's perspective -- they see three other player's boards
 other players will see the same layout, except their boardstate will be displayed in the larger bottom region instead
 players will be able to drag and drop cards across different boards
+</feature request>
+
+<output requirements>
+outline how you would approach implementing the {{feature request}} step-by-step in order to maintain consistency with the existing project's control flow and style
+respond in numbered separated paragraph form in natural language, not code
+</output requirements>
 
 
+
+
+
+
+#	haiku refined approach
+
+In a previous conversation with Claude 3.5 Haiku, I built this sequence of prompts to help with code generation using Claude 3.5 Sonnet.
+It's intended to set up high quality context for a final implementation that both optimizes for simplicity while integrating well within the existing codebase.
+
+Are there any additional keywords you would insert to generate a higher quality response? For example, I've heard using phrases such as "step-by-step" causes Claude 3.5 to engage in "better reasoning".
+
+1.	Provide a precise definition of the feature request within the context of the given project files, clearly identifying its purpose, expected functionality, and expected interaction with the existing system.
+2.	Describe how the code in the provided project files is structured, showing how different files and functions are currently connected. Focus on actual data flow and direct function calls between project parts.
+3.	Outline a step-by-step implementation approach: prioritize simplicity, avoids unnecessary complexity, aligns with the existing code structure, and provides a practical solution that meets current requirements.
+
+
+```
+#	part 1
+
+you will be given a 'feature request' and then a 'task' to complete as input
+
+<feature request>
+...
+</feature request>
+
+<feature requirements task>
+Provide a precise definition of the {{feature request}}, clearly identifying its [purpose], [expected functionality], and [expected interaction with the existing system].
+</feature requirements task>
+
+<formatting requirements>
+Respond in numbered separated paragraph form in natural language, not code
+<formatting requirements>
+
+#	part 2
+
+<contextualization task>
+Contextualize the feature request by describing how the code within the provided project files is structured, focus on the actual data flow and direct function calls between project parts.
+</contextualization task>
+
+<formatting requirements>
+Respond in numbered separated paragraph form in natural language, not code
+<formatting requirements>
+
+#	part 3
+
+<design task>
+Develop a step-by-step implementation approach: Build upon the {{contextualization task}} to design a solution that directly addresses the {{feature requirements task}}.  Optimize for simplicity, avoid unnecessary complexity and over-engineering, and use the minimum code possible within the existing system architecture.  
+</design task>
+
+<formatting requirements>
+Respond in numbered separated paragraph form in natural language, not code
+<formatting requirements>
+
+#	part 4
+
+<implementation task>
+Begin implementing the solution you proposed {{design task}}.
+<implementation task>
+
+<formatting requirements>
+Respond in artifacts with proper file names.
+Use 'snake_case' variable naming and '/* comments */' for comments.
+<formatting requirements>
+```
+
+
+
+
+
+
+
+
+
+---
+
+
+you will be given a feature request in xml tags followed by a task
+
+<feature request>
+...
+</feature request>
+
+<output requirements>
+considering the given [project files], outline how you would approach implementing {{feature request}} step-by-step
+optimize for simplicity and ease of implementation, while minimizing the introduction of unnecessary complexity 
+respond in numbered separated paragraph form in natural language, not code
+<output requirements>
+
+
+
+while still maintaining consistency with the existing project structure
+respond in numbered separated paragraph form in natural language, not code
+
+begin implementing your proposed changes from the [previous response] [step-by-step] 
+respond with artifacts with proper filenames
 
 
 
