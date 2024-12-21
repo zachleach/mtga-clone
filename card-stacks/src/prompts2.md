@@ -75,3 +75,88 @@ a bottom row consisting of a board object taking 60% of the viewport height
 
 
 
+
+
+---
+
+
+
+#	this worked
+
+
+context: 
+these files make up my current project except BoardReferenceFile
+BoardReferenceFile contains styling for the component layout i'm trying to mirror
+
+
+>	explain the intention of the given feature request within the context of the project at a high-level.  respond in paragraph form in natural language not code
+
+feature request:
+modify the project so that the rows of each board are proportionally the same as the styling in BoardReferenceFile
+additionally, style the cards so they take up a proportion of their container size similar to how it is done in BoardReferenceFile
+
+>	break down the feature request into simpler more approachable conceptual units;  respond in paragraph form in natural language not code and be as verbose and detailed as possible
+
+#	repeat after assumption analysis step if necessary 
+>	come up with a step-by-step outline of how and where you would structure your changes to implement this feature to ensure your additions maintain consistency with the existing project organization and conventions.  respond in paragraph form in natural language not code, be as verbose and detailed as possible
+
+>	the purpose of this query is to identify if the proposed changes are feasible given the current application architecture. 
+	analyze each step of your approach for the assumptions it makes about the project, the feature's intention and scope, and the impact the changes will have on the rest of the system;  respond in paragraph form in natural language not code, be as verbose and detailed as possible
+
+
+>	begin implementing the changes; respond with the artifacts with proper filenames corresponding to the files being added or changed
+	when adding new comments, maintain the '/* comment */' notation but in all uppercase 
+
+>	provide the final app.jsx file as an artifact
+
+
+
+
+
+
+
+summarize the intention and background assumptions
+
+
+lets refine this claude approach
+it's too long and will result in rate limits and prompt overloading
+
+
+
+#	query 1
+respond in paragraph form in natural language not code
+1.	state the intent of the feature request within the context of the project
+2.	break the feature down into approachable conceptual units
+3.	state the implicit assumptions made about the project in the feature request
+4.	the impact the feature will have on the rest of the system 
+5.	assess whether the scope of the feature request is too large with justification
+
+feature request:
+currently there are dark gray regions below the player's hand regions that shouldn't be there
+the player hand should take up 25% of the board
+the left and right rows should take up the next 25% of the board
+and the top row should take up the remaining 50% of that player's board
+there shouldn't be an additional dark gray region at the bottom -- i'm not sure why that's there
+the feature should remove this dark gray row region
+
+
+
+#	query 2
+outline how you would approach implementing this feature step-by-step to ensure the changes maintain consistency with the existing project organization
+respond in paragraph form in natural language not code, and make reference to where in the project each change would need to be made
+
+
+#	query 3
+implement the changes
+respond with the artifacts with properfilenames corresponding to the files being changed
+when adding comments, maintain the `/* comment */` notation but in all upercase
+
+
+
+
+
+
+
+
+
+the refactor from one board to multiple players needs to be studied

@@ -242,7 +242,7 @@ const Board = () => {
   const container_style = {
     display: 'flex',
     flexDirection: 'column',
-    height: '100vh',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'flex-start',
   }
@@ -275,9 +275,12 @@ const Board = () => {
  */
 const App = () => {
   return (
-    <BoardStateProvider>
-      <Board/>
-    </BoardStateProvider>
+		<div style={{ height: '100vh' }}>
+			<div style={{ height: '40%'}}> </div>
+			<BoardStateProvider>
+				<Board/>
+			</BoardStateProvider>
+		</div>
   )
 }
 
