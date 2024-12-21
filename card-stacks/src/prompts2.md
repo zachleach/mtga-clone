@@ -67,3 +67,11 @@ the position to insert the card into is the closest card (horizontally) to where
 
 
 
+
+feature request:
+i'd like to be able to layout board components in App.jsx similar to how boards are layed out in Previous.jsx
+a top row consisting of board objects in a row, rotated 180 degrees, taking up 40% of the viewport height
+a bottom row consisting of a board object taking 60% of the viewport height
+
+
+

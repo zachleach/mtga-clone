@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react'
 import './remove_scrollbars.css'
 import { BoardStateProvider, useBoardState } from './BoardState'
 
+
+
 /**
  * Base visual component representing a single card.
  * Renders as a colored rectangle with rounded corners and border.
@@ -24,6 +26,8 @@ const Card = ({ color }) => {
     <div style={card_style}/>
   )
 }
+
+
 
 /**
  * Manages layout and drag/drop behavior for a vertical stack of cards.
@@ -83,6 +87,8 @@ const CardStack = ({ card_arr, row, stack_id }) => {
   )
 }
 
+
+
 /**
  * Container component for a row of card stacks.
  * Now supports both vertical and horizontal positioning based on row_position.
@@ -111,7 +117,7 @@ const CardRow = ({ row, row_position }) => {
     if (row_position === 'top') {
       return {
         ...base_style,
-        height: '20%',
+        height: '50%',
         width: '100%',
       }
     } else {
@@ -152,7 +158,7 @@ const CardHand = () => {
   const { hand, handlers } = useBoardState()
   
   const container_style = {
-    height: '20%',
+    height: '25%',
     width: '100%',
     background: 'grey',
     border: '1px solid black',
@@ -219,6 +225,10 @@ const CardHand = () => {
   )
 }
 
+
+
+
+
 /**
  * Main layout component organizing card rows in a T-shaped arrangement.
  * Top row spans full width, left and right rows are positioned horizontally,
@@ -242,7 +252,7 @@ const Board = () => {
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
-    height: '20%',
+    height: '25%',
     justifyContent: 'space-between', /* MODIFIED: ENSURES FULL WIDTH DISTRIBUTION */
     alignItems: 'stretch',           /* MODIFIED: ENSURES CHILDREN STRETCH VERTICALLY */
   }
