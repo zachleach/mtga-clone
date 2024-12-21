@@ -1,12 +1,15 @@
 
 current approach
+good practices: ensure the feature request is limited in scope
+have a conversation discussing how to design a feature request with scope if you're struggling
+
 
 ```debugging
 currently there's a bug where dragging and dropping a card from a cardstack onto the cardhand (not directly onto the cards in the hand) seems to insert one card to the right of what it should
 for instance, dragging and dropping a yellow card to the left of the leftmost card in the cardhand will insert the yellow card at index 1 instead of index 0 within the card hand
 explain why this is happening
 
-analyze your [previous approach] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
+analyze your [previous response] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
 respond in numbered separated paragraph form in natural language, not code
 
 begin implementing your proposed changes from the [previous response] [step-by-step] 
@@ -28,6 +31,16 @@ respond with artifacts with proper filenames
 
 
 the next step is what
+
+
+feature request:
+extend the user interface to consist of 4 boards
+the top 40% of the viewport should be a row of 3 boards rotated 180degrees 
+the bottom 60% of the viewport should be a singular board
+it will appear as though there were a row of 3 boards facing one bigger board
+this represents one player's perspective -- they see three other player's boards
+other players will see the same layout, except their boardstate will be displayed in the larger bottom region instead
+players will be able to drag and drop cards across different boards
 
 
 
