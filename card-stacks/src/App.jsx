@@ -29,7 +29,6 @@ const Card = ({ color }) => {
  * Manages layout and drag/drop behavior for a vertical stack of cards.
  * Cards are positioned absolutely with partial overlap based on stack size.
  * Registers itself with BoardState's ref system for position tracking.
- * Handles drag/drop events at the card level.
  *
  * @param {Object} props
  * @param {Array} props.card_arr - Array of card objects to display
@@ -76,7 +75,7 @@ const CardStack = ({ card_arr, row, stack_id }) => {
   return (
     <div ref={stack_ref} style={stack_container_styling}>
       {card_arr.map((card, index) => (
-        <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)} >
+        <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
           <Card {...card} />
         </div>
       ))}
@@ -85,8 +84,8 @@ const CardStack = ({ card_arr, row, stack_id }) => {
 }
 
 /**
- * Container component for a horizontal row of card stacks.
- * Handles drag/drop events at the row level for creating new stacks.
+ * Container component for a row of card stacks.
+ * Now supports both vertical and horizontal positioning based on row_position.
  * Maintains consistent height and spacing of stacks within row.
  *
  * @param {Object} props
@@ -97,15 +96,32 @@ const CardStack = ({ card_arr, row, stack_id }) => {
 const CardRow = ({ row, row_position }) => {
   const { handlers } = useBoardState()
 
-  const container_style = {
-    height: '20%', 
-    width: '100%', 
-    background: 'grey',
-    border: '1px solid black',
-    boxSizing: 'border-box',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+  /* ADDED: DETERMINE CONTAINER STYLE BASED ON ROW POSITION */
+  const get_container_style = () => {
+    const base_style = {
+      background: 'grey',
+      border: '1px solid black',
+      boxSizing: 'border-box',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }
+
+    /* ADDED: ADJUST DIMENSIONS BASED ON VERTICAL OR HORIZONTAL POSITIONING */
+    if (row_position === 'top') {
+      return {
+        ...base_style,
+        height: '20%',
+        width: '100%',
+      }
+    } else {
+      return {
+        ...base_style,
+        height: '100%',  /* TAKES FULL HEIGHT OF PARENT (20% OF VIEWPORT) */
+        width: '50%',    /* TAKES HALF OF PARENT WIDTH */
+        flex: 1,         /* ALLOWS FLEXIBLE GROWTH TO FILL SPACE */
+      }
+    }
   }
 
   const html5_dnd_attributes = {
@@ -114,7 +130,7 @@ const CardRow = ({ row, row_position }) => {
   }
 
   return (
-    <div style={container_style} {...html5_dnd_attributes}>
+    <div style={get_container_style()} {...html5_dnd_attributes}>
       {row.stacks.map(stack => (
         <CardStack
           key={stack.id}
@@ -127,16 +143,11 @@ const CardRow = ({ row, row_position }) => {
   )
 }
 
-
-
-
 /**
  * Component for displaying a fanned hand of cards at the bottom of the board.
  * Cards are arranged in a curved arc pattern with rotation and vertical offset.
  * Handles drag/drop events at the card level.
  */
-
-
 const CardHand = () => {
   const { hand, handlers } = useBoardState()
   
@@ -149,6 +160,7 @@ const CardHand = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    boxSizing: 'border-box',  /* ADDED: ENSURES CONSISTENT SIZING CALCULATIONS */
   }
 
   const get_card_style = (index, total_cards) => {
@@ -207,32 +219,41 @@ const CardHand = () => {
   )
 }
 
-
-
-
-
 /**
- * Main layout component organizing three rows of card stacks and a card hand.
- * Provides full-height container and centers content vertically and horizontally.
- * Consumes row and hand data from BoardState context.
+ * Main layout component organizing card rows in a T-shaped arrangement.
+ * Top row spans full width, left and right rows are positioned horizontally,
+ * and hand remains at the bottom.
  */
 const Board = () => {
   const { rows } = useBoardState()
   const [top_row, left_row, right_row] = rows
 
+  /* ADDED: MAIN CONTAINER WITH COLUMN LAYOUT */
   const container_style = {
-    display: 'flex',  
+    display: 'flex',
+    flexDirection: 'column',
     height: '100vh',
     alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  }
+
+  /* ADDED: MIDDLE SECTION FOR HORIZONTAL ROW ARRANGEMENT */
+  const middle_section_style = {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    height: '20%',
+    justifyContent: 'space-between', /* MODIFIED: ENSURES FULL WIDTH DISTRIBUTION */
+    alignItems: 'stretch',           /* MODIFIED: ENSURES CHILDREN STRETCH VERTICALLY */
   }
 
   return (
     <div style={container_style}>
       <CardRow row={top_row} row_position="top" />
-      <CardRow row={left_row} row_position="left" />
-      <CardRow row={right_row} row_position="right" />
+      <div style={middle_section_style}>
+        <CardRow row={left_row} row_position="left" />
+        <CardRow row={right_row} row_position="right" />
+      </div>
       <CardHand />
     </div>
   )
