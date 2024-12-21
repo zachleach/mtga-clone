@@ -156,7 +156,7 @@ export const move_card_to_hand = (source, target_index, get_row_setter, set_hand
   setTimeout(() => {
     set_hand(curr_state => {
       const updated_state = { ...curr_state }
-      updated_state.cards.splice(target_index + 1, 0, moved_card)
+      updated_state.cards.splice(target_index, 0, moved_card)
       return updated_state
     })
   }, 0)

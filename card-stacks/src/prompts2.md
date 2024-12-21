@@ -210,14 +210,16 @@ respond in paragraph form in natural language, not code
 outline how you would approach implementing the feature you just mentioned step-by-step in order to maintain consistency with the existing project's control flow and style
 explain in numbered separated paragraph form in natural language, not code
 
-analyze your previous approach for redundancy, unnecessary complexity, and overengineering; then provide your updated approach that optimizes for simplicity, ease, readability
+
+
+```
+
+outline how you would approach [decomposing boardstate.jsx] step-by-step in order to maintain consistency with the existing project's control flow and style
+explain in numbered separated paragraph form in natural language, not code
+
+
+analyze your [previous approach] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
 respond in numbered separated paragraph form in natural language, not code
 
 begin implementing your proposed changes from the [previous response] [step-by-step] 
 respond with artifacts with proper filenames
-
-
-
-
-outline how you would approach [decomposing boardstate.jsx] step-by-step in order to maintain consistency with the existing project's control flow and style
-explain in numbered separated paragraph form in natural language, not code
