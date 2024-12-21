@@ -47,6 +47,8 @@ how would your proposed changes interact with the rest of the system
 
 
 
+#	this worked
+
 >	analyze the existing architecture, coding patterns, file organization, and naming conventions already established in the project;  respond in paragraph form in natural language not code
 
 feature request: 
@@ -59,7 +61,9 @@ the position to insert the card into is the closest card (horizontally) to where
 
 >	break down the feature request into simpler more approachable conceptual units;  respond in paragraph form in natural language not code 
 
->	come up with a step-by-step outline for how you would approach implementing the feature while ensuring your additions maintain consistency with the existing project conventions;  respond in paragraph form in natural language not code, and be as verbose and detailed as possible 
+>	come up with a step-by-step outline for how you would approach implementing the feature while ensuring your additions maintain consistency with the existing project conventions;  respond in paragraph form in natural language not code, be as verbose and detailed as possible 
 
 >	begin implementing the changes;  respond with the artifacts with proper filenames corresponding to the files being changed
+
+
 
