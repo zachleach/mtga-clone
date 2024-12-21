@@ -1,4 +1,45 @@
 
+current approach
+
+```debugging
+currently there's a bug where dragging and dropping a card from a cardstack onto the cardhand (not directly onto the cards in the hand) seems to insert one card to the right of what it should
+for instance, dragging and dropping a yellow card to the left of the leftmost card in the cardhand will insert the yellow card at index 1 instead of index 0 within the card hand
+explain why this is happening
+
+analyze your [previous approach] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
+respond in numbered separated paragraph form in natural language, not code
+
+begin implementing your proposed changes from the [previous response] [step-by-step] 
+respond with artifacts with proper filenames
+```
+
+```feature request
+outline how you would approach [decomposing boardstate.jsx] step-by-step in order to maintain consistency with the existing project's control flow and style
+respond in numbered separated paragraph form in natural language, not code
+
+analyze your [previous approach] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
+respond in numbered separated paragraph form in natural language, not code
+
+begin implementing your proposed changes from the [previous response] [step-by-step] 
+respond with artifacts with proper filenames
+```
+
+
+
+
+the next step is what
+
+
+
+
+
+
+
+
+
+
+----
+
 before responding to the following query, outline the task and its assumptions step-by-step
 
 extend the cardhand component to add the following drag and drop functionality 
@@ -213,13 +254,22 @@ explain in numbered separated paragraph form in natural language, not code
 
 
 ```
+currently there's a bug where dragging and dropping a card from a cardstack onto the cardhand (not directly onto the cards in the hand) seems to insert one card to the right of what it should
+for instance, dragging and dropping a yellow card to the left of the leftmost card in the cardhand will insert the yellow card at index 1 instead of index 0 within the card hand
+
+explain why this is happening
 
 outline how you would approach [decomposing boardstate.jsx] step-by-step in order to maintain consistency with the existing project's control flow and style
-explain in numbered separated paragraph form in natural language, not code
-
+respond in numbered separated paragraph form in natural language, not code
 
 analyze your [previous approach] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
 respond in numbered separated paragraph form in natural language, not code
 
 begin implementing your proposed changes from the [previous response] [step-by-step] 
 respond with artifacts with proper filenames
+
+```
+
+
+
+
