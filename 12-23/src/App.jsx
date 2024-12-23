@@ -18,6 +18,46 @@ const App = () => {
 					{/* OPPONENT 1 */}
 					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',  }}>
 						{/* Hand */}
+						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow', minHeight: '20%' }}>
+							Hand
+						</div>
+
+						{/* Non-Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row', minHeight: '30%' }}>
+							<Row />
+							<Row />
+						</div>
+
+						{/* Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
+							<Row />
+						</div>
+					</div>
+
+
+					{/* OPPONENT 2 */}
+					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',  }}>
+						{/* Hand */}
+						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow', minHeight: '20%' }}>
+							Hand
+						</div>
+
+						{/* Non-Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row', minHeight: '30%' }}>
+							<Row />
+							<Row />
+						</div>
+
+						{/* Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
+							<Row />
+						</div>
+					</div>
+
+
+					{/* OPPONENT 3 */}
+					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',  }}>
+						{/* Hand */}
 						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow', minHeight: '20%'  }}>
 							Hand
 						</div>
@@ -32,48 +72,6 @@ const App = () => {
 						<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%'}}>
 							<Row />
 						</div>
-					</div>
-
-
-					{/* OPPONENT 2 */}
-					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',   }}>
-						{/* Hand */}
-						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow',  minHeight: '20%'}}>
-							Hand
-						</div>
-
-						{/* Non-Creatures */}
-						<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row' }}>
-							<Row />
-							<Row />
-						</div>
-
-						{/* Creatures */}
-						<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
-							<Row />
-						</div>
-					</div>
-
-
-					{/* OPPONENT 3 */}
-					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red', }}>
-
-						{/* Hand */}
-						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow',  }}>
-							Hand
-						</div>
-
-						{/* Non-Creatures */}
-						<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row',  }}>
-							<Row />
-							<Row />
-						</div>
-
-						{/* Creatures */}
-						<div style={{ display: 'flex', flex: '0 0 50%', }}>
-							<Row />
-						</div>
-
 					</div>
 				</div>
 			</div>
