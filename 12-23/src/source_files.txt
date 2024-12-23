@@ -13,8 +13,12 @@ const Board = ({ opp = false }) => {
   }
 
   return (
-		<div style={{ display: 'flex', flex: '1 1 100%'}}>
+		<div style={{ display: 'flex', flex: '1 1 100%', flexDirection: 'column', width: '100%' }}>
 			<Row />
+			<div style={{ display: 'flex', flex: '1 1 100%', flexDirection: 'row' }}>
+				<Row />
+				<Row />
+			</div>
 		</div>
   )
 }
@@ -22,14 +26,16 @@ const Board = ({ opp = false }) => {
 
 export default Board
 /* components/Card.jsx */
+const Card = ({ img_path, container_height }) => {
 
-const Card = ({ img_path }) => {
-  const h = 300;  
-  const ASPECT_RATIO = 745 / 1040;  
+  /* Calculate height as percentage of container */
+  const height_percentage = 0.95 /* 95% of container height */
+  const calculated_height = container_height * height_percentage
+  const ASPECT_RATIO = 745 / 1040
 
   const card_style = {
-    height: `${h}px`,
-    width: `${h * ASPECT_RATIO}px`,  
+    height: `${calculated_height}px`,
+    width: `${calculated_height * ASPECT_RATIO}px`,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
@@ -55,20 +61,41 @@ const Card = ({ img_path }) => {
 
 export default Card
 /* components/Hand.jsx */
-
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card } from '.'
 
 const Hand = () => {
   const [card_arr, set_card_arr] = useState([ 
-		{ img_path: '/src/assets/mh3_101_Mindless_Conscription.png' },
-		{ img_path: '/src/assets/mh3_104_Quest_for_the_Necropolis.png' },
-		{ img_path: '/src/assets/mh3_105_Refurbished_Familiar.png' },
-		{ img_path: '/src/assets/mh3_106_Retrofitted_Transmogrant.png' },
-		{ img_path: '/src/assets/mh3_108_Scurrilous_Sentry.png' },
-		{ img_path: '/src/assets/mh3_111_Wither_and_Bloom.png' },
-		{ img_path: '/src/assets/mh3_112_Wurmcoil_Larva.png' },
-	])
+    { img_path: '/src/assets/mh3_101_Mindless_Conscription.png' },
+    { img_path: '/src/assets/mh3_104_Quest_for_the_Necropolis.png' },
+    { img_path: '/src/assets/mh3_105_Refurbished_Familiar.png' },
+    { img_path: '/src/assets/mh3_106_Retrofitted_Transmogrant.png' },
+    { img_path: '/src/assets/mh3_108_Scurrilous_Sentry.png' },
+    { img_path: '/src/assets/mh3_111_Wither_and_Bloom.png' },
+    { img_path: '/src/assets/mh3_112_Wurmcoil_Larva.png' },
+  ])
+  
+  /* Add container height state and ref */
+  const [container_height, set_container_height] = useState(0)
+  const container_ref = useRef(null)
+
+  /* Measure container height on mount and resize */
+  useEffect(() => {
+    const update_height = () => {
+      if (container_ref.current) {
+        set_container_height(container_ref.current.clientHeight)
+      }
+    }
+
+    /* Initial measurement */
+    update_height()
+
+    /* Add resize listener */
+    window.addEventListener('resize', update_height)
+
+    /* Cleanup */
+    return () => window.removeEventListener('resize', update_height)
+  }, [])
   
   const container_style = {
     height: '100%',
@@ -80,33 +107,33 @@ const Hand = () => {
     justifyContent: 'center',
   }
 
-	const get_card_style = (index, total_cards) => {
-		const base_height = '100%'
-		const aspect_ratio = 745 / 1040
-		const card_width = parseInt(base_height) * aspect_ratio
-		
-		const position = index - (total_cards - 1) / 2
-		
-		const rotation_multiplier = 4
-		const rotation = rotation_multiplier * position
-		
-		const hand_density = 150
-		const hand_density_multiplier = 1
-		
-		const lower_by = 0.8 * card_width
-		const vertical_offset = (Math.pow(position, 2) * rotation_multiplier) + lower_by
+  const get_card_style = (index, total_cards) => {
+    const base_height = '100%'
+    const aspect_ratio = 745 / 1040
+    const card_width = parseInt(base_height) * aspect_ratio
+    
+    const position = index - (total_cards - 1) / 2
+    
+    const rotation_multiplier = 4
+    const rotation = rotation_multiplier * position
+    
+    const hand_density = 150
+    const hand_density_multiplier = 1
+    
+    const lower_by = 0.8 * card_width
+    const vertical_offset = (Math.pow(position, 2) * rotation_multiplier) + lower_by
 
-		return {
-			position: 'absolute',
-			height: base_height,
-			aspectRatio: aspect_ratio.toString(),
-			transform: `rotate(${rotation}deg) translateY(${vertical_offset}px)`,
-			transformOrigin: 'bottom center',
-			left: `calc(50% - ${card_width / 2}px + ${position * (hand_density / hand_density_multiplier)}px)`,
-			backgroundColor: 'transparent',
-			zIndex: index,
-		}
-	}
+    return {
+      position: 'absolute',
+      height: base_height,
+      aspectRatio: aspect_ratio.toString(),
+      transform: `rotate(${rotation}deg) translateY(${vertical_offset}px)`,
+      transformOrigin: 'bottom center',
+      left: `calc(50% - ${card_width / 2}px + ${position * (hand_density / hand_density_multiplier)}px)`,
+      backgroundColor: 'transparent',
+      zIndex: index,
+    }
+  }
 
   const html5_dnd_attributes = (index) => ({
     draggable: true,
@@ -121,39 +148,38 @@ const Hand = () => {
   }
 
   return (
-    <div style={container_style} {...container_dnd_attributes}>
+    <div ref={container_ref} style={container_style} {...container_dnd_attributes}>
       {card_arr.map((card, index) => (
-        <div key={index} style={get_card_style(index, card_arr.length)} {...html5_dnd_attributes(index)} >
-          <Card {...card} />
+        <div key={index} style={get_card_style(index, card_arr.length)} {...html5_dnd_attributes(index)}>
+          <Card {...card} container_height={container_height} />
         </div>
       ))}
     </div>
   )
 }
 
-
 export default Hand
-
-
 /* components/Row.jsx */
 
 import { useState } from 'react'
 import { Stack, Hand } from '.'
 
 
-const Row = ({ h, w }) => {
-  const [stack_ids, set_stack_ids] = useState(['0', '1', '2' ])
+const Row = () => {
+  const [stack_ids, set_stack_ids] = useState(['0', '1', '2'])
 
   const container_style = {
-    background: 'white',
-    border: '1px solid black',
-    boxSizing: 'border-box',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     height: '100%',
     width: '100%',
-    overflow: 'hidden',  
+    background: 'white',
+    border: '1px solid green',
+    boxSizing: 'border-box',
+
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+		flex: '1 1 100%',
+		overflow: 'hidden'
   }
 
   const html5_dnd_attributes = (index) => ({
@@ -174,37 +200,51 @@ const Row = ({ h, w }) => {
 
 
 export default Row
-/* components/Stack.jsx */
-
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Tile } from '.'
 
 const Stack = ({ stack_id, is_hand = false }) => {
-	const [card_arr, set_card_arr] = useState([
-		{ img_path: '/src/assets/artcrop.jpg' }
+  const [card_arr, set_card_arr] = useState([
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
   ])
-
-	const stack_container_styling = {
-		position: 'relative',
-		height: '100%',  
-		width: 'auto', 
-		aspectRatio: (626 / 457).toString(),  
-		margin: '0pt 0pt',    
-		flex: '0 1 auto',      
-		minWidth: 0,          
-	}
+  
+  const ASPECT_RATIO = 626 / 457
+  const stack_container_styling = {
+    position: 'relative',
+    height: '50%',  
+    aspectRatio: `${ASPECT_RATIO}`,
+    minWidth: 0,          
+  }
 
   const get_position_styling = (index) => {
-    const totalCards = card_arr.length;
-    const stackSpacing = 15; 
-    const totalStackHeight = (totalCards - 1) * stackSpacing;
-    const startOffset = -(totalStackHeight / 2); 
+    const total_cards = card_arr.length
+    // Maximum desired stack height as percentage of container
+    const MAX_STACK_HEIGHT = 100
+    // Calculate dynamic spacing that ensures total height stays within MAX_STACK_HEIGHT
+    const stack_spacing = Math.min(25, MAX_STACK_HEIGHT / total_cards)
+    const total_stack_height = (total_cards - 1) * stack_spacing
+    const start_offset = -(total_stack_height / 2)
 
     return {
       position: 'absolute',
       height: '100%',
       width: '100%',
-      top: `calc(50% + ${startOffset + (index * stackSpacing)}%)`,
+      top: `calc(50% + ${start_offset + (index * stack_spacing)}%)`,
       transform: 'translateY(-50%)', 
       zIndex: index,
     }
@@ -235,14 +275,12 @@ const Stack = ({ stack_id, is_hand = false }) => {
 
 export default Stack
 /* components/Tile.jsx */
-
-const Tile = ({ img_path }) => {
-  const h = 125;  
-  const ASPECT_RATIO = 626 / 457;  
+const Tile = ({ img_path, container_height }) => {
+  const ASPECT_RATIO = 626 / 457
 
   const card_style = {
-    height: `${h}px`,
-    width: `${h * ASPECT_RATIO}px`,  
+    height: '100%',
+		aspectRatio: `${ASPECT_RATIO}`,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
@@ -277,21 +315,98 @@ export { default as Board } from './Board'
 
 import './App.css'
 import { useState, useEffect, useRef } from 'react'
-import { Board, Hand } from './components'
+import { Board, Hand, Row } from './components'
 
 const App = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
 
-			<div style={{ flex: '0 0 30%', border: '1pt solid red', display: 'flex' }}>
-				<div style={{ flex: '1 1 100%', border: '1pt solid blue' }}/>
-				<div style={{ flex: '1 1 100%', border: '1pt solid blue' }}/>
-				<div style={{ flex: '1 1 100%', border: '1pt solid blue' }}/>
+			{/* 30% row height */}
+			<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid yellow', overflow: 'hidden' }}>
+				
+				{/* flex row wrapper */}
+				<div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'row', overflow: 'hidden' }}>
+
+
+					{/* OPPONENT 1 */}
+					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',  }}>
+
+						{/* Non-Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 40%', flexDirection: 'row', minHeight: '30%' }}>
+							<Row />
+							<Row />
+						</div>
+
+						{/* Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 60%', minHeight: '50%' }}>
+							<Row />
+						</div>
+					</div>
+
+
+					{/* OPPONENT 2 */}
+					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',  }}>
+						{/* Hand */}
+						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow', minHeight: '20%' }}>
+							Hand
+						</div>
+
+						{/* Non-Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row', minHeight: '30%' }}>
+							<Row />
+							<Row />
+						</div>
+
+						{/* Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
+							<Row />
+						</div>
+					</div>
+
+
+					{/* OPPONENT 3 */}
+					<div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red',  }}>
+						{/* Hand */}
+						<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow', minHeight: '20%'  }}>
+							Hand
+						</div>
+
+						{/* Non-Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row', minHeight: '30%' }}>
+							<Row />
+							<Row />
+						</div>
+
+						{/* Creatures */}
+						<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%'}}>
+							<Row />
+						</div>
+					</div>
+				</div>
 			</div>
 
-			<div style={{ flex: '0 0 70%', border: '1pt solid red', display: 'flex' }}>
-				<Board />
+
+			{/* 70% row height */}
+			<div style={{ display: 'flex', flex: '0 0 70%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden',  }}>
+
+				{/* Creatures */}
+				<div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
+					<Row />
+				</div>
+
+				{/* Non-Creatures */}
+				<div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row', minHeight: '30%' }}>
+					<Row />
+					<Row />
+				</div>
+
+				{/* Hand */}
+				<div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow',  minHeight: '20%'}}>
+					Hand
+				</div>
+
 			</div>
+
 
     </div>
   )

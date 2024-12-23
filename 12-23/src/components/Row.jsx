@@ -5,7 +5,7 @@ import { Stack, Hand } from '.'
 
 
 const Row = () => {
-  const [stack_ids, set_stack_ids] = useState(['0', '1'])
+  const [stack_ids, set_stack_ids] = useState(['0', '1', '2'])
 
   const container_style = {
     height: '100%',
@@ -16,9 +16,9 @@ const Row = () => {
 
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    overflow: 'hidden',  
+    justifyContent: 'flex-start',
 		flex: '1 1 100%',
+		overflow: 'hidden'
   }
 
   const html5_dnd_attributes = (index) => ({

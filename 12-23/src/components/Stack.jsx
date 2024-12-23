@@ -1,42 +1,48 @@
-/* components/Stack.jsx */
-
-import { useState } from 'react'
-import { Tile, Card } from '.'
+import { useState, useRef, useEffect } from 'react'
+import { Tile } from '.'
 
 const Stack = ({ stack_id, is_hand = false }) => {
-	const [card_arr, set_card_arr] = useState([
-		{ img_path: '/src/assets/artcrop.jpg' }
+  const [card_arr, set_card_arr] = useState([
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
+    { img_path: '/src/assets/artcrop.png' },
   ])
-
-	/*
-  const [card_arr, set_card_arr] = useState([ 
-		{ img_path: '/src/assets/mh3_101_Mindless_Conscription.png' },
-		{ img_path: '/src/assets/mh3_104_Quest_for_the_Necropolis.png' },
-		{ img_path: '/src/assets/mh3_105_Refurbished_Familiar.png' },
-	])
-	*/
-
-	const stack_container_styling = {
-		position: 'relative',
-		height: '100%',  
-		width: 'auto', 
-		aspectRatio: (626 / 457).toString(),  
-		margin: '0pt 0pt',    
-		flex: '1 1 auto',      
-		minWidth: 0,          
-	}
+  
+  const ASPECT_RATIO = 626 / 457
+  const stack_container_styling = {
+    position: 'relative',
+    height: '50%',  
+    aspectRatio: `${ASPECT_RATIO}`,
+    minWidth: 0,          
+  }
 
   const get_position_styling = (index) => {
-    const totalCards = card_arr.length;
-    const stackSpacing = 8; 
-    const totalStackHeight = (totalCards - 1) * stackSpacing;
-    const startOffset = -(totalStackHeight / 2); 
+    const total_cards = card_arr.length
+    // Maximum desired stack height as percentage of container
+    const MAX_STACK_HEIGHT = 100
+    // Calculate dynamic spacing that ensures total height stays within MAX_STACK_HEIGHT
+    const stack_spacing = Math.min(25, MAX_STACK_HEIGHT / total_cards)
+    const total_stack_height = (total_cards - 1) * stack_spacing
+    const start_offset = -(total_stack_height / 2)
 
     return {
       position: 'absolute',
       height: '100%',
       width: '100%',
-      top: `calc(50% + ${startOffset + (index * stackSpacing)}%)`,
+      top: `calc(50% + ${start_offset + (index * stack_spacing)}%)`,
       transform: 'translateY(-50%)', 
       zIndex: index,
     }
