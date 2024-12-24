@@ -1,25 +1,25 @@
 import { useState, useRef, useEffect } from 'react'
 import { Tile } from '.'
 
+const TILE_ASPECT_RATIO = 626 / 457
+
+
 const Stack = ({ stack_id, is_hand = false }) => {
   const [card_arr, set_card_arr] = useState([
     { img_path: '/src/assets/artcrop.png' },
     { img_path: '/src/assets/artcrop.png' },
   ])
   
-  const ASPECT_RATIO = 626 / 457
   const stack_container_styling = {
     position: 'relative',
     height: '50%',  
-    aspectRatio: `${ASPECT_RATIO}`,
+    aspectRatio: `${TILE_ASPECT_RATIO}`,
     minWidth: 0,          
   }
 
   const get_position_styling = (index) => {
     const total_cards = card_arr.length
-    // Maximum desired stack height as percentage of container
-    const MAX_STACK_HEIGHT = 100
-    // Calculate dynamic spacing that ensures total height stays within MAX_STACK_HEIGHT
+    const MAX_STACK_HEIGHT = 100 
     const stack_spacing = Math.min(25, MAX_STACK_HEIGHT / total_cards)
     const total_stack_height = (total_cards - 1) * stack_spacing
     const start_offset = -(total_stack_height / 2)
@@ -48,11 +48,13 @@ const Stack = ({ stack_id, is_hand = false }) => {
 
   return (
     <div style={stack_container_styling}>
+
       {card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
           <Tile {...card} />
         </div>
       ))}
+
     </div>
   )
 }

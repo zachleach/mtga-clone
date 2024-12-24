@@ -1,14 +1,16 @@
 /* components/Card.jsx */
+
+/**
+ * can probably be combined with tile 
+ * the only thing that changes is the aspect ratio
+ */
 const Card = ({ img_path, container_height }) => {
 
-  /* Calculate height as percentage of container */
-  const height_percentage = 0.95 /* 95% of container height */
-  const calculated_height = container_height * height_percentage
   const ASPECT_RATIO = 745 / 1040
 
   const card_style = {
-    height: `${calculated_height}px`,
-    width: `${calculated_height * ASPECT_RATIO}px`,
+    height: `100%`,
+		aspectRatio: ASPECT_RATIO,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
