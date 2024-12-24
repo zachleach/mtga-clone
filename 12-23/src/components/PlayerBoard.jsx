@@ -1,5 +1,5 @@
 /* components/PlayerBoard.jsx */
-import { Row } from '.'
+import { Row, Hand } from '.'
 
 const PlayerBoard = () => {
   return (
@@ -17,7 +17,7 @@ const PlayerBoard = () => {
 
       {/* Hand */}
       <div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow' }}>
-        Hand
+				<Hand />
       </div>
     </div>
   )

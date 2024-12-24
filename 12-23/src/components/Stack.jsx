@@ -6,10 +6,24 @@ const CARD_ASPECT_RATIO = 745 / 1040
 
 
 const Stack = ({ stack_id, is_hand = false }) => {
+
+
   const [card_arr, set_card_arr] = useState([
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-  ])
+		{
+			card_art: '/src/assets/card1.png',
+			tile_art: '/src/assets/crop1.png'
+		},
+		{
+			card_art: '/src/assets/card2.png',
+			tile_art: '/src/assets/crop2.png'
+		},
+		{
+			card_art: '/src/assets/card3.png',
+			tile_art: '/src/assets/crop3.png'
+		},
+	])
+
+
 
 	const ASPECT_RATIO = TILE_ASPECT_RATIO
   
@@ -52,11 +66,11 @@ const Stack = ({ stack_id, is_hand = false }) => {
   return (
     <div style={stack_container_styling}>
 
-      {card_arr.map((card, index) => (
-        <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
-          <Tile {...card} />
-        </div>
-      ))}
+			{card_arr.map((card, index) => (
+				<div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
+					<Tile tile_art={card.tile_art} />
+				</div>
+			))}
 
     </div>
   )

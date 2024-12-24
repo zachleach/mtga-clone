@@ -1,16 +1,9 @@
-/* components/Card.jsx */
-
-/**
- * can probably be combined with tile 
- * the only thing that changes is the aspect ratio
- */
-const Card = ({ img_path, container_height }) => {
-
+const Card = ({ card_art, container_height }) => {
   const ASPECT_RATIO = 745 / 1040
 
   const card_style = {
-    height: `100%`,
-		aspectRatio: ASPECT_RATIO,
+    height: '100%',
+    aspectRatio: ASPECT_RATIO,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
@@ -26,7 +19,7 @@ const Card = ({ img_path, container_height }) => {
   return (
     <div style={card_style}>
       <img 
-        src={img_path} 
+        src={card_art} 
         alt="Card" 
         style={img_style}
       />

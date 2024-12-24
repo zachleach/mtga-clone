@@ -1,10 +1,9 @@
-/* components/Tile.jsx */
-const Tile = ({ img_path, container_height }) => {
+const Tile = ({ tile_art, container_height }) => {
   const ASPECT_RATIO = 626 / 457
 
   const card_style = {
     height: '100%',
-		aspectRatio: `${ASPECT_RATIO}`,
+    aspectRatio: ASPECT_RATIO,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
@@ -20,7 +19,7 @@ const Tile = ({ img_path, container_height }) => {
   return (
     <div style={card_style}>
       <img 
-        src={img_path} 
+        src={tile_art} 
         alt="Tile" 
         style={img_style}
       />
