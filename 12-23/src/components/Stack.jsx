@@ -5,20 +5,6 @@ const Stack = ({ stack_id, is_hand = false }) => {
   const [card_arr, set_card_arr] = useState([
     { img_path: '/src/assets/artcrop.png' },
     { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
   ])
   
   const ASPECT_RATIO = 626 / 457

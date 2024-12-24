@@ -1,20 +1,21 @@
+```
+explain the change i've just described in detail, citing the impact on the sourcefiles that will require consideration
+only prioritize explaining the changes accurately, do not provide anything else extraneous to this explanation (e.g., do not propose solutions)
+respond in numbered natural language paragraph form not in code
 
-current approach
-good practices: ensure the feature request is limited in scope
-have a conversation discussing how to design a feature request with scope if you're struggling
+outline a minimal step-by-step implementation considering what you've stated in your previous response
+respond in numbered natural language paragraph form not in code
 
-
-```debugging
-currently there's a bug where dragging and dropping a card from a cardstack onto the cardhand (not directly onto the cards in the hand) seems to insert one card to the right of what it should
-for instance, dragging and dropping a yellow card to the left of the leftmost card in the cardhand will insert the yellow card at index 1 instead of index 0 within the card hand
-explain why this is happening
-
-analyze your [previous response] for redundancy, unnecessary complexity, and overengineering; then provide an updated approach that optimizes for simplicity, ease, readability
-respond in numbered separated paragraph form in natural language, not code
+for each step in your previous response, provide step-by-step reasoning for whether the step is an essential implementation detail or over-engineering
+respond in numbered natural language paragraph form not in code
 
 begin implementing your proposed changes from the [previous response] [step-by-step] 
 respond with artifacts with proper filenames
 ```
+
+
+
+
 
 ```feature request
 outline how you would approach [] step-by-step in order to maintain consistency with the existing project's control flow and style

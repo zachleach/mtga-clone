@@ -164,10 +164,15 @@ import { Row } from '.'
 const OpponentBoard = () => {
   return (
     <div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red' }}>
-      {/* Non-Creatures */}
-      <div style={{ display: 'flex', flex: '0 0 40%', flexDirection: 'row', minHeight: '30%' }}>
-        <Row />
-        <Row />
+      {/* Non-Creatures - Testing different row widths */}
+      <div style={{ 
+        display: 'flex', 
+        flex: '0 0 40%', 
+        flexDirection: 'row',
+        minHeight: '30%'
+      }}>
+        <Row variant="wide" />
+        <Row variant="narrow" />
       </div>
 
       {/* Creatures */}
@@ -183,7 +188,7 @@ import { Row } from '.'
 
 const PlayerBoard = () => {
   return (
-    <div style={{ display: 'flex', flex: '0 0 70%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
       {/* Creatures */}
       <div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
         <Row />
@@ -204,14 +209,22 @@ const PlayerBoard = () => {
 }
 
 export default PlayerBoard
-/* components/Row.jsx */
-
 import { useState } from 'react'
-import { Stack, Hand } from '.'
+import { Stack } from '.'
 
+const Row = ({ variant = 'default' }) => {
+  const getStackIds = () => {
+    switch(variant) {
+      case 'wide':
+        return ['0', '1', '2', '3', '5']
+      case 'narrow':
+        return ['0']
+      default:
+        return ['0', '1', '2']
+    }
+  }
 
-const Row = () => {
-  const [stack_ids, set_stack_ids] = useState(['0', '1', '2'])
+  const [stack_ids, set_stack_ids] = useState(getStackIds())
 
   const container_style = {
     height: '100%',
@@ -219,12 +232,11 @@ const Row = () => {
     background: 'white',
     border: '1px solid green',
     boxSizing: 'border-box',
-
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-start',
-		flex: '1 1 100%',
-		overflow: 'hidden'
+    flex: `${Math.max(1, stack_ids.length)} 1 auto`,
+    overflow: 'hidden'
   }
 
   const html5_dnd_attributes = (index) => ({
@@ -243,27 +255,12 @@ const Row = () => {
   )
 }
 
-
 export default Row
 import { useState, useRef, useEffect } from 'react'
 import { Tile } from '.'
 
 const Stack = ({ stack_id, is_hand = false }) => {
   const [card_arr, set_card_arr] = useState([
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
-    { img_path: '/src/assets/artcrop.png' },
     { img_path: '/src/assets/artcrop.png' },
     { img_path: '/src/assets/artcrop.png' },
   ])
@@ -374,7 +371,9 @@ const App = () => {
       </div>
 
       {/* Player's Board - 70% height */}
-      <PlayerBoard />
+      <div style={{ display: 'flex', flex: '0 0 70%', overflow: 'hidden' }}>
+        <PlayerBoard />
+      </div>
     </div>
   )
 }
