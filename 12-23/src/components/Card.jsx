@@ -1,3 +1,4 @@
+/* components/Card.jsx */
 const Card = ({ card_art, container_height }) => {
   const ASPECT_RATIO = 745 / 1040
 

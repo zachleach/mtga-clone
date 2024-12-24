@@ -1,3 +1,4 @@
+/* components/Tile.jsx */
 const Tile = ({ tile_art, container_height }) => {
   const ASPECT_RATIO = 626 / 457
 
