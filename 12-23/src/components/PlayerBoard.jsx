@@ -4,6 +4,7 @@ import { Row, Hand } from '.'
 const PlayerBoard = () => {
   return (
     <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'column', border: '1pt solid red' }}>
+
       {/* Creatures */}
       <div style={{ display: 'flex', flex: '0 0 50%' }}>
         <Row />
@@ -19,6 +20,7 @@ const PlayerBoard = () => {
       <div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow' }}>
 				<Hand />
       </div>
+
     </div>
   )
 }

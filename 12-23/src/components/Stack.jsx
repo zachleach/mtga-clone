@@ -64,7 +64,6 @@ const Stack = ({ stack_id, is_hand = false }) => {
 
 
 	const on_drag_start = (e, index) => {
-    /* We can store the dragged card data and its source index in dataTransfer */
     const dragged_card = card_arr[index]
     e.dataTransfer.setData('application/json', JSON.stringify({
       card: dragged_card,
@@ -74,13 +73,11 @@ const Stack = ({ stack_id, is_hand = false }) => {
   }
 
   const on_drag_over = (e, index) => {
-    /* Prevent default to allow drop and set move effect */
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
   }
 
   const on_drag_end = (e, index) => {
-    /* Only remove card if drop was successful */
     if (!same_stack_drop.current && e.dataTransfer.dropEffect === 'move') {
       set_card_arr(prev_cards => 
         prev_cards.filter((_, idx) => idx !== index)
@@ -92,7 +89,6 @@ const Stack = ({ stack_id, is_hand = false }) => {
   const on_drop = (e, drop_index) => {
     e.preventDefault()
     
-    /* Get the dropped card data */
     const drop_data = JSON.parse(e.dataTransfer.getData('application/json'))
     const { card, source_index, source_stack_id } = drop_data
 
@@ -100,12 +96,12 @@ const Stack = ({ stack_id, is_hand = false }) => {
 		same_stack_drop.current = source_stack_id === stack_id
     
     set_card_arr(prev_cards => {
-      /* For same stack, filter out the source card first */
+      /* handle deletion on_drop for same stack because it's cancelled for on_drag_end in this case */
       const cards_without_source = source_stack_id === stack_id 
         ? prev_cards.filter((_, idx) => idx !== source_index)
         : prev_cards
         
-      /* Insert the dropped card at the target position */
+      /* insert */
       const new_cards = [...cards_without_source]
       new_cards.splice(drop_index, 0, card)
       return new_cards

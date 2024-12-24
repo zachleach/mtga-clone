@@ -1,10 +1,15 @@
 /* components/Row.jsx */
 import { useState } from 'react'
 import { Stack } from '.'
+import { useUniqueId } from '../hooks'
 
-const Row = ({ variant = 'default' }) => {
+const Row = () => {
 
-  const [stack_ids, set_stack_ids] = useState(['0', '1'])
+	const gen_uuid_func = useUniqueId('stack')
+  const [stack_ids, set_stack_ids] = useState([
+		gen_uuid_func(),
+		gen_uuid_func(),
+	])
 
   const container_style = {
     height: '100%',

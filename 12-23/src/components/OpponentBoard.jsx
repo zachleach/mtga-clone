@@ -7,8 +7,8 @@ const OpponentBoard = () => {
 
       {/* Non-Creatures */}
       <div style={{ display: 'flex', flex: '0 0 40%', flexDirection: 'row' }}>
-        <Row variant="wide" />
-        <Row variant="narrow" />
+        <Row />
+        <Row />
       </div>
 
       {/* Creatures */}
