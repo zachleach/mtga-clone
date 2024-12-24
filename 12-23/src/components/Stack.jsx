@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { Tile } from '.'
+import { Tile, Card } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
+const CARD_ASPECT_RATIO = 745 / 1040
 
 
 const Stack = ({ stack_id, is_hand = false }) => {
@@ -9,11 +10,13 @@ const Stack = ({ stack_id, is_hand = false }) => {
     { img_path: '/src/assets/artcrop.png' },
     { img_path: '/src/assets/artcrop.png' },
   ])
+
+	const ASPECT_RATIO = TILE_ASPECT_RATIO
   
   const stack_container_styling = {
     position: 'relative',
-    height: '50%',  
-    aspectRatio: `${TILE_ASPECT_RATIO}`,
+    height: '40%',  
+    aspectRatio: `${ASPECT_RATIO}`,
     minWidth: 0,          
   }
 
