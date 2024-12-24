@@ -6,7 +6,7 @@ const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
 
 
-const Stack = ({ stack_id, is_hand = false }) => {
+const Stack = ({ stack_id, self_destruct_func }) => {
 
 	const same_stack_drop = useRef(false)
 
@@ -24,6 +24,12 @@ const Stack = ({ stack_id, is_hand = false }) => {
 			tile_art: '/src/assets/crop3.png'
 		},
 	])
+
+	useEffect(() => {
+		if (card_arr.length === 0) {
+			self_destruct_func(stack_id)
+		}
+	}, [card_arr.length, stack_id, self_destruct_func])
 
 
 
@@ -59,7 +65,6 @@ const Stack = ({ stack_id, is_hand = false }) => {
     onDrop: (e) => on_drop(e, index),
     onDragOver: (e) => on_drag_over(e, index),
 		onDragEnd: (e) => on_drag_end(e, index),
-
   })
 
 
@@ -88,6 +93,7 @@ const Stack = ({ stack_id, is_hand = false }) => {
 
   const on_drop = (e, drop_index) => {
     e.preventDefault()
+		e.stopPropagation()
     
     const drop_data = JSON.parse(e.dataTransfer.getData('application/json'))
     const { card, source_index, source_stack_id } = drop_data

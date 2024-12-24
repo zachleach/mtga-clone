@@ -11,6 +11,12 @@ const Row = () => {
 		gen_uuid_func(),
 	])
 
+
+	const remove_stack = (stack_id) => {
+		set_stack_ids(prev_ids => prev_ids.filter(id => id !== stack_id))
+	}
+
+
   const container_style = {
     height: '100%',
     background: 'white',
@@ -33,7 +39,7 @@ const Row = () => {
   return (
     <div style={container_style} {...html5_dnd_attributes}>
       {stack_ids.map(id => (
-        <Stack key={id} stack_id={id} />
+        <Stack key={id} stack_id={id} self_destruct_func={remove_stack} />
       ))}
     </div>
   )
