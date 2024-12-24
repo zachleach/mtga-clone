@@ -1,41 +1,16 @@
-/* components/Hand.jsx */
-import { Row, Hand } from '.'
-
-const Board = ({ opp = false }) => {
-  const container_style = {
-    display: 'flex',
-    height: '100%',
-    width: '100%',
-    flexDirection: 'column',
-    minWidth: 0,  
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  }
-
-  return (
-		<div style={{ display: 'flex', flex: '1 1 100%', flexDirection: 'column', width: '100%' }}>
-			<Row />
-			<div style={{ display: 'flex', flex: '1 1 100%', flexDirection: 'row' }}>
-				<Row />
-				<Row />
-			</div>
-		</div>
-  )
-}
-
-
-export default Board
 /* components/Card.jsx */
+
+/**
+ * can probably be combined with tile 
+ * the only thing that changes is the aspect ratio
+ */
 const Card = ({ img_path, container_height }) => {
 
-  /* Calculate height as percentage of container */
-  const height_percentage = 0.95 /* 95% of container height */
-  const calculated_height = container_height * height_percentage
   const ASPECT_RATIO = 745 / 1040
 
   const card_style = {
-    height: `${calculated_height}px`,
-    width: `${calculated_height * ASPECT_RATIO}px`,
+    height: `100%`,
+		aspectRatio: ASPECT_RATIO,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
@@ -159,49 +134,48 @@ const Hand = () => {
 }
 
 export default Hand
+/* components/OpponentBoard.jsx */
 import { Row } from '.'
 
 const OpponentBoard = () => {
   return (
     <div style={{ display: 'flex', flex: '0 0 33.33%', flexDirection: 'column', border: '1pt solid red' }}>
-      {/* Non-Creatures - Testing different row widths */}
-      <div style={{ 
-        display: 'flex', 
-        flex: '0 0 40%', 
-        flexDirection: 'row',
-        minHeight: '30%'
-      }}>
+
+      {/* Non-Creatures */}
+      <div style={{ display: 'flex', flex: '0 0 40%', flexDirection: 'row' }}>
         <Row variant="wide" />
         <Row variant="narrow" />
       </div>
 
       {/* Creatures */}
-      <div style={{ display: 'flex', flex: '0 0 60%', minHeight: '50%' }}>
+      <div style={{ display: 'flex', flex: '0 0 60%' }}>
         <Row />
       </div>
+
     </div>
   )
 }
 
 export default OpponentBoard
+/* components/PlayerBoard.jsx */
 import { Row } from '.'
 
 const PlayerBoard = () => {
   return (
-    <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'column', border: '1pt solid red' }}>
       {/* Creatures */}
-      <div style={{ display: 'flex', flex: '0 0 50%', minHeight: '50%' }}>
+      <div style={{ display: 'flex', flex: '0 0 50%' }}>
         <Row />
       </div>
 
       {/* Non-Creatures */}
-      <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row', minHeight: '30%' }}>
+      <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'row' }}>
         <Row />
         <Row />
       </div>
 
       {/* Hand */}
-      <div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow', minHeight: '20%' }}>
+      <div style={{ display: 'flex', flex: '0 0 20%', flexDirection: 'column', border: '1pt solid yellow' }}>
         Hand
       </div>
     </div>
@@ -209,33 +183,23 @@ const PlayerBoard = () => {
 }
 
 export default PlayerBoard
+/* components/Row.jsx */
 import { useState } from 'react'
 import { Stack } from '.'
 
 const Row = ({ variant = 'default' }) => {
-  const getStackIds = () => {
-    switch(variant) {
-      case 'wide':
-        return ['0', '1', '2', '3', '5']
-      case 'narrow':
-        return ['0']
-      default:
-        return ['0', '1', '2']
-    }
-  }
 
-  const [stack_ids, set_stack_ids] = useState(getStackIds())
+  const [stack_ids, set_stack_ids] = useState(['0', '1'])
 
   const container_style = {
     height: '100%',
-    width: '100%',
     background: 'white',
     border: '1px solid green',
     boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    flex: `${Math.max(1, stack_ids.length)} 1 auto`,
+    flex: '1 0 auto', 
     overflow: 'hidden'
   }
 
@@ -259,25 +223,25 @@ export default Row
 import { useState, useRef, useEffect } from 'react'
 import { Tile } from '.'
 
+const TILE_ASPECT_RATIO = 626 / 457
+
+
 const Stack = ({ stack_id, is_hand = false }) => {
   const [card_arr, set_card_arr] = useState([
     { img_path: '/src/assets/artcrop.png' },
     { img_path: '/src/assets/artcrop.png' },
   ])
   
-  const ASPECT_RATIO = 626 / 457
   const stack_container_styling = {
     position: 'relative',
     height: '50%',  
-    aspectRatio: `${ASPECT_RATIO}`,
+    aspectRatio: `${TILE_ASPECT_RATIO}`,
     minWidth: 0,          
   }
 
   const get_position_styling = (index) => {
     const total_cards = card_arr.length
-    // Maximum desired stack height as percentage of container
-    const MAX_STACK_HEIGHT = 100
-    // Calculate dynamic spacing that ensures total height stays within MAX_STACK_HEIGHT
+    const MAX_STACK_HEIGHT = 100 
     const stack_spacing = Math.min(25, MAX_STACK_HEIGHT / total_cards)
     const total_stack_height = (total_cards - 1) * stack_spacing
     const start_offset = -(total_stack_height / 2)
@@ -306,11 +270,13 @@ const Stack = ({ stack_id, is_hand = false }) => {
 
   return (
     <div style={stack_container_styling}>
+
       {card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
           <Tile {...card} />
         </div>
       ))}
+
     </div>
   )
 }
@@ -352,7 +318,6 @@ export { default as Card } from './Card'
 export { default as Hand } from './Hand'
 export { default as Stack } from './Stack'
 export { default as Row } from './Row'
-export { default as Board } from './Board'
 export { default as OpponentBoard } from './OpponentBoard'
 export { default as PlayerBoard } from './PlayerBoard'
 import './App.css'
@@ -361,6 +326,7 @@ import { OpponentBoard, PlayerBoard } from './components'
 const App = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+
       {/* Opponents Section - 30% height */}
       <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid yellow', overflow: 'hidden' }}>
         <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'row', overflow: 'hidden' }}>
@@ -374,6 +340,7 @@ const App = () => {
       <div style={{ display: 'flex', flex: '0 0 70%', overflow: 'hidden' }}>
         <PlayerBoard />
       </div>
+
     </div>
   )
 }
