@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Stack } from '.'
 import { useUniqueId } from '../hooks'
 
-const Row = ({ init_data = null }) => {
+const Row = ({ init_data = null, use_cards = false }) => {
   const gen_uuid_func = useUniqueId('stack')
   const [stacks, set_stacks] = useState(() => {
     if (!init_data) return []
@@ -39,7 +39,7 @@ const Row = ({ init_data = null }) => {
     boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: use_cards ? 'center': 'flex-start',
     flex: '1 0 auto', 
     overflow: 'hidden'
   }
@@ -57,6 +57,7 @@ const Row = ({ init_data = null }) => {
           stack_id={stack.id} 
           self_destruct_func={remove_stack}
           init_card={stack.card}
+          use_cards={use_cards}
         />
       ))}
     </div>

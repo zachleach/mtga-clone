@@ -1,10 +1,11 @@
 /* components/Stack.jsx */
 import { useState, useRef, useEffect } from 'react'
-import { Tile } from '.'
+import { Tile, Card } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
+const CARD_ASPECT_RATIO = 745 / 1040
 
-const Stack = ({ stack_id, self_destruct_func, init_card = null }) => {
+const Stack = ({ stack_id, self_destruct_func, init_card = null, use_cards = false }) => {
   const same_stack_drop = useRef(false)
 
   const [card_arr, set_card_arr] = useState(() => 
@@ -17,12 +18,12 @@ const Stack = ({ stack_id, self_destruct_func, init_card = null }) => {
     }
   }, [card_arr.length, stack_id, self_destruct_func])
 
-  const ASPECT_RATIO = TILE_ASPECT_RATIO
+  const aspect_ratio = use_cards ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO
   
   const stack_container_styling = {
     position: 'relative',
-    height: '40%',  
-    aspectRatio: `${ASPECT_RATIO}`,
+    height: use_cards ? '100%' : '40%',  
+    aspectRatio: aspect_ratio,
     minWidth: 0,          
   }
 
@@ -94,11 +95,14 @@ const Stack = ({ stack_id, self_destruct_func, init_card = null }) => {
     })
   }
 
+  const DisplayComponent = use_cards ? Card : Tile
+  const art_prop = use_cards ? 'card_art' : 'tile_art'
+
   return (
     <div style={stack_container_styling}>
       {card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
-          <Tile tile_art={card.tile_art} />
+          <DisplayComponent {...{[art_prop]: card[art_prop]}} />
         </div>
       ))}
     </div>
