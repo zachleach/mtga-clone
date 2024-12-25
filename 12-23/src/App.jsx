@@ -1,3 +1,4 @@
+/* App.jsx */
 import './App.css'
 import { OpponentBoard, PlayerBoard } from './components'
 

@@ -1,39 +1,23 @@
 /* components/Stack.jsx */
 import { useState, useRef, useEffect } from 'react'
-import { Tile, Card } from '.'
+import { Tile } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
-const CARD_ASPECT_RATIO = 745 / 1040
 
+const Stack = ({ stack_id, self_destruct_func, init_card = null }) => {
+  const same_stack_drop = useRef(false)
 
-const Stack = ({ stack_id, self_destruct_func }) => {
+  const [card_arr, set_card_arr] = useState(() => 
+    init_card ? [init_card] : []
+  )
 
-	const same_stack_drop = useRef(false)
+  useEffect(() => {
+    if (card_arr.length === 0) {
+      self_destruct_func(stack_id)
+    }
+  }, [card_arr.length, stack_id, self_destruct_func])
 
-  const [card_arr, set_card_arr] = useState([
-		{
-			card_art: '/src/assets/card1.png',
-			tile_art: '/src/assets/crop1.png'
-		},
-		{
-			card_art: '/src/assets/card2.png',
-			tile_art: '/src/assets/crop2.png'
-		},
-		{
-			card_art: '/src/assets/card3.png',
-			tile_art: '/src/assets/crop3.png'
-		},
-	])
-
-	useEffect(() => {
-		if (card_arr.length === 0) {
-			self_destruct_func(stack_id)
-		}
-	}, [card_arr.length, stack_id, self_destruct_func])
-
-
-
-	const ASPECT_RATIO = TILE_ASPECT_RATIO
+  const ASPECT_RATIO = TILE_ASPECT_RATIO
   
   const stack_container_styling = {
     position: 'relative',
@@ -64,11 +48,10 @@ const Stack = ({ stack_id, self_destruct_func }) => {
     onDragStart: (e) => on_drag_start(e, index),
     onDrop: (e) => on_drop(e, index),
     onDragOver: (e) => on_drag_over(e, index),
-		onDragEnd: (e) => on_drag_end(e, index),
+    onDragEnd: (e) => on_drag_end(e, index),
   })
 
-
-	const on_drag_start = (e, index) => {
+  const on_drag_start = (e, index) => {
     const dragged_card = card_arr[index]
     e.dataTransfer.setData('application/json', JSON.stringify({
       card: dragged_card,
@@ -88,42 +71,36 @@ const Stack = ({ stack_id, self_destruct_func }) => {
         prev_cards.filter((_, idx) => idx !== index)
       )
     }
-		same_stack_drop.current = false
+    same_stack_drop.current = false
   }
 
   const on_drop = (e, drop_index) => {
     e.preventDefault()
-		e.stopPropagation()
+    e.stopPropagation()
     
     const drop_data = JSON.parse(e.dataTransfer.getData('application/json'))
     const { card, source_index, source_stack_id } = drop_data
 
-		/* mechanism for on_drag_end to cancel the deletion from source stack after the drop occurs */
-		same_stack_drop.current = source_stack_id === stack_id
+    same_stack_drop.current = source_stack_id === stack_id
     
     set_card_arr(prev_cards => {
-      /* handle deletion on_drop for same stack because it's cancelled for on_drag_end in this case */
       const cards_without_source = source_stack_id === stack_id 
         ? prev_cards.filter((_, idx) => idx !== source_index)
         : prev_cards
         
-      /* insert */
       const new_cards = [...cards_without_source]
       new_cards.splice(drop_index, 0, card)
       return new_cards
     })
   }
 
-
   return (
     <div style={stack_container_styling}>
-
-			{card_arr.map((card, index) => (
-				<div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
-					<Tile tile_art={card.tile_art} />
-				</div>
-			))}
-
+      {card_arr.map((card, index) => (
+        <div key={index} style={get_position_styling(index)} {...html5_dnd_attributes(index)}>
+          <Tile tile_art={card.tile_art} />
+        </div>
+      ))}
     </div>
   )
 }

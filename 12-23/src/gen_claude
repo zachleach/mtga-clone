@@ -3,5 +3,9 @@
 # gen_claude
 # 2024.12.23, by @zachleach
 
-cat components/* App.jsx > source_files.txt
+rm -rf claude && mkdir claude
+cp **/*.jsx claude
+cp *.jsx claude
+
+rm claude/main.jsx
 

@@ -3,19 +3,34 @@ import { useState } from 'react'
 import { Stack } from '.'
 import { useUniqueId } from '../hooks'
 
-const Row = () => {
+const Row = ({ init_data = null }) => {
+  const gen_uuid_func = useUniqueId('stack')
+  const [stacks, set_stacks] = useState(() => {
+    if (!init_data) return []
+    return init_data.map(card => ({
+      id: gen_uuid_func(),
+      card: card
+    }))
+  })
 
-	const gen_uuid_func = useUniqueId('stack')
-  const [stack_ids, set_stack_ids] = useState([
-		gen_uuid_func(),
-		gen_uuid_func(),
-	])
+  const remove_stack = (stack_id) => {
+    set_stacks(prev_stacks => prev_stacks.filter(stack => stack.id !== stack_id))
+  }
 
+  const create_stack = (card_obj) => {
+    const new_id = gen_uuid_func()
+    set_stacks(prev_stacks => [...prev_stacks, { id: new_id, card: card_obj }])
+  }
 
-	const remove_stack = (stack_id) => {
-		set_stack_ids(prev_ids => prev_ids.filter(id => id !== stack_id))
-	}
+  const on_drop = (e) => {
+    e.preventDefault()
+    const dropped_data = JSON.parse(e.dataTransfer.getData('application/json'))
+    create_stack(dropped_data.card)
+  }
 
+  const on_drag_over = (e) => {
+    e.preventDefault()
+  }
 
   const container_style = {
     height: '100%',
@@ -29,17 +44,20 @@ const Row = () => {
     overflow: 'hidden'
   }
 
-  const html5_dnd_attributes = (index) => ({
-    draggable: true,
-    onDragStart: null,
-    onDrop: null,
-    onDragOver: null
+  const html5_dnd_attributes = () => ({
+    onDrop: (e) => on_drop(e),
+    onDragOver: (e) => on_drag_over(e)
   })
 
   return (
-    <div style={container_style} {...html5_dnd_attributes}>
-      {stack_ids.map(id => (
-        <Stack key={id} stack_id={id} self_destruct_func={remove_stack} />
+    <div style={container_style} {...html5_dnd_attributes()}>
+      {stacks.map((stack) => (
+        <Stack 
+          key={stack.id} 
+          stack_id={stack.id} 
+          self_destruct_func={remove_stack}
+          init_card={stack.card}
+        />
       ))}
     </div>
   )
