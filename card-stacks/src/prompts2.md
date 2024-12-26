@@ -1,15 +1,34 @@
+
+(explain intended feature)
+what are the different ways i can do this with pros and cons in terms of maintainability
+
+---
+
+i'm trying to refactor the code organization of this project so that i can pass a state initializer from the parent component as props.  each component should manage its own state, i'm deliberately avoiding the lift state up pattern.  the idea is: i can initialize some data in playerboard, pass it to the row as props, the row initializes itself with that data which initializes itself with that data: creating an stack in the handrow with the data defined in playerboard.
+
+output requirements:
+provide a minimal explaination of the change i've just described 
+explain the expected behavior of the system in detail
+respond in numbered natural language paragraph form not code
+
+
+
+
+
+
 ```
-explain the change i've just described in detail, citing the impact on the sourcefiles that will require consideration
-only prioritize explaining the changes accurately, do not provide anything else extraneous to this explanation (e.g., do not propose solutions)
-respond in numbered natural language paragraph form not in code
+consider your previous responses
 
-outline a minimal step-by-step implementation considering what you've stated in your previous response
-respond in numbered natural language paragraph form not in code
+output requirements:
+outline simple non-over-engineered step-by-step implementation approach 
+respond in numbered natural language paragraph form not code
+```
 
-for each step in your previous response, provide step-by-step reasoning for whether the step is an essential implementation detail or over-engineering
-respond in numbered natural language paragraph form not in code
+```
+consider your previous responses
 
-begin implementing your proposed changes from the [previous response] [step-by-step] 
+output requirements:
+begin implementing your proposed changes step-by-step 
 respond with artifacts with proper filenames
 ```
 

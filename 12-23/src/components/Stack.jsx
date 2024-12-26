@@ -29,7 +29,7 @@ const Stack = ({ stack_id, self_destruct_func, init_card = null, use_cards = fal
 
   const get_position_styling = (index) => {
     const total_cards = card_arr.length
-    const MAX_STACK_HEIGHT = 100 
+    const MAX_STACK_HEIGHT = 150
     const stack_spacing = Math.min(25, MAX_STACK_HEIGHT / total_cards)
     const total_stack_height = (total_cards - 1) * stack_spacing
     const start_offset = -(total_stack_height / 2)

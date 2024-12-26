@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# gen_claude
+# 2024.12.26, by @zachleach
+
+shopt -s globstar
+
+rm -rf claude && mkdir claude
+cp **/*.{jsx,py} claude
+
+rm claude/{main.jsx,flatted.py,test.py}

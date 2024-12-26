@@ -39,7 +39,7 @@ const Row = ({ init_data = null, use_cards = false }) => {
     boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: use_cards ? 'center': 'flex-start',
+    justifyContent: 'center',
     flex: '1 0 auto', 
     overflow: 'hidden'
   }
