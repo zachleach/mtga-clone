@@ -7,5 +7,7 @@ shopt -s globstar
 
 rm -rf claude && mkdir claude
 cp **/*.{jsx,py} claude
+cp context.txt claude
 
 rm claude/{main.jsx,flatted.py,test.py}
+
