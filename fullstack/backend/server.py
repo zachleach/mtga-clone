@@ -1,37 +1,59 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-import json
+from typing import Dict
 
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 todos = [
-    {'text': 'frick'},
+    {'text': 'Example todo', 'username': 'system'},
 ]
 
-active_connections = []
+active_connections: Dict[str, WebSocket] = {}
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+@app.websocket("/ws/{username}")
+async def websocket_endpoint(websocket: WebSocket, username: str):
     await websocket.accept()
-    active_connections.append(websocket)
+    active_connections[username] = websocket
     
     try:
-        await websocket.send_json(todos)
+        await websocket.send_json({
+            'type': 'init',
+            'todos': todos,
+            'users': list(active_connections.keys())
+        })
+        
+        # Notify others of new user
+        for user, conn in active_connections.items():
+            if user != username:
+                await conn.send_json({
+                    'type': 'users',
+                    'users': list(active_connections.keys())
+                })
+        
         while True:
             data = await websocket.receive_json()
-            todos.append(data)
-            for connection in active_connections:
-                await connection.send_json(todos)
+            todos.append({'text': data['text'], 'username': username})
+            # Broadcast updates
+            for conn in active_connections.values():
+                await conn.send_json({
+                    'type': 'todos',
+                    'todos': todos
+                })
     except:
-        active_connections.remove(websocket)
-
+        del active_connections[username]
+        # Notify others of user disconnect
+        for conn in active_connections.values():
+            await conn.send_json({
+                'type': 'users',
+                'users': list(active_connections.keys())
+            })
 
 if __name__ == "__main__":
     import uvicorn
