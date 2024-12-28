@@ -1,119 +1,81 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 
-const App = () => {
-  const [username, setUsername] = useState(() => localStorage.getItem('username') || '')
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('username'))
-  const [todos, setTodos] = useState([])
-  const [users, setUsers] = useState([])
-  const [newTodo, setNewTodo] = useState('')
-  const [socket, setSocket] = useState(null)
-  const [status, setStatus] = useState('disconnected')
+export default function App() {
+    /* State management */
+    const [username, setUsername] = useState('');
+    const [isConnected, setIsConnected] = useState(false);
+    const [connectedUsers, setConnectedUsers] = useState([]);
+    const [ws, setWs] = useState(null);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      connect()
+    /* Handle WebSocket connection */
+    const connectWebSocket = (username) => {
+        const websocket = new WebSocket(`ws://localhost:8000/ws/${username}`);
+        
+        websocket.onopen = () => {
+            setIsConnected(true);
+            setWs(websocket);
+        };
+        
+        websocket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'users_list') {
+                setConnectedUsers(data.users);
+            }
+        };
+        
+        websocket.onclose = () => {
+            setIsConnected(false);
+            setWs(null);
+        };
+        
+        return websocket;
     }
-  }, [isLoggedIn])
 
-  const handleLogin = (e) => {
-    e.preventDefault()
-    if (!username.trim()) return
-    localStorage.setItem('username', username)
-    setIsLoggedIn(true)
-  }
+    /* Clean up WebSocket on component unmount */
+    useEffect(() => {
+        return () => {
+            if (ws) {
+                ws.close();
+            }
+        };
+    }, [ws]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('username')
-    setIsLoggedIn(false)
-    socket?.close()
-  }
+    /* Handle form submission */
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (username.trim()) {
+            connectWebSocket(username);
+        }
+    };
 
-  const connect = () => {
-    const ws = new WebSocket(`ws://localhost:5000/ws/${username}`)
-    
-    ws.onopen = () => setStatus('connected')
-    ws.onclose = () => {
-      setStatus('disconnected')
-      setTimeout(() => connect(), 1000)
+    /* Render loading screen */
+    if (!isConnected) {
+        return (
+            <div>
+                <h1>Welcome</h1>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter your name"
+                    />
+                    <button type="submit">Join</button>
+                </form>
+            </div>
+        );
     }
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      switch (data.type) {
-        case 'init':
-          setTodos(data.todos)
-          setUsers(data.users)
-          break
-        case 'todos':
-          setTodos(data.todos)
-          break
-        case 'users':
-          setUsers(data.users)
-          break
-      }
-    }
-    
-    setSocket(ws)
-  }
 
-
-  const addTodo = () => {
-    if (!newTodo.trim() || !socket) return
-    socket.send(JSON.stringify({ text: newTodo }))
-    setNewTodo('')
-  }
-
-
-
-
-  if (!isLoggedIn) {
+    /* Render game screen */
     return (
-      <div>
-        <h1>Enter Username</h1>
-        <form onSubmit={handleLogin}>
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-          />
-          <button type="submit">Join</button>
-        </form>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <h1>Real-time Todos</h1>
-      <p>Welcome, {username}! <button onClick={handleLogout}>Logout</button></p>
-      <p>Status: {status}</p>
-      
-      <div>
-        <h2>Online Users</h2>
-        <ul>
-          {users.map(user => (
-            <li key={user}>{user}</li>
-          ))}
-        </ul>
-      </div>
-
-      <input
-        value={newTodo}
-        onChange={(e) => setNewTodo(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && addTodo()}
-        placeholder="Enter todo"
-      />
-      <button onClick={addTodo} disabled={status !== 'connected'}>
-        Add
-      </button>
-
-      <ul>
-        {todos.map((todo, index) => (
-          <li key={index}>{todo.username}: {todo.text}</li>
-        ))}
-      </ul>
-    </div>
-  )
+        <div>
+            <h1>Welcome, {username}!</h1>
+            <h2>Connected Users:</h2>
+            <ul>
+                {connectedUsers.map((user) => (
+                    <li key={user}>{user}</li>
+                ))}
+            </ul>
+        </div>
+    );
 }
-
-export default App

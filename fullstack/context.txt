@@ -1,0 +1,14 @@
+context:
+i'm unfamiliar with web development terminology
+i'm trying to learn how websockets and endpoints work
+
+tech stack:
+the frontend is in react
+the backend is in python using fast api 
+
+output requirements:
+do not use any css, only bare html elements to illustrate core functionality
+do not add more functionality than what is specified by the user
+use two space indentation for javascript files
+the fastapi server should have hot reloading (e.g., if __name__ == "__main__": uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
