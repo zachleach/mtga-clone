@@ -1,7 +1,8 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import Dict, Set
-from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict
+import json
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -39,9 +40,16 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 "users": list(active_connections.keys())
             })
             
-        # Keep the connection alive and handle any incoming messages
+        # Keep the connection alive and handle messages
         while True:
-            await websocket.receive_text()
+            data = await websocket.receive_json()
+            
+            if data["type"] == "request_card_art":
+                await websocket.send_json({
+                    "type": "card_art",
+                    "card": "https://cards.scryfall.io/large/front/7/b/7baf9549-1869-4bd3-a52a-2f0b30ba0b16.jpg?1717011254",
+                    "crop": "https://cards.scryfall.io/art_crop/front/7/b/7baf9549-1869-4bd3-a52a-2f0b30ba0b16.jpg?171701125"
+                })
             
     except WebSocketDisconnect:
         # Remove the connection when user disconnects
@@ -54,7 +62,6 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 "users": list(active_connections.keys())
             })
 
-# Optional: Add a health check endpoint
 @app.get("/")
 async def health_check():
     return {"status": "ok"}
