@@ -1,3 +1,5 @@
+import './App.css'
+import { PlayerBoard, OpponentBoard } from './components'
 import React, { useState, useEffect } from 'react';
 
 export default function App() {
@@ -77,23 +79,36 @@ export default function App() {
     );
   }
 
+
+
+	const opponents = connectedUsers.filter(user => user !== username)
+
+
   /* Render game screen */
   return (
-    <div>
-      <h1>Welcome, {username}!</h1>
-      <h2>Connected Users:</h2>
-      <ul>
-        {connectedUsers.map((user) => (
-          <li key={user}>{user}</li>
-        ))}
-      </ul>
-      <button onClick={handleRequestCardArt}>Get Card Art</button>
-      {cardArt && (
-        <div>
-          <img src={cardArt.card} alt="Full card view" />
-          <img src={cardArt.crop} alt="Cropped card art" />
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+      {/* Opponents Section - 30% height */}
+      <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'row', overflow: 'hidden',  }}>
+					{opponents.map((name, idx) => (
+
+						<div key={name} style={{ display: 'flex', flex: `0 0 ${100 / opponents.length}%`, flexDirection: 'column', border: '1pt solid red', boxSizing: 'border-box' }}>
+							<OpponentBoard player_name={name}/>
+						</div>
+
+					))}
         </div>
-      )}
+      </div>
+
+      {/* Player's Board - 70% height */}
+      <div style={{ display: 'flex', flex: '0 0 70%', overflow: 'hidden' }}>
+				<PlayerBoard player_name={username}/>
+      </div>
+
     </div>
-  );
+  )
 }
+
+
+
