@@ -2,7 +2,7 @@ import './App.css'
 import { PlayerBoard, OpponentBoard } from './components'
 import React, { useState, useEffect } from 'react';
 
-export default function App() {
+export default App = () => {
   /* State management */
   const [username, setUsername] = useState('');
   const [isConnected, setIsConnected] = useState(false);
