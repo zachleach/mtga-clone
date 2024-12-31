@@ -1,5 +1,9 @@
 /* components/Row.jsx */
-export const Row = ({ state }) => {
+import { Stack } from '.'
+
+export const Row = ({ row_state }) => {
+
+	const is_hand = row_state.is_hand === 'true'
 
   const container_style = {
     height: '100%',
@@ -15,7 +19,9 @@ export const Row = ({ state }) => {
 
   return (
     <div style={container_style} >
-			{state}
+			{row_state['stack_state'].map((stack, idx) => (
+				<Stack key={idx} stack_state={stack} is_hand={is_hand}/>
+			))}
     </div>
   )
 }
