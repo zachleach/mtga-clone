@@ -9,8 +9,6 @@ const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
 
-	console.log(stack_state)
-
 	const container_style = {
       position: 'relative',
       height: is_hand ? '100%' : '40%',
@@ -38,7 +36,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
   if (is_hand) {
     return (
       <div style={container_style}>
-        {stack_state && stack_state.card_arr.map((card, index) => (
+        {stack_state.card_arr.map((card, index) => (
           <div key={index} style={get_position_styling(index)}>
             <Card art_url={card.card} />
           </div>
@@ -48,7 +46,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
   }
   return (
     <div style={container_style}>
-      {stack_state && stack_state.card_arr.map((card, index) => (
+      {stack_state.card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)}>
           <Tile art_url={card.crop} />
         </div>

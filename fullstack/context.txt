@@ -1,6 +1,3 @@
-context:
-i'm currently hardcoding game state and trying to get each component to render it properly before moving state to the backend 
-
 tech stack:
 the frontend is in react
 the backend is in python using fast api 

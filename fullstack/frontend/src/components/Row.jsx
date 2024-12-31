@@ -3,8 +3,6 @@ import { Stack } from '.'
 
 export const Row = ({ row_state }) => {
 
-	const is_hand = row_state.is_hand === 'true'
-
   const container_style = {
     height: '100%',
     background: 'white',
@@ -20,7 +18,7 @@ export const Row = ({ row_state }) => {
   return (
     <div style={container_style} >
 			{row_state['stack_state'].map((stack, idx) => (
-				<Stack key={idx} stack_state={stack} is_hand={is_hand}/>
+				<Stack key={idx} stack_state={stack} is_hand={row_state.is_hand}/>
 			))}
     </div>
   )
