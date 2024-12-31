@@ -11,8 +11,8 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 	const container_style = {
       position: 'relative',
-      height: is_hand ? '100%' : '40%',
-      aspectRatio: is_hand ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO,
+      height: is_hand === true ? '100%' : '40%',
+      aspectRatio: is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO,
       minWidth: 0,
 	}
 
@@ -33,7 +33,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
-  if (is_hand) {
+  if (is_hand === true) {
     return (
       <div style={container_style}>
         {stack_state.card_arr.map((card, index) => (

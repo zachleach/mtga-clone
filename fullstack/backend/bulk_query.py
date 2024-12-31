@@ -13,41 +13,21 @@ class ScryfallDeckUtils:
     """
     
     def __init__(self, request_delay: float = 0.1):
-        """
-        Initialize the utility class.
-        
-        Args:
-            request_delay: Time to wait between API requests in seconds
-        """
         self.request_delay = request_delay
         self.bulk_url = "https://api.scryfall.com/cards/collection"
         self.batch_size = 75  # Scryfall's maximum batch size
     
     def fetch_cards_bulk(self, card_identifiers: List[Dict[str, str]]) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Fetch card data from Scryfall API using bulk data endpoint, handling pagination.
-        
-        Args:
-            card_identifiers: List of card identifiers. Each identifier should be a dict with
-                            either 'name', 'id', or ('set' and 'collector_number')
-        
-        Returns:
-            Dict with 'found' and 'not_found' lists
-        """
-        # Initialize results
         found_cards = []
         not_found_cards = []
         
-        # Calculate number of batches
         num_batches = ceil(len(card_identifiers) / self.batch_size)
         
         for i in range(num_batches):
-            # Get current batch of identifiers
             start_idx = i * self.batch_size
             end_idx = min((i + 1) * self.batch_size, len(card_identifiers))
             current_batch = card_identifiers[start_idx:end_idx]
             
-            # Prepare request payload
             payload = {
                 "identifiers": current_batch
             }
@@ -60,7 +40,6 @@ class ScryfallDeckUtils:
                 found_cards.extend(data.get('data', []))
                 not_found_cards.extend(data.get('not_found', []))
                 
-                # Sleep between requests to respect rate limits
                 if i < num_batches - 1:
                     time.sleep(self.request_delay)
                     
@@ -75,16 +54,6 @@ class ScryfallDeckUtils:
     
     @staticmethod
     def parse_mtga_decklist(decklist_text: str) -> List[Dict[str, str]]:
-        """
-        Parse an MTGA decklist text into Scryfall identifiers.
-        Ignores #string patterns at the end of lines.
-        
-        Args:
-            decklist_text: String containing MTGA formatted decklist
-        
-        Returns:
-            List of card identifiers for Scryfall API
-        """
         pattern = r'^\s*(\d+)\s+([^(\n]+?)(?:\s+\((\w+)\)\s+(\d+))?\s*(?:#[^\n]*)?$'
         identifiers = []
         
@@ -110,17 +79,8 @@ class ScryfallDeckUtils:
         
         return identifiers
     
+
     def fetch_deck_data(self, decklist_text: str) -> Dict[str, Any]:
-        """
-        Parse MTGA decklist and fetch card data from Scryfall.
-        
-        Args:
-            decklist_text: String containing MTGA formatted decklist
-        
-        Returns:
-            Dictionary containing deck data and any errors
-        """
-        # Parse the decklist
         identifiers = self.parse_mtga_decklist(decklist_text)
         
         if not identifiers:
