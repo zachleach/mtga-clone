@@ -1,5 +1,5 @@
 /* components/OpponentBoard.jsx */
-import { Row, PlayerIcon } from '.'
+import { Row } from '.'
 
 export const OpponentBoard = ({ board_state }) => {
   return (
@@ -8,7 +8,6 @@ export const OpponentBoard = ({ board_state }) => {
       {/* Non-Creatures */}
       <div style={{ display: 'flex', flex: '0 0 40%', flexDirection: 'row' }}>
         <Row row_state={board_state.left_row_state} />
-				<PlayerIcon />
         <Row row_state={board_state.right_row_state} />
       </div>
 
