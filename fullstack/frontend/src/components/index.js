@@ -1,3 +1,4 @@
+export { PlayerIcon } from './PlayerIcon'
 export { Card } from './Card'
 export { OpponentBoard } from './OpponentBoard'
 export { PlayerBoard } from './PlayerBoard'
