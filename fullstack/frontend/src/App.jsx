@@ -1,4 +1,4 @@
-import './App.css'
+import './remove_scrollbars.css'
 import { PlayerBoard, OpponentBoard } from './components'
 import React, { useState, useEffect } from 'react';
 

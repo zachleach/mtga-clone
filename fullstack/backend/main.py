@@ -7,9 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from bulk_query import ScryfallDeckUtils
 
 
-
-
-game_state = {}
 active_connections: Dict[str, WebSocket] = {}
 
 async def broadcast_json(payload: Dict):
@@ -28,41 +25,22 @@ app.add_middleware(
 )
 
 
-def generate_initial_state(username: str) -> dict:
-    return {
-        'uuid': username,
-        'hand_row_state': {
-            'uuid': '',
-            'is_hand': True,
-            'stack_state': []
-        },
-        'top_row_state': {
-            'uuid': '',
-            'is_hand': False,
-            'stack_state': []
-        },
-        'left_row_state': {
-            'uuid': '',
-            'is_hand': False,
-            'stack_state': []
-        },
-        'right_row_state': {
-            'uuid': '',
-            'is_hand': False,
-            'stack_state': []
-        }
-    }
-
-'''
-TODO:
-    insert_stack(username, row_uuid, card, index)
-    insert_card(username, stack_uuid, card, index)
-    etc
-
-'''
+game_state = {}
+scryfall_utils = ScryfallDeckUtils()
 
 
 
+
+
+def get_cards(decklist):
+    deck_json = scryfall_utils.fetch_deck_data(decklist)
+    card_jsons = deck_json['cards']
+
+    cards = []
+    for card in card_jsons:
+        cards += [generate_card(card)]
+
+    return cards
 
 def generate_card(scryfall_card_json: dict) -> dict:
     return {
@@ -71,39 +49,100 @@ def generate_card(scryfall_card_json: dict) -> dict:
     }
 
 
-scryfall_utils = ScryfallDeckUtils()
+def create_stack(cards, mtga_list=None):
+    stack = { 
+        'uuid': '',
+        'card_arr': cards
+    }
+
+    if (mtga_list is None):
+        return stack
+
+    stack['card_arr'] = get_cards(mtga_list)
+    return stack
+
+
+def generate_initial_state(mtga_list=None) -> dict:
+
+
+    hand = '''
+        1 Abrade (LCI) 131
+        1 Ancestral Vision (TSR) 52
+        1 Blackblade Reforged (DMC) 178
+        1 Cathartic Reunion (2XM) 121
+    '''
+
+    left = '''
+        1 Doom Blade (IMA) 87
+        1 Feed the Swarm (OTC) 134
+        1 Fleetfeather Sandals (THS) 216
+        1 Gilded Pinions (SNC) 238
+        1 Glamdring (LTR) 239
+    '''
+
+    top = '''
+        1 Go for the Throat (MOC) 250
+        1 Illusionist's Bracers (RVR) 260
+        1 Inevitable Betrayal (MH2) 47
+        1 Lightning Greaves (OTC) 260
+    '''
+
+    hand_stacks = []
+    for card in get_cards(hand):
+        hand_stacks += [create_stack([card])]
+
+    left_stacks = []
+    for card in get_cards(left):
+        left_stacks += [create_stack([card])]
+
+    top_stacks = []
+    for card in get_cards(top):
+        top_stacks += [create_stack([card])]
+
+
+
+    return {
+        'uuid': '',
+        'hand_row_state': {
+            'uuid': '',
+            'is_hand': True,
+            'stacks': hand_stacks
+        },
+        'top_row_state': {
+            'uuid': '',
+            'is_hand': False,
+            'stacks': top_stacks
+        },
+        'left_row_state': {
+            'uuid': '',
+            'is_hand': False,
+            'stacks': left_stacks
+        },
+        'right_row_state': {
+            'uuid': '',
+            'is_hand': False,
+            'stacks': []
+        }
+    }
+
+
+
+
+
+
+
 
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
     await websocket.accept()
     active_connections[username] = websocket
 
-    game_state[username] = generate_initial_state(username)
+    game_state[username] = generate_initial_state()
     
     try:
         request = await websocket.receive_json()
         if (request['type'] == 'decklist'):
             decklist = request['payload'] 
-
-            deck_json = scryfall_utils.fetch_deck_data(decklist)
-            cards = deck_json['cards']
-
-            for card in cards:
-                card_obj = generate_card(card)
-                game_state[username]['hand_row_state']['stack_state'] += [{
-                    'uuid': '',
-                    'card_arr': [card_obj]
-                }]
-                game_state[username]['top_row_state']['stack_state'] += [{
-                    'uuid': '',
-                    'card_arr': [card_obj]
-                }]
-
-
-
-
-
-
 
         await broadcast_json({
             "type": "game_state",
