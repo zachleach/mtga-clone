@@ -122,7 +122,9 @@ const App = () => {
 
 
 	const generate_overlay = () => {
-		return <CardGridOverlay />
+		if (is_viewing_library) {
+			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'}/>
+		}
 	}
 
 

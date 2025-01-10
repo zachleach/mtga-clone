@@ -91,6 +91,27 @@ def generate_initial_state(mtga_list=None) -> dict:
         1 Illusionist's Bracers (RVR) 260
         1 Inevitable Betrayal (MH2) 47
         1 Lightning Greaves (OTC) 260
+        1 Adarkar Wastes (M3C) 316 
+        1 Arcane Sanctum (BRC) 173 
+        1 Arid Mesa (MH2) 244 
+        1 Badlands (VMA) 291 
+        1 Battlefield Forge (M3C) 321 
+        1 Bayou (VMA) 293 
+        1 Blackcleave Cliffs (OTC) 272 
+        1 Blood Crypt (RVR) 292 
+        1 Bloodstained Mire (MH3) 216 
+        1 Blooming Marsh (OTJ) 266 
+        1 Botanical Sanctum (OTJ) 267 
+        1 Breeding Pool (RNA) 246 
+        1 Brushland (M3C) 324 
+        1 Cascade Bluffs (2XM) 313 
+        1 Cascading Cataracts (DMC) 202 
+        1 Caves of Koilos (C20) 262 
+        1 City of Brass (MD1) 15 
+        1 Command Tower (ELD) 333
+        1 Commercial District (MKM) 259 
+        1 Concealed Courtyard (KLD) 245 
+        1 Copperline Gorge (ONE) 249 
     '''
 
     deck = get_cards(decklist)
@@ -98,6 +119,7 @@ def generate_initial_state(mtga_list=None) -> dict:
     return {
         'uuid': '',
         'deck': deck,
+        'library': deck,
         'graveyard': [],
         'exile': [],
         'scry': [],
