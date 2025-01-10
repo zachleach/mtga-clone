@@ -3,6 +3,5 @@ the frontend is in react
 the backend is in python using fast api 
 
 output requirements:
-do not use any css, only bare html elements to illustrate core functionality
 use two space indentation for javascript files
 

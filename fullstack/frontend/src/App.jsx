@@ -1,5 +1,5 @@
 import './remove_scrollbars.css'
-import { PlayerBoard, OpponentBoard } from './components'
+import { PlayerBoard, OpponentBoard, CardGridOverlay } from './components'
 import React, { useState, useEffect } from 'react';
 
 const App = () => {
@@ -12,6 +12,11 @@ const App = () => {
   const [ws, setWs] = useState(null);
 	const [game_state, set_game_state] = useState({})
 
+
+	const [is_viewing_library, set_is_viewing_library] = useState(false)
+	const [is_viewing_graveyard, set_is_viewing_graveyard] = useState(false)
+	const [is_viewing_exile, set_is_viewing_exile] = useState(false)
+	const [is_scrying, set_is_scrying] = useState(false)
 
 
 
@@ -57,6 +62,28 @@ const App = () => {
 
 
 
+	/* setup global window hotkeys */
+	useEffect(() => {
+
+		const keyboard_listener = (event) => {
+			if (!isConnected) return
+
+			switch (event.key) {
+				case 'l':
+					set_is_viewing_library(!is_viewing_library)
+					break;
+
+				default:
+					console.log(`pressed: ${event.key}`)
+			}
+		}
+
+		window.addEventListener('keydown', keyboard_listener)
+		return () => window.removeEventListener('keydown', keyboard_listener)
+	}, [isConnected, is_viewing_library])
+
+
+
 
 
   const handleSubmit = (e) => {
@@ -65,6 +92,8 @@ const App = () => {
       connectWebSocket(username);
     }
   };
+
+
 
   /* Render loading screen */
   if (!isConnected) {
@@ -92,11 +121,19 @@ const App = () => {
 
 
 
+	const generate_overlay = () => {
+		return <CardGridOverlay />
+	}
+
+
+
 	const opponents = connectedUsers.filter(user => user !== username)
 
   /* Render game screen */
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+			{is_viewing_library && generate_overlay()}
 
       {/* Opponents Section - 30% height */}
       <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
