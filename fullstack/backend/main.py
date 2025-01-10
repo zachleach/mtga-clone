@@ -30,6 +30,10 @@ scryfall_utils = ScryfallDeckUtils()
 
 
 
+'''
+    get an array of frontend card objects from an mtga decklist
+
+'''
 def get_cards(decklist):
     deck_json = scryfall_utils.fetch_deck_data(decklist)
     card_jsons = deck_json['cards']
@@ -40,6 +44,11 @@ def get_cards(decklist):
 
     return cards
 
+
+'''
+    get a frontend card object from a scryfall card json object
+
+'''
 def generate_card(scryfall_card_json: dict) -> dict:
     return {
         'card': scryfall_card_json['image_uris']['large'],
@@ -47,6 +56,10 @@ def generate_card(scryfall_card_json: dict) -> dict:
     }
 
 
+'''
+    create a frontend card stack object that can be stored in a row's `stacks` array
+
+'''
 def create_stack(cards, mtga_list=None):
     stack = { 
         'uuid': '',
@@ -60,62 +73,48 @@ def create_stack(cards, mtga_list=None):
     return stack
 
 
+'''
+    hardcode deck state for initial testing purposes
+
+'''
 def generate_initial_state(mtga_list=None) -> dict:
-    hand = '''
+    decklist = '''
         1 Abrade (LCI) 131
         1 Ancestral Vision (TSR) 52
         1 Blackblade Reforged (DMC) 178
         1 Cathartic Reunion (2XM) 121
-    '''
-
-    left = '''
         1 Doom Blade (IMA) 87
         1 Feed the Swarm (OTC) 134
         1 Fleetfeather Sandals (THS) 216
         1 Glamdring (LTR) 239
-    '''
-
-    top = '''
         1 Go for the Throat (MOC) 250
         1 Illusionist's Bracers (RVR) 260
         1 Inevitable Betrayal (MH2) 47
         1 Lightning Greaves (OTC) 260
     '''
 
-    hand_stacks = []
-    for card in get_cards(hand):
-        hand_stacks += [create_stack([card])]
-
-    left_stacks = []
-    for card in get_cards(left):
-        left_stacks += [create_stack([card])]
-
-    top_stacks = []
-    for card in get_cards(top):
-        top_stacks += [create_stack([card])]
-
-
+    deck = get_cards(decklist)
 
     return {
         'uuid': '',
-        'deck': [],
+        'deck': deck,
         'graveyard': [],
         'exile': [],
         'scry': [],
         'hand_row': {
             'uuid': '',
             'is_hand': True,
-            'stacks': hand_stacks
+            'stacks': []
         },
         'top_row': {
             'uuid': '',
             'is_hand': False,
-            'stacks': top_stacks
+            'stacks': []
         },
         'left_row': {
             'uuid': '',
             'is_hand': False,
-            'stacks': left_stacks
+            'stacks': []
         },
         'right_row': {
             'uuid': '',
@@ -123,10 +122,6 @@ def generate_initial_state(mtga_list=None) -> dict:
             'stacks': []
         }
     }
-
-
-
-
 
 
 
