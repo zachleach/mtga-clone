@@ -1,6 +1,4 @@
 /* components/Stack.jsx */
-
-/* components/Stack.jsx */
 import { useState, useRef, useEffect } from 'react'
 import { Tile, Card } from '.'
 

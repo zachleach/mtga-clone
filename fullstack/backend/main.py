@@ -30,8 +30,6 @@ scryfall_utils = ScryfallDeckUtils()
 
 
 
-
-
 def get_cards(decklist):
     deck_json = scryfall_utils.fetch_deck_data(decklist)
     card_jsons = deck_json['cards']
@@ -63,8 +61,6 @@ def create_stack(cards, mtga_list=None):
 
 
 def generate_initial_state(mtga_list=None) -> dict:
-
-
     hand = '''
         1 Abrade (LCI) 131
         1 Ancestral Vision (TSR) 52
@@ -76,7 +72,6 @@ def generate_initial_state(mtga_list=None) -> dict:
         1 Doom Blade (IMA) 87
         1 Feed the Swarm (OTC) 134
         1 Fleetfeather Sandals (THS) 216
-        1 Gilded Pinions (SNC) 238
         1 Glamdring (LTR) 239
     '''
 
@@ -103,22 +98,26 @@ def generate_initial_state(mtga_list=None) -> dict:
 
     return {
         'uuid': '',
-        'hand_row_state': {
+        'deck': [],
+        'graveyard': [],
+        'exile': [],
+        'scry': [],
+        'hand_row': {
             'uuid': '',
             'is_hand': True,
             'stacks': hand_stacks
         },
-        'top_row_state': {
+        'top_row': {
             'uuid': '',
             'is_hand': False,
             'stacks': top_stacks
         },
-        'left_row_state': {
+        'left_row': {
             'uuid': '',
             'is_hand': False,
             'stacks': left_stacks
         },
-        'right_row_state': {
+        'right_row': {
             'uuid': '',
             'is_hand': False,
             'stacks': []

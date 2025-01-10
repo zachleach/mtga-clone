@@ -15,13 +15,13 @@ export const OpponentBoard = ({ board_state }) => {
 
       {/* Non-Creatures */}
       <div style={{ display: 'flex', flex: '0 0 25%', flexDirection: 'row' }}>
-        <Row row_state={board_state.left_row_state} />
-        <Row row_state={board_state.right_row_state} />
+        <Row row_state={board_state.right_row} />
+        <Row row_state={board_state.left_row} />
       </div>
 
       {/* Creatures */}
       <div style={{ display: 'flex', flex: '0 0 50%' }}>
-        <Row row_state={board_state.top_row_state} />
+        <Row row_state={board_state.top_row} />
       </div>
 
     </div>
