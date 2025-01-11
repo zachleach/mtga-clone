@@ -5,20 +5,32 @@ const card_width = 220
 const gap = 10
 
 
-export const CardGridOverlay = ({ card_arr, type }) => {
+export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 	const [hovered_index, set_hovered_index] = useState(null)
 	const [selected_cards, set_selected_cards] = useState([])
 
 	useEffect(() => {
 		const handler = (event) => {
-			console.log(event.key)
+			if (event.key === 'Escape') {
+				console.log("CardGridOverlay: event.key === 'Escape'")
+
+				/* send selected_cards to server */
+				if (selected_cards.length > 0) {
+					connection.send(JSON.stringify({
+						type: `${type}-esc`,
+						cards: selected_cards
+					}))
+				}
+
+				/* toggle off */
+				toggle()
+			}
 		}
 
 		window.addEventListener('keydown', handler) 
-
 		return () => window.removeEventListener('keydown', handler)
-	}, [])
+	}, [selected_cards, connection])
 
 
 

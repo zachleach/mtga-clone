@@ -83,9 +83,6 @@ const App = () => {
 	}, [isConnected, is_viewing_library])
 
 
-
-
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (username.trim()) {
@@ -95,7 +92,7 @@ const App = () => {
 
 
 
-  /* Render loading screen */
+  /* render loading screen */
   if (!isConnected) {
     return (
       <div>
@@ -123,7 +120,8 @@ const App = () => {
 
 	const generate_overlay = () => {
 		if (is_viewing_library) {
-			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'}/>
+			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'} connection={ws} toggle={() => set_is_viewing_library(!is_viewing_library)}/>
+
 		}
 	}
 

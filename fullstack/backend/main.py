@@ -147,6 +147,20 @@ def generate_initial_state(mtga_list=None) -> dict:
 
 
 
+'''
+    move the cards from deck at given indices to hand
+'''
+def handle_library_esc(username, indices):
+    library = game_state[username]['library'] 
+    hand = game_state[username]['hand_row'] 
+    for i in reversed(indices):
+        card = library.pop(i)
+        stack = create_stack([card])
+        game_state[username]['hand_row']['stacks'] += [stack]
+
+    
+
+
 
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
@@ -167,6 +181,20 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
         while True:
             data = await websocket.receive_json()
+            if 'type' not in data: 
+                continue
+
+            match data['type']:
+                case 'library-esc':
+                    handle_library_esc(username, data['cards'])
+                case _:
+                    print('unknown request type')
+
+            await broadcast_json({
+                "type": "game_state",
+                "game_state": game_state
+            })
+            
             
     except WebSocketDisconnect:
         del active_connections[username]
