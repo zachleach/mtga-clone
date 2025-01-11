@@ -16,7 +16,7 @@ const App = () => {
 	const [is_viewing_library, set_is_viewing_library] = useState(false)
 	const [is_viewing_graveyard, set_is_viewing_graveyard] = useState(false)
 	const [is_viewing_exile, set_is_viewing_exile] = useState(false)
-	const [is_scrying, set_is_scrying] = useState(false)
+	const [scry_counter, set_scry_counter] = useState(0)
 
 
 
@@ -64,23 +64,50 @@ const App = () => {
 
 	/* setup global window hotkeys */
 	useEffect(() => {
-
 		const keyboard_listener = (event) => {
 			if (!isConnected) return
 
 			switch (event.key) {
 				case 'l':
-					set_is_viewing_library(!is_viewing_library)
+					if (scry_counter > 0) return
+					if (is_viewing_exile) return
+					if (is_viewing_graveyard) return
+
+					set_is_viewing_library(true)
 					break;
 
+				case 's':
+					if (is_viewing_library) return
+					if (is_viewing_exile) return
+					if (is_viewing_graveyard) return
+
+					set_scry_counter(prev => prev + 1)
+					break;
+				
+				case 't':
+					if (scry_counter > 0 || is_viewing_library || is_viewing_exile || is_viewing_graveyard) return
+					/* fill in when you get to the board state hotkey stuff */
+					break;
+
+				case 'b':
+					if (scry_counter > 0 || is_viewing_library || is_viewing_exile || is_viewing_graveyard) return
+					/* fill in when you get to the board state hotkey stuff */
+					break;
+
+				case 'g':
+					if (scry_counter > 0 || is_viewing_library || is_viewing_exile || is_viewing_graveyard) return
+					/* fill in when you get to the board state hotkey stuff */
+					break;
+
+
 				default:
-					console.log(`pressed: ${event.key}`)
+					console.log(`App.jsx: event.key === ${event.key}`)
 			}
 		}
 
 		window.addEventListener('keydown', keyboard_listener)
 		return () => window.removeEventListener('keydown', keyboard_listener)
-	}, [isConnected, is_viewing_library])
+	}, [isConnected, is_viewing_library, scry_counter])
 
 
   const handleSubmit = (e) => {
@@ -104,7 +131,7 @@ const App = () => {
             placeholder="Enter your name"
           />
           <button type="submit">Join</button>
-			<br/>
+					<br/>
 					<textarea
 						value={decklist}
 						onChange={(e) => set_decklist(e.target.value)}
@@ -121,7 +148,9 @@ const App = () => {
 	const generate_overlay = () => {
 		if (is_viewing_library) {
 			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'} connection={ws} toggle={() => set_is_viewing_library(!is_viewing_library)}/>
-
+		}
+		if (scry_counter > 0) {
+			return <CardGridOverlay card_arr={game_state[username]['library'].slice(0, scry_counter)} type={'scry'} connection={ws} toggle={() => set_scry_counter(0)}/>
 		}
 	}
 
@@ -133,7 +162,7 @@ const App = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
 
-			{is_viewing_library && generate_overlay()}
+			{generate_overlay()}
 
       {/* Opponents Section - 30% height */}
       <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>

@@ -122,7 +122,6 @@ def generate_initial_state(mtga_list=None) -> dict:
         'library': deck,
         'graveyard': [],
         'exile': [],
-        'scry': [],
         'hand_row': {
             'uuid': '',
             'is_hand': True,

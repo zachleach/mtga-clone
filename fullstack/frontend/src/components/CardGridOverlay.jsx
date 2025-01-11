@@ -6,25 +6,32 @@ const gap = 10
 
 
 export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
-
 	const [hovered_index, set_hovered_index] = useState(null)
 	const [selected_cards, set_selected_cards] = useState([])
 
 	useEffect(() => {
 		const handler = (event) => {
-			if (event.key === 'Escape') {
-				console.log("CardGridOverlay: event.key === 'Escape'")
 
-				/* send selected_cards to server */
-				if (selected_cards.length > 0) {
-					connection.send(JSON.stringify({
-						type: `${type}-esc`,
-						cards: selected_cards
-					}))
-				}
+			switch (event.key) {
+				case 'Escape':
+					console.log("CardGridOverlay: event.key === 'Escape'")
 
-				/* toggle off */
-				toggle()
+					/* send selected_cards to server */
+					if (selected_cards.length > 0) {
+						connection.send(JSON.stringify({
+							type: `${type}-esc`,
+							cards: selected_cards
+						}))
+					}
+
+					/* toggle off */
+					toggle()
+					break
+
+				case 't':
+				case 'g':
+				case 'b':
+				default:
 			}
 		}
 
@@ -73,6 +80,10 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		onMouseEnter: () => set_hovered_index(index),
 		onMouseLeave: () => set_hovered_index(null),
 		onClick: (event) => {
+			if (type === 'scry') {
+				return
+			}
+
 			set_selected_cards(prev => {
 				if (prev.includes(index)) {
 					return prev.filter(i => i !== index)
