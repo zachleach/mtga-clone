@@ -152,12 +152,16 @@ def generate_initial_state(mtga_list=None) -> dict:
 def handle_library_esc(username, indices):
     library = game_state[username]['library'] 
     hand = game_state[username]['hand_row'] 
-    for i in reversed(indices):
-        card = library.pop(i)
-        stack = create_stack([card])
-        game_state[username]['hand_row']['stacks'] += [stack]
 
-    
+    new_library = []
+    for i, card in enumerate(library):
+        if i not in indices:
+            new_library += [card]
+        else:
+            stack = create_stack([card])
+            game_state[username]['hand_row']['stacks'] += [stack]
+
+    game_state[username]['library'] = new_library
 
 
 
