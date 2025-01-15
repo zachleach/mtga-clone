@@ -7,6 +7,9 @@ const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
 
+	const uuid = stack_state.uuid
+	console.log(uuid)
+
 	const container_style = {
       position: 'relative',
       height: is_hand === true ? '100%' : '40%',

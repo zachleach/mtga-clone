@@ -1,4 +1,5 @@
 import pprint
+import uuid
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from typing import Dict
 import json
@@ -51,7 +52,7 @@ def get_cards(decklist):
 '''
 def generate_card(scryfall_card_json: dict) -> dict:
     return {
-        'uuid': '',
+        'uuid': str(uuid.uuid4()),
         'card': scryfall_card_json['image_uris']['large'],
         'crop': scryfall_card_json['image_uris']['art_crop']
     }
@@ -63,7 +64,7 @@ def generate_card(scryfall_card_json: dict) -> dict:
 '''
 def create_stack(cards, mtga_list=None):
     stack = { 
-        'uuid': '',
+        'uuid': str(uuid.uuid4()),
         'card_arr': cards
     }
 
@@ -122,28 +123,28 @@ def generate_initial_state(mtga_list=None) -> dict:
 
 
     return {
-        'uuid': '',
+        'uuid': str(uuid.uuid4()),
         'deck': deck,
         'library': deck,
         'graveyard': [],
         'exile': [],
         'hand_row': {
-            'uuid': '',
+            'uuid': str(uuid.uuid4()),
             'is_hand': True,
             'stacks': cards
         },
         'top_row': {
-            'uuid': '',
+            'uuid': str(uuid.uuid4()),
             'is_hand': False,
             'stacks': cards
         },
         'left_row': {
-            'uuid': '',
+            'uuid': str(uuid.uuid4()),
             'is_hand': False,
             'stacks': []
         },
         'right_row': {
-            'uuid': '',
+            'uuid': str(uuid.uuid4()),
             'is_hand': False,
             'stacks': []
         }

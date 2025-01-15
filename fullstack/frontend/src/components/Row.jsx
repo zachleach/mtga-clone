@@ -2,6 +2,7 @@
 import { Stack } from '.'
 
 export const Row = ({ row_state }) => {
+	const uuid = row_state.uuid
 
   const container_style = {
     height: '100%',

@@ -2,6 +2,9 @@
 import { Row } from './Row'
 
 export const PlayerBoard = ({ board_state }) => {
+
+	const uuid = board_state.uuid
+
   return (
     <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'column', border: '1pt solid red' }}>
       {/* Creatures */}

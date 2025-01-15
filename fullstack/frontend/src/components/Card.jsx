@@ -1,13 +1,8 @@
 /* components/Card.jsx */
 
-/* event listeners in this component */
-/* you'd need uuid for the card itself to report events */
-/* does the card itself need the websocket to report events then ? */
-/* then the stack would need it as well for stack related events */
-/* then you have prop drilling */
-/* you'd need this anyways for tapping */
+/* this can be simplified hella */
 
-export const Card = ({ art_url, aspect_ratio = 745 / 1040, outline, uuid }) => {
+export const Card = ({ art_url, aspect_ratio = 745 / 1040, outline }) => {
 
   const container_style = {
     height: '100%',
