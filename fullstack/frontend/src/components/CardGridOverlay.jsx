@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Card } from '.'
+import { Image } from '.'
 
 const card_width = 220
 const gap = 10
@@ -115,7 +115,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 			<div style={grid_style}>
 				{card_arr.map((card, index) => (
-					<Card art_url={card.card} />
+					<Image key={index} art_url={card.card} />
 				))}
 			</div>
 
