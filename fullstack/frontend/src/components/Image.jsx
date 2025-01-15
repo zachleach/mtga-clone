@@ -1,7 +1,5 @@
 /* components/Image.jsx */
 
-/* this can be simplified hella */
-
 export const Image = ({ art_url, aspect_ratio = 745 / 1040, outline }) => {
 
   const container_style = {

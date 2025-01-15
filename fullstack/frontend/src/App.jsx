@@ -1,143 +1,70 @@
 import './remove_scrollbars.css'
 import { PlayerBoard, OpponentBoard, CardGridOverlay } from './components'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { GameContext } from './components'
 
 const App = () => {
-  /* State management */
-  const [username, setUsername] = useState('');
+  const [username, set_username] = useState('');
 	const [decklist, set_decklist] = useState('')
-
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectedUsers, setConnectedUsers] = useState([]);
-  const [ws, setWs] = useState(null);
-	const [game_state, set_game_state] = useState({})
-
 
 	const [is_viewing_library, set_is_viewing_library] = useState(false)
 	const [is_viewing_graveyard, set_is_viewing_graveyard] = useState(false)
 	const [is_viewing_exile, set_is_viewing_exile] = useState(false)
 	const [scry_counter, set_scry_counter] = useState(0)
 
+	const { 
+		ws_connect,
+		is_connected,
+		game_state,
+		connected_users
+	} = useContext(GameContext)
 
 
-  /* Handle WebSocket connection */
-  const connectWebSocket = (username) => {
-    const websocket = new WebSocket(`ws://localhost:8000/ws/${username}`);
-    
-    websocket.onopen = () => {
-      setIsConnected(true);
-      setWs(websocket);
+  const handle_login_button = () => {
+    event.preventDefault();
 
-			websocket.send(JSON.stringify({
-				type: "decklist",
-				payload: decklist
-			}))
-    };
-    
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'game_state') {
-        setConnectedUsers(Object.keys(data.game_state));
-				set_game_state(data.game_state)
-			}
-    };
-    
-    websocket.onclose = () => {
-      setIsConnected(false);
-      setWs(null);
-    };
-
-    
-    return websocket;
-  }
-
-  /* Clean up WebSocket on component unmount */
-  useEffect(() => {
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, [ws]);
-
-
-
-	/* setup global window hotkeys */
-	useEffect(() => {
-		const keyboard_listener = (event) => {
-			if (!isConnected) return
-
-			switch (event.key) {
-				case 'l':
-					if (scry_counter > 0) return
-					if (is_viewing_exile) return
-					if (is_viewing_graveyard) return
-
-					set_is_viewing_library(true)
-					break;
-
-				case 's':
-					if (is_viewing_library) return
-					if (is_viewing_exile) return
-					if (is_viewing_graveyard) return
-
-					set_scry_counter(prev => prev + 1)
-					break;
-				
-				case 't':
-					if (scry_counter > 0 || is_viewing_library || is_viewing_exile || is_viewing_graveyard) return
-					/* fill in when you get to the board state hotkey stuff */
-					break;
-
-				case 'b':
-					if (scry_counter > 0 || is_viewing_library || is_viewing_exile || is_viewing_graveyard) return
-					/* fill in when you get to the board state hotkey stuff */
-					break;
-
-				case 'g':
-					if (scry_counter > 0 || is_viewing_library || is_viewing_exile || is_viewing_graveyard) return
-					/* fill in when you get to the board state hotkey stuff */
-					break;
-
-
-				default:
-					console.log(`App.jsx: event.key === ${event.key}`)
-			}
-		}
-
-		window.addEventListener('keydown', keyboard_listener)
-		return () => window.removeEventListener('keydown', keyboard_listener)
-	}, [isConnected, is_viewing_library, scry_counter])
-
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
     if (username.trim()) {
-      connectWebSocket(username);
+      ws_connect(username, decklist);
     }
   };
 
 
-
   /* render loading screen */
-  if (!isConnected) {
+  if (!is_connected) {
     return (
       <div>
-        <h1>Welcome</h1>
-        <form onSubmit={handleSubmit}>
+
+        <h1>
+					Login Screen
+				</h1>
+
+        <form onSubmit={handle_login_button}>
+
+					{/* username */}
           <input
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => set_username(e.target.value)}
             placeholder="Enter your name"
           />
-          <button type="submit">Join</button>
+
 					<br/>
+
+					{/* decklist */}
 					<textarea
 						value={decklist}
 						onChange={(e) => set_decklist(e.target.value)}
 						placeholder="Enter MTGA formatted decklist"
 					/>
+
+					<br/>
+
+					{/* button */}
+          <button type="submit">
+						Join
+					</button>
+
         </form>
+
       </div>
     );
   }
@@ -153,8 +80,7 @@ const App = () => {
 	}
 
 	console.log(game_state)
-
-	const opponents = connectedUsers.filter(user => user !== username)
+	const opponents = connected_users.filter(user => user !== username)
 
   /* Render game screen */
   return (
