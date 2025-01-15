@@ -143,8 +143,6 @@ const App = () => {
   }
 
 
-
-
 	const generate_overlay = () => {
 		if (is_viewing_library) {
 			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'} connection={ws} toggle={() => set_is_viewing_library(!is_viewing_library)}/>
@@ -154,7 +152,7 @@ const App = () => {
 		}
 	}
 
-
+	console.log(game_state)
 
 	const opponents = connectedUsers.filter(user => user !== username)
 

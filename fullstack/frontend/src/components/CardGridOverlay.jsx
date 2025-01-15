@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-
+import { Card } from '.'
 
 const card_width = 220
 const gap = 10
-
 
 export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 	const [hovered_index, set_hovered_index] = useState(null)
@@ -14,7 +13,6 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 			switch (event.key) {
 				case 'Escape':
-					console.log("CardGridOverlay: event.key === 'Escape'")
 
 					/* send selected_cards to server */
 					if (selected_cards.length > 0) {
@@ -29,16 +27,17 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 					break
 
 				case 't':
-				case 'g':
 				case 'b':
+				case 'g':
+				case 'e':
 				default:
+					console.log(`CardGridOverlay: event.key === '${event.key}'`)
 			}
 		}
 
 		window.addEventListener('keydown', handler) 
 		return () => window.removeEventListener('keydown', handler)
 	}, [selected_cards, connection])
-
 
 
 	const overlay_style = {
@@ -50,6 +49,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		overflow: 'auto',
 	}
 
+
 	const grid_style = {
 		display: 'grid',
 		gridTemplateColumns: `repeat(5, ${card_width}px)`,
@@ -59,14 +59,6 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		padding: '20px',
 	}
 
-	const card_container_style = (is_hovered, is_selected) => ({
-		width: `${card_width}px`,
-		aspectRatio: '0.714',
-		backgroundColor: 'black',
-		borderRadius: '12px',
-		overflow: 'hidden',
-		outline: is_hovered && is_selected ? '4px solid blue' : (is_hovered ? '4px solid white' : (is_selected ? '4px solid red' : 'none'))
-	})
 
 	const card_img_style = {
 		width: '100%',
@@ -74,42 +66,58 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		objectFit: 'cover',
 	}
 
-
-	const card_container_attr = (index) => ({
-		style: card_container_style(index === hovered_index, selected_cards.includes(index)),
-		onMouseEnter: () => set_hovered_index(index),
-		onMouseLeave: () => set_hovered_index(null),
-		onClick: (event) => {
-			if (type === 'scry') {
-				return
-			}
-
-			set_selected_cards(prev => {
-				if (prev.includes(index)) {
-					return prev.filter(i => i !== index)
-				}
-				return [...prev, index]
-			})
-		}
-	})
-
 	const card_image_attr = (card_obj) => ({
 		style: card_img_style,
 		src: card_obj.card, 
 		alt: "fuck, it's not loading"
 	})
 
+
+	const card_container_style = (is_hovered, is_selected) => ({
+		width: `${card_width}px`,
+		aspectRatio: '0.714',
+		backgroundColor: 'black',
+		borderRadius: '12px',
+		overflow: 'hidden',
+		outline: is_hovered && is_selected ? '4px solid blue' : (is_hovered ? '4px solid white' : (is_selected ? '4px solid red' : 'none')),
+	})
+
+	const card_container_attr = (index) => ({
+		style: card_container_style(index === hovered_index, selected_cards.includes(index)),
+
+		onMouseEnter: () => {
+			set_hovered_index(index) 
+		},
+
+		onMouseLeave: () => {
+			set_hovered_index(null)
+		},
+
+		onClick: (event) => {
+			if (type === 'scry') {
+				return
+			}
+
+			/* if not scrying, add clicked card to selected state */
+			set_selected_cards(prev => {
+				if (prev.includes(index)) {
+					return prev.filter(i => i !== index)
+				}
+				return [...prev, index]
+			})
+		},
+	})
+
+
+
 	return (
 		<div style={overlay_style}>
 
 			<div style={grid_style}>
 				{card_arr.map((card, index) => (
-					<div key={index} {...card_container_attr(index)}>
-						<img {...card_image_attr(card)}/>
-					</div>
+					<Card art_url={card.card} />
 				))}
 			</div>
-
 
 		</div>
 	)

@@ -51,6 +51,7 @@ def get_cards(decklist):
 '''
 def generate_card(scryfall_card_json: dict) -> dict:
     return {
+        'uuid': '',
         'card': scryfall_card_json['image_uris']['large'],
         'crop': scryfall_card_json['image_uris']['art_crop']
     }
@@ -116,6 +117,10 @@ def generate_initial_state(mtga_list=None) -> dict:
 
     deck = get_cards(decklist)
 
+    test = deck[0:4]
+    cards = [create_stack([card]) for card in test]
+
+
     return {
         'uuid': '',
         'deck': deck,
@@ -125,12 +130,12 @@ def generate_initial_state(mtga_list=None) -> dict:
         'hand_row': {
             'uuid': '',
             'is_hand': True,
-            'stacks': []
+            'stacks': cards
         },
         'top_row': {
             'uuid': '',
             'is_hand': False,
-            'stacks': []
+            'stacks': cards
         },
         'left_row': {
             'uuid': '',

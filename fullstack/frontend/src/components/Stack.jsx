@@ -1,6 +1,6 @@
 /* components/Stack.jsx */
 import { useState, useRef, useEffect } from 'react'
-import { Tile, Card } from '.'
+import { Card } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
@@ -31,23 +31,18 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
-  if (is_hand === true) {
-    return (
-      <div style={container_style}>
-        {stack_state.card_arr.map((card, index) => (
-          <div key={index} style={get_position_styling(index)}>
-            <Card art_url={card.card} />
-          </div>
-        ))}
-      </div>
-    )
-  }
   return (
     <div style={container_style}>
       {stack_state.card_arr.map((card, index) => (
+
         <div key={index} style={get_position_styling(index)}>
-          <Tile art_url={card.crop} />
+          <Card 
+						uuid={card.uuid}
+						art_url={is_hand === true ? card.card : card.crop} 
+						aspect_ratio={is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO} 
+					/>
         </div>
+
       ))}
     </div>
   )

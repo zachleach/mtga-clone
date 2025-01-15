@@ -1,14 +1,22 @@
 /* components/Card.jsx */
-export const Card = ({ art_url }) => {
-  const ASPECT_RATIO = 745 / 1040
 
-  const card_style = {
+/* event listeners in this component */
+/* you'd need uuid for the card itself to report events */
+/* does the card itself need the websocket to report events then ? */
+/* then the stack would need it as well for stack related events */
+/* then you have prop drilling */
+/* you'd need this anyways for tapping */
+
+export const Card = ({ art_url, aspect_ratio = 745 / 1040, outline, uuid }) => {
+
+  const container_style = {
     height: '100%',
-    aspectRatio: ASPECT_RATIO,
+    aspectRatio: aspect_ratio,
     overflow: 'hidden',
     background: 'black',
     border: '2px solid black',
     borderRadius: '8px',
+		outline: `${outline}`
   }
 
   const img_style = {
@@ -18,10 +26,10 @@ export const Card = ({ art_url }) => {
   }
 
   return (
-    <div style={card_style}>
+    <div style={container_style}>
       <img 
         src={art_url} 
-        alt="Card" 
+        alt="Card.jsx failed to load img element" 
         style={img_style}
       />
     </div>
