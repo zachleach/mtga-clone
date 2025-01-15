@@ -197,7 +197,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 case 'library-esc':
                     handle_library_esc(username, data['cards'])
                 case _:
-                    print('unknown request type')
+                    print(data)
 
             await broadcast_json({
                 "type": "game_state",
