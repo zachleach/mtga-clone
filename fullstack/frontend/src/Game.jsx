@@ -78,8 +78,7 @@ export const GameProvider = ({ children }) => {
 
 
 	const notify_server = (json_object) => {
-		console.log(json_object)
-		/*ws.send(JSON.stringify(json_object))*/
+		ws.send(JSON.stringify(json_object))
 	}
 
 

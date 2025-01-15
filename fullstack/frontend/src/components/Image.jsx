@@ -1,6 +1,18 @@
 /* components/Image.jsx */
 
-export const Image = ({ art_url, aspect_ratio = 745 / 1040, outline }) => {
+import { useContext } from 'react'
+import { GameContext } from '.'
+
+export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => {
+
+	const { notify_server } = useContext(GameContext)
+
+	const handle_click = () => {
+		notify_server({
+			type: 'CardClickEvent',
+			uuid: uuid
+		})
+	}
 
   const container_style = {
     height: '100%',
@@ -19,7 +31,7 @@ export const Image = ({ art_url, aspect_ratio = 745 / 1040, outline }) => {
   }
 
   return (
-    <div style={container_style}>
+    <div style={container_style} onClick={handle_click}>
       <img 
         src={art_url} 
         alt="Card.jsx failed to load img element" 
