@@ -70,23 +70,11 @@ const App = () => {
   }
 
 
-	const generate_overlay = () => {
-		if (is_viewing_library) {
-			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'} connection={ws} toggle={() => set_is_viewing_library(!is_viewing_library)}/>
-		}
-		if (scry_counter > 0) {
-			return <CardGridOverlay card_arr={game_state[username]['library'].slice(0, scry_counter)} type={'scry'} connection={ws} toggle={() => set_scry_counter(0)}/>
-		}
-	}
-
-	console.log(game_state)
 	const opponents = connected_users.filter(user => user !== username)
 
   /* Render game screen */
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-
-			{generate_overlay()}
 
       {/* Opponents Section - 30% height */}
       <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
