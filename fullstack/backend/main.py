@@ -121,7 +121,6 @@ def generate_initial_state(mtga_list=None) -> dict:
     test = deck[0:4]
     cards = [create_stack([card]) for card in test]
 
-
     return {
         'uuid': str(uuid.uuid4()),
         'deck': deck,
@@ -171,6 +170,76 @@ def handle_library_esc(username, indices):
 
 
 
+'''
+    move the card from src to dst
+
+    get the row of src and st
+    remove src from src row
+    add src to dst row at or after dst index (we'll see which looks better)
+
+'''
+def handle_card_drop_event(src, dst):
+    print(src, dst)
+
+    src_context = identify_card_context_board(src)
+    dst_context = identify_card_context_board(dst)
+    print(src_context, dst_context)
+
+
+
+'''
+    given a card's uuid, returns a dict containing relevant information about the location of a card within the game_state 
+    assumes cards can't exist in two zones at the same time
+
+'''
+def identify_card_context_board(card_uuid):
+    for username, player_state in game_state.items():
+        #   check library 
+        for i, card in enumerate(player_state['library']):
+            if card['uuid'] == card_uuid:
+                return {
+                    'username': username,
+                    'location': 'library',
+                    'index': i
+                }
+                
+        #   check graveyard 
+        for i, card in enumerate(player_state['graveyard']):
+            if card['uuid'] == card_uuid:
+                return {
+                    'username': username,
+                    'location': 'graveyard',
+                    'index': i
+                }
+                
+        #   check exile 
+        for i, card in enumerate(player_state['exile']):
+            if card['uuid'] == card_uuid:
+                return {
+                    'username': username,
+                    'location': 'exile',
+                    'index': i
+                }
+
+        #   check board
+        for row_name in ['hand_row', 'top_row', 'left_row', 'right_row']:
+            row = player_state[row_name]
+            for stack_idx, stack in enumerate(row['stacks']):
+                for card_idx, card in enumerate(stack['card_arr']):
+                    if card['uuid'] == card_uuid:
+                        return {
+                            'username': username,
+                            'location': row_name,
+                            'stack_uuid': stack['uuid'],
+                            'stack_index': stack_idx,
+                            'card_index': card_idx
+                        }
+    
+    return None
+
+
+
+
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
     await websocket.accept()
@@ -196,6 +265,8 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             match data['type']:
                 case 'library-esc':
                     handle_library_esc(username, data['cards'])
+                case 'CardDropEvent':
+                    handle_card_drop_event(data['src'], data['dst'])
                 case _:
                     print(data)
 

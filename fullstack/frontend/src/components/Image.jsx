@@ -14,6 +14,30 @@ export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => 
 		})
 	}
 
+	const html5_dnd_attr = {
+		onDragStart: () => {
+			event.dataTransfer.setData('source', uuid)
+		},
+
+		onDragOver: () => {
+			event.preventDefault()
+		},
+
+		onDrop: () => {
+			const src_uuid = event.dataTransfer.getData('source')
+			notify_server({
+				type: 'CardDropEvent',
+				src: src_uuid,
+				dst: uuid
+			})
+
+		},
+
+		onDragEnd: () => {
+		}
+	}
+
+
   const container_style = {
     height: '100%',
     aspectRatio: aspect_ratio,
@@ -31,7 +55,7 @@ export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => 
   }
 
   return (
-    <div style={container_style} onClick={handle_click}>
+    <div style={container_style} onClick={handle_click} {...html5_dnd_attr}>
       <img 
         src={art_url} 
         alt="Card.jsx failed to load img element" 
