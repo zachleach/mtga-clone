@@ -1,11 +1,11 @@
 /* components/Row.jsx */
-import { Stack, GameContext } from '.'
+import { Stack, Server } from '.'
 import { useContext } from 'react'
 
 export const Row = ({ row_state }) => {
 	const uuid = row_state.uuid
 
-	const { notify_server } = useContext(GameContext)
+	const { notify_server } = useContext(Server)
 
   const container_style = {
     height: '100%',

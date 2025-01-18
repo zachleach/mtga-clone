@@ -1,10 +1,10 @@
 import { createRoot } from 'react-dom/client'
+import { ServerProvider } from './components'
 import App from './App.jsx'
-import { GameProvider } from './components'
 
 createRoot(document.getElementById('root')).render( 
-	<GameProvider>
+	<ServerProvider>
 		<App />
-	</GameProvider>
+	</ServerProvider>
 )
 

@@ -1,11 +1,11 @@
 /* components/Image.jsx */
 
 import { useContext } from 'react'
-import { GameContext } from '.'
+import { Server } from '.'
 
 export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity }) => {
 
-	const { notify_server } = useContext(GameContext)
+	const { notify_server } = useContext(Server)
 
 	const handle_click = () => {
 		notify_server({

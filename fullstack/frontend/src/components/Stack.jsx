@@ -1,13 +1,13 @@
 /* components/Stack.jsx */
 import { useState, useRef, useEffect, useContext } from 'react'
-import { Card, GameContext } from '.'
+import { Card, Server } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
 
-	const { notify_server } = useContext(GameContext)
+	const { notify_server } = useContext(Server)
 
 	const uuid = stack_state.uuid
 

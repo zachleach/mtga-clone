@@ -1,7 +1,6 @@
 import './remove_scrollbars.css'
-import { PlayerBoard, OpponentBoard, CardGridOverlay } from './components'
+import { PlayerBoard, OpponentBoard, CardGridOverlay, Server } from './components'
 import React, { useState, useEffect, useContext } from 'react';
-import { GameContext } from './components'
 
 const App = () => {
   const [username, set_username] = useState('');
@@ -17,7 +16,7 @@ const App = () => {
 		is_connected,
 		game_state,
 		connected_users
-	} = useContext(GameContext)
+	} = useContext(Server)
 
 
   const handle_login_button = () => {

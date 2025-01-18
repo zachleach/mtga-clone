@@ -1,8 +1,8 @@
 import { useState, useEffect, createContext } from 'react'
 
-export const GameContext = createContext(null)
+export const Server = createContext(null)
 
-export const GameProvider = ({ children }) => {
+export const ServerProvider = ({ children }) => {
   const [ws, set_ws] = useState(null);
   const [is_connected, set_is_connected] = useState(false);
   const [connected_users, set_connected_users] = useState([]);
@@ -92,9 +92,9 @@ export const GameProvider = ({ children }) => {
 	}
 
 	return (
-		<GameContext.Provider value={value}>
+		<Server.Provider value={value}>
 			{children}
-		</GameContext.Provider>
+		</Server.Provider>
 	)
 }
 
