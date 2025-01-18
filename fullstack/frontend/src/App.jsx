@@ -75,18 +75,20 @@ const App = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
 
+
+
       {/* Opponents Section - 30% height */}
       <div style={{ display: 'flex', flex: '0 0 30%', flexDirection: 'column', border: '1pt solid red', overflow: 'hidden' }}>
         <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'row', overflow: 'hidden',  }}>
 					{opponents.map((name, idx) => (
-
 						<div key={name} style={{ display: 'flex', flex: `0 0 ${100 / opponents.length}%`, flexDirection: 'column', border: '1pt solid red', boxSizing: 'border-box' }}>
 							<OpponentBoard board_state={game_state[name]}/>
 						</div>
-
 					))}
         </div>
       </div>
+
+
 
       {/* Player's Board - 70% height */}
       <div style={{ display: 'flex', flex: '0 0 70%', overflow: 'hidden' }}>
@@ -94,6 +96,8 @@ const App = () => {
 					<PlayerBoard board_state={game_state[username]}/>
 				)}
       </div>
+
+
 
     </div>
   )

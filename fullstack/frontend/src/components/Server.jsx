@@ -1,12 +1,88 @@
 import { useState, useEffect, createContext } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 export const Server = createContext(null)
 
 export const ServerProvider = ({ children }) => {
+	/* server state */
   const [ws, set_ws] = useState(null);
   const [is_connected, set_is_connected] = useState(false);
   const [connected_users, set_connected_users] = useState([]);
+  const [username, set_username] = useState('');
+
+	/* game state */
 	const [game_state, set_game_state] = useState({})
+	const [drag_card, set_drag_card] = useState(null)
+
+	/* helper functions for modifying game state using uuids */
+	const State = {
+		dragged_card: drag_card,
+		set_dragged_card: (card_obj) => {
+			set_drag_card(card_obj)
+		},
+
+
+		Stack: {
+			/* insert a card at index */
+			insert: (stack_id, card, index) => {
+				if (index === undefined) return
+				const new_game_state = { ...game_state }
+				for (const player_name of Object.keys(new_game_state)) {
+					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+						const stack = new_game_state[player_name][row_name].stacks.find(s => s.uuid === stack_id)
+						if (stack) {
+							stack.card_arr.splice(index, 0, card)
+							set_game_state(new_game_state)
+							return
+						}
+					}
+				}
+			},
+
+			/* remove a card from a stack */
+			remove: (stack_id, card) => {
+				const new_game_state = { ...game_state }
+				for (const player_name of Object.keys(new_game_state)) {
+					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+						/* find the stack's index in the row's stacks array */
+						const stack_index = new_game_state[player_name][row_name].stacks.findIndex(s => s.uuid === stack_id)
+						if (stack_index !== -1) {
+							const stack = new_game_state[player_name][row_name].stacks[stack_index]
+							
+							/* find and remove the card from the stack's card array */
+							const card_index = stack.card_arr.findIndex(c => c.uuid === card.uuid)
+							if (card_index !== -1) {
+								stack.card_arr.splice(card_index, 1)
+								
+								/* if stack is now empty, remove it from the row's stacks array */
+								if (stack.card_arr.length === 0) {
+									new_game_state[player_name][row_name].stacks.splice(stack_index, 1)
+								}
+								
+								set_game_state(new_game_state)
+								return
+							}
+						}
+					}
+				}
+			},
+
+			/* create a new stack object containing a card */
+			create: (card_obj) => {
+
+			},
+		},
+		Row: {
+			/* add a card to a row at index */
+			insert: (row_id, card_id, index) => {
+
+			},
+
+
+		},
+	}
+
+
 
 
   const ws_connect = (username, decklist) => {
@@ -21,8 +97,9 @@ export const ServerProvider = ({ children }) => {
 		 *
 		 */
     websocket.onopen = () => {
-      set_is_connected(true);
-      set_ws(websocket);
+      set_is_connected(true)
+      set_ws(websocket)
+			set_username(username)
 
 			/* SEND: DECKLIST */
 			websocket.send(JSON.stringify({
@@ -89,6 +166,7 @@ export const ServerProvider = ({ children }) => {
 		game_state,
 		connected_users,
 		notify_server,
+		State
 	}
 
 	return (

@@ -7,15 +7,16 @@ const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
 
-	const { notify_server } = useContext(Server)
+	const { notify_server, State } = useContext(Server)
 
 	const uuid = stack_state.uuid
 
 	const container_style = {
-      position: 'relative',
-      height: is_hand === true ? '100%' : '40%',
-      aspectRatio: is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO,
-      minWidth: 0,
+		position: 'relative',
+		height: is_hand === true ? '100%' : '40%',
+		aspectRatio: is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO,
+		minWidth: 0,
+		margin: '10px'
 	}
 
   const get_position_styling = (index) => {
@@ -35,9 +36,53 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
-	const html5_dnd_attr = (index) => ({
+	const html5_dnd_attr = (card, index) => ({
+		onDragStart: (event) => {
+			console.log(`Card onDragStart: ${uuid}`)
+			event.dataTransfer.setData('source', uuid)
+
+			/* set the card */
+			State.set_dragged_card(card)
+		},
+
+		onDragOver: (event) => {
+			event.stopPropagation()
+			event.preventDefault()
+		},
+
+		onDrop: (event) => {
+			event.stopPropagation()
+
+			/* remove the source card from the source stack? i swear this made sense but didn't work last time i implemented it */
+			 
+			const source = event.dataTransfer.getData('source')
+			console.log(`Stack onDrop: ${source} -> ${uuid}`)
+		},
+
+		onDragEnd: (event) => {
+			State.set_dragged_card(null)
+		},
+
+		onDragEnter: (event) => {
+			const same_stack = stack_state.card_arr.some(card => card.uuid === State.dragged_card.uuid)
+			if (!event.currentTarget.contains(event.relatedTarget) && !same_stack) {
+				console.log(`Stack onDragEnter: ${uuid}`)
+
+				/* you need some kind of mechanism for removing the dragged card from whatever stack it was in before inserting it into this new stack */
+				/* also, currently, when you delete a stack on removal, it causes the rest of the cards to shift before releasing the key */
+				State.Stack.insert(uuid, State.dragged_card, index)
+
+			}
+		},
+
+		onDragLeave: (event) => {
+			if (!event.currentTarget.contains(event.relatedTarget)) {
+				console.log(`Stack onDragLeave: ${uuid}`)
+			}
+		}
 
 	})
+
 
 
 
@@ -45,11 +90,12 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     <div style={container_style}>
       {stack_state.card_arr.map((card, index) => (
 
-        <div key={index} style={get_position_styling(index)} >
+        <div key={index} style={get_position_styling(index)} {...html5_dnd_attr(card, index)}>
           <Card 
 						uuid={card.uuid}
 						art_url={is_hand === true ? card.card : card.crop} 
 						aspect_ratio={is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO} 
+						opacity={State.dragged_card === card ? '25%' : '100%'}
 					/>
         </div>
 

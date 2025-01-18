@@ -25,13 +25,8 @@ export const Row = ({ row_state }) => {
 		},
 		onDrop: (event) => {
 			event.preventDefault()
-			const src_uuid = event.dataTransfer.getData('source')
-			console.log(event)
-			notify_server({
-				type: 'RowDropEvent',
-				card: src_uuid,
-				row: uuid
-			})
+			const source = event.dataTransfer.getData('source')
+			console.log(`Row onDrop: ${source} -> ${uuid}`)
 		}
 	}
 

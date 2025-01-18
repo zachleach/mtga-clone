@@ -5,7 +5,7 @@ import { Server } from '.'
 
 export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity }) => {
 
-	const { notify_server } = useContext(Server)
+	const { notify_server, State } = useContext(Server)
 
 	const handle_click = () => {
 		notify_server({
@@ -21,7 +21,8 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     background: 'black',
     border: '2px solid black',
     borderRadius: '8px',
-		outline: `${outline}`
+		outline: `${outline}`,
+		opacity: `${opacity}`
   }
 
   const img_style = {
@@ -30,8 +31,10 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     display: 'block',
   }
 
+
+
   return (
-    <div style={container_style} onClick={handle_click}>
+    <div style={container_style} onClick={handle_click} >
       <img 
         src={art_url} 
         alt="Card.jsx failed to load img element" 
