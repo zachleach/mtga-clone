@@ -1,5 +1,5 @@
 export { CardGridOverlay } from './CardGridOverlay'
-export { Image } from './Image'
+export { Card } from './Card'
 export { OpponentBoard } from './OpponentBoard'
 export { PlayerBoard } from './PlayerBoard'
 export { Row } from './Row'

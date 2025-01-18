@@ -3,7 +3,7 @@
 import { useContext } from 'react'
 import { GameContext } from '.'
 
-export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => {
+export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity }) => {
 
 	const { notify_server } = useContext(GameContext)
 
@@ -13,33 +13,6 @@ export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => 
 			uuid: uuid
 		})
 	}
-
-	const html5_dnd_attr = {
-		onDragStart: (event) => {
-			event.dataTransfer.setData('source', uuid)
-		},
-
-		onDragOver: (event) => {
-			event.preventDefault()
-			event.stopPropagation()
-		},
-
-		onDrop: (event) => {
-			event.preventDefault()
-			event.stopPropagation()
-			const src_uuid = event.dataTransfer.getData('source')
-			notify_server({
-				type: 'CardDropEvent',
-				src: src_uuid,
-				dst: uuid
-			})
-
-		},
-
-		onDragEnd: () => {
-		}
-	}
-
 
   const container_style = {
     height: '100%',
@@ -58,7 +31,7 @@ export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => 
   }
 
   return (
-    <div style={container_style} onClick={handle_click} {...html5_dnd_attr}>
+    <div style={container_style} onClick={handle_click}>
       <img 
         src={art_url} 
         alt="Card.jsx failed to load img element" 

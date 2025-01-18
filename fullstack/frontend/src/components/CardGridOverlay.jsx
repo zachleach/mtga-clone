@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Image } from '.'
+import { Card } from '.'
 
 const card_width = 220
 const gap = 10
@@ -66,7 +66,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		objectFit: 'cover',
 	}
 
-	const card_image_attr = (card_obj) => ({
+	const card_Card_attr = (card_obj) => ({
 		style: card_img_style,
 		src: card_obj.card, 
 		alt: "fuck, it's not loading"
@@ -115,7 +115,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 			<div style={grid_style}>
 				{card_arr.map((card, index) => (
-					<Image key={index} art_url={card.card} />
+					<Card key={index} art_url={card.card} />
 				))}
 			</div>
 

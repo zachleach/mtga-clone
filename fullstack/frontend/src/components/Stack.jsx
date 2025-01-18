@@ -1,6 +1,6 @@
 /* components/Stack.jsx */
 import { useState, useRef, useEffect, useContext } from 'react'
-import { Image, GameContext } from '.'
+import { Card, GameContext } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
@@ -35,13 +35,18 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
+	const html5_dnd_attr = (index) => ({
+
+	})
+
+
 
   return (
     <div style={container_style}>
       {stack_state.card_arr.map((card, index) => (
 
-        <div key={index} style={get_position_styling(index)}>
-          <Image 
+        <div key={index} style={get_position_styling(index)} >
+          <Card 
 						uuid={card.uuid}
 						art_url={is_hand === true ? card.card : card.crop} 
 						aspect_ratio={is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO} 
