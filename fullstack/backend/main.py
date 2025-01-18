@@ -180,10 +180,16 @@ def handle_library_esc(username, indices):
 '''
 def handle_card_drop_event(src, dst):
     print(src, dst)
-
     src_context = identify_card_context_board(src)
     dst_context = identify_card_context_board(dst)
     print(src_context, dst_context)
+
+
+def handle_row_drop_event(card, row):
+    pass
+
+
+
 
 
 
@@ -240,6 +246,8 @@ def identify_card_context_board(card_uuid):
 
 
 
+
+
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
     await websocket.accept()
@@ -267,6 +275,8 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                     handle_library_esc(username, data['cards'])
                 case 'CardDropEvent':
                     handle_card_drop_event(data['src'], data['dst'])
+                case 'RowDropEvent':
+                    handle_row_drop_event(data['card'], data['row'])
                 case _:
                     print(data)
 

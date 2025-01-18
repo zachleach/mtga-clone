@@ -15,15 +15,18 @@ export const Image = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline }) => 
 	}
 
 	const html5_dnd_attr = {
-		onDragStart: () => {
+		onDragStart: (event) => {
 			event.dataTransfer.setData('source', uuid)
 		},
 
-		onDragOver: () => {
+		onDragOver: (event) => {
 			event.preventDefault()
+			event.stopPropagation()
 		},
 
-		onDrop: () => {
+		onDrop: (event) => {
+			event.preventDefault()
+			event.stopPropagation()
 			const src_uuid = event.dataTransfer.getData('source')
 			notify_server({
 				type: 'CardDropEvent',
