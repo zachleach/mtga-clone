@@ -13,12 +13,17 @@ export const ServerProvider = ({ children }) => {
 	/* game state */
 	const [game_state, set_game_state] = useState({})
 	const [drag_card, set_drag_card] = useState(null)
+	const [copy_card, set_copy_card] = useState(null)
 
 	/* helper functions for modifying game state using uuids */
 	const State = {
 		dragged_card: drag_card,
 		set_dragged_card: (card_obj) => {
 			set_drag_card(card_obj)
+		},
+		copied_card: copy_card,
+		set_copied_card: (card_obj) => {
+			set_copy_card(card_obj)
 		},
 
 
@@ -52,7 +57,7 @@ export const ServerProvider = ({ children }) => {
 							/* find and remove the card from the stack's card array */
 							const card_index = stack.card_arr.findIndex(c => c.uuid === card.uuid)
 							if (card_index !== -1) {
-								stack.card_arr.splice(card_index, 1)
+								const removed_card = stack.card_arr.splice(card_index, 1)[0]
 								
 								/* if stack is now empty, remove it from the row's stacks array */
 								if (stack.card_arr.length === 0) {
@@ -60,11 +65,12 @@ export const ServerProvider = ({ children }) => {
 								}
 								
 								set_game_state(new_game_state)
-								return
+								return removed_card
 							}
 						}
 					}
 				}
+				return null
 			},
 
 			/* create a new stack object containing a card */
@@ -78,8 +84,38 @@ export const ServerProvider = ({ children }) => {
 
 			},
 
-
 		},
+		Card: {
+
+			/* identifies the stack_id of a card, and then calls Stack.remove(stack_id, card) */
+			remove: (card) => {
+				const new_game_state = { ...game_state }
+				for (const player_name of Object.keys(new_game_state)) {
+					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+						const stack = new_game_state[player_name][row_name].stacks.find(s => 
+							s.card_arr.some(c => c.uuid === card.uuid)
+						)
+						if (stack) {
+							State.Stack.remove(stack.uuid, card)
+							return
+						}
+					}
+				}
+			},
+
+			/* creates a copy of a card but with a new uuid_4 */
+			copy: (card) => {
+				const card_copy = {
+					...card,
+					uuid: uuidv4()
+				}
+
+				return card_copy
+			},
+
+
+
+		}
 	}
 
 

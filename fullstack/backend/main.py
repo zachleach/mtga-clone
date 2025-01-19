@@ -130,7 +130,7 @@ def generate_initial_state(mtga_list=None) -> dict:
         'hand_row': {
             'uuid': str(uuid.uuid4()),
             'is_hand': True,
-            'stacks': cards
+            'stacks': []
         },
         'top_row': {
             'uuid': str(uuid.uuid4()),

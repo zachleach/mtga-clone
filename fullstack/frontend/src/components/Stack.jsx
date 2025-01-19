@@ -36,13 +36,34 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
-	const html5_dnd_attr = (card, index) => ({
+
+	const stack_html5_dnd_attr = {
+
+		/* if you move to a new stack while dragging, remove the copied card from previous stack */
+		onDragLeave: (event) => {
+			if (!event.currentTarget.contains(event.relatedTarget)) {
+				console.log(`Stack Container onDragLeave: ${uuid}`)
+
+				if (State.dragged_card !== null) {
+					State.Stack.remove(uuid, State.copied_card)
+				}
+			}
+		}
+
+
+	}
+
+
+
+	
+	const card_html5_dnd_attr = (card, index) => ({
 		onDragStart: (event) => {
-			console.log(`Card onDragStart: ${uuid}`)
+			console.log(`Stack onDragStart: ${uuid}`)
 			event.dataTransfer.setData('source', uuid)
 
-			/* set the card */
+			const copy = State.Card.copy(card)
 			State.set_dragged_card(card)
+			State.set_copied_card(copy)
 		},
 
 		onDragOver: (event) => {
@@ -54,32 +75,53 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 			event.stopPropagation()
 
 			/* remove the source card from the source stack? i swear this made sense but didn't work last time i implemented it */
-			 
 			const source = event.dataTransfer.getData('source')
 			console.log(`Stack onDrop: ${source} -> ${uuid}`)
+
+			if (card.uuid !== State.dragged_card.uuid) {
+				State.Card.remove(State.dragged_card)
+			}
+
 		},
 
 		onDragEnd: (event) => {
-			State.set_dragged_card(null)
+			console.log(`Stack onDragEnd: ${uuid}`, event.dataTransfer.dropEffect)
+			if (event.dataTransfer.dropEffect !== 'none') {
+				State.set_dragged_card(null)
+				State.set_copied_card(null)
+			}
+
 		},
 
 		onDragEnter: (event) => {
-			const same_stack = stack_state.card_arr.some(card => card.uuid === State.dragged_card.uuid)
-			if (!event.currentTarget.contains(event.relatedTarget) && !same_stack) {
+			if (!event.currentTarget.contains(event.relatedTarget) && card.uuid !== State.dragged_card.uuid) {
 				console.log(`Stack onDragEnter: ${uuid}`)
 
-				/* you need some kind of mechanism for removing the dragged card from whatever stack it was in before inserting it into this new stack */
-				/* also, currently, when you delete a stack on removal, it causes the rest of the cards to shift before releasing the key */
-				State.Stack.insert(uuid, State.dragged_card, index)
+				/* if stack contains the dragged card, replace the dragged card with copy card */
+				const contains_dragged = stack_state.card_arr.some(card => card.uuid === State.dragged_card.uuid)
+				if (contains_dragged) {
+					State.Stack.remove(uuid, State.dragged_card)
+					State.Stack.insert(uuid, State.copied_card, index)
+					return
+				}
 
+				/* if stack does not contain the copy: insert on top of the card hovered */
+				const contains_copy = stack_state.card_arr.some(card => card.uuid === State.copied_card.uuid)
+				if (!contains_copy) {
+					State.Stack.insert(uuid, State.copied_card, index + 1)
+				}
+				/* otherwise, if moving the card around in the stack: move the card to the index hovered */
+				else {
+					if (card.uuid === State.copied_card.uuid) {
+						return
+					}
+					State.Stack.remove(uuid, State.copied_card)
+					State.Stack.insert(uuid, State.copied_card, index)
+				}
 			}
 		},
 
-		onDragLeave: (event) => {
-			if (!event.currentTarget.contains(event.relatedTarget)) {
-				console.log(`Stack onDragLeave: ${uuid}`)
-			}
-		}
+
 
 	})
 
@@ -87,10 +129,10 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 
   return (
-    <div style={container_style}>
+    <div style={container_style} {...stack_html5_dnd_attr}>
       {stack_state.card_arr.map((card, index) => (
 
-        <div key={index} style={get_position_styling(index)} {...html5_dnd_attr(card, index)}>
+        <div key={index} style={get_position_styling(index)} {...card_html5_dnd_attr(card, index)}>
           <Card 
 						uuid={card.uuid}
 						art_url={is_hand === true ? card.card : card.crop} 
