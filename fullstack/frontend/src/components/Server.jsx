@@ -111,9 +111,6 @@ export const ServerProvider = ({ children }) => {
 
 				return card_copy
 			},
-
-
-
 		}
 	}
 

@@ -91,6 +91,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 		},
 
 		onDragEnter: (event) => {
+			event.stopPropagation()
 			if (!event.currentTarget.contains(event.relatedTarget) && card.uuid !== State.dragged_card.uuid) {
 				console.log(`Stack onDragEnter: ${uuid}`)
 
@@ -117,6 +118,10 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 				}
 			}
 		},
+
+		onDragLeave: (event) => {
+			event.stopPropagation()
+		}
 
 
 

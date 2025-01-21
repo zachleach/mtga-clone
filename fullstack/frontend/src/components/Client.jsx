@@ -9,7 +9,6 @@ export const ClientProvider = ({ children }) => {
 	const ref_map = useRef(new Map())
 
 	const register_ref = (uuid, ele) => {
-		console.log(uuid, ele)
 		if (ele) {
 			ref_map.current.set(uuid, ele)
 		}
