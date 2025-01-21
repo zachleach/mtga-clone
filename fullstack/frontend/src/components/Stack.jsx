@@ -60,11 +60,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 	const card_html5_dnd_attr = (card, index) => ({
 		onDragStart: (event) => {
 			console.log(`Stack onDragStart: ${uuid}`)
-			event.dataTransfer.setData('source', uuid)
-
-			const copy = State.Card.copy(card)
-			State.set_dragged_card(card)
-			State.set_copied_card(copy)
+			event.dataTransfer.setData('source', card.uuid)
 		},
 
 		onDragOver: (event) => {
@@ -74,49 +70,25 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 		onDrop: (event) => {
 			event.stopPropagation()
-
 			const source = event.dataTransfer.getData('source')
 			console.log(`Stack onDrop: ${source} -> ${uuid}`)
 
-			if (card.uuid !== State.dragged_card.uuid) {
-				State.Card.remove(State.dragged_card)
-			}
+			const card = State.Card.remove(source)
+			State.Stack.insert(uuid, card, index)
+
+			/* remove card from source stack
+			 * insert card at dropped location
+			 *
+			 */
 
 		},
 
 		onDragEnd: (event) => {
 			console.log(`Stack onDragEnd: ${uuid}`, event.dataTransfer.dropEffect)
-			State.set_dragged_card(null)
-			State.set_copied_card(null)
 		},
 
 		onDragEnter: (event) => {
 			event.stopPropagation()
-			if (!event.currentTarget.contains(event.relatedTarget) && card.uuid !== State.dragged_card.uuid) {
-				console.log(`Stack onDragEnter: ${uuid}`)
-
-				/* if stack contains the dragged card, replace the dragged card with copy card */
-				const contains_dragged = stack_state.card_arr.some(card => card.uuid === State.dragged_card.uuid)
-				if (contains_dragged) {
-					State.Stack.remove(uuid, State.dragged_card)
-					State.Stack.insert(uuid, State.copied_card, index)
-					return
-				}
-
-				/* if stack does not contain the copy: insert on top of the card hovered */
-				const contains_copy = stack_state.card_arr.some(card => card.uuid === State.copied_card.uuid)
-				if (!contains_copy) {
-					State.Stack.insert(uuid, State.copied_card, index + 1)
-				}
-				/* otherwise, if moving the card around in the stack: move the card to the index hovered */
-				else {
-					if (card.uuid === State.copied_card.uuid) {
-						return
-					}
-					State.Stack.remove(uuid, State.copied_card)
-					State.Stack.insert(uuid, State.copied_card, index)
-				}
-			}
 		},
 
 		onDragLeave: (event) => {
