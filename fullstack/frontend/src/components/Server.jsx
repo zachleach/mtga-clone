@@ -26,7 +26,6 @@ export const ServerProvider = ({ children }) => {
 			set_copy_card(card_obj)
 		},
 
-
 		Stack: {
 			/* insert a card at index */
 			insert: (stack_id, card, index) => {

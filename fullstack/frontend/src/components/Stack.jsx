@@ -1,6 +1,6 @@
 /* components/Stack.jsx */
-import { useState, useRef, useEffect, useContext } from 'react'
-import { Card, Server } from '.'
+import { useState, useRef, useEffect, useContext, useCallback } from 'react'
+import { Card, Server, Client } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
@@ -8,6 +8,7 @@ const CARD_ASPECT_RATIO = 745 / 1040
 export const Stack = ({ stack_state, is_hand = false }) => {
 
 	const { notify_server, State } = useContext(Server)
+	const { register_ref } = useContext(Client)
 
 	const uuid = stack_state.uuid
 
@@ -74,7 +75,6 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 		onDrop: (event) => {
 			event.stopPropagation()
 
-			/* remove the source card from the source stack? i swear this made sense but didn't work last time i implemented it */
 			const source = event.dataTransfer.getData('source')
 			console.log(`Stack onDrop: ${source} -> ${uuid}`)
 
@@ -86,11 +86,8 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 		onDragEnd: (event) => {
 			console.log(`Stack onDragEnd: ${uuid}`, event.dataTransfer.dropEffect)
-			if (event.dataTransfer.dropEffect !== 'none') {
-				State.set_dragged_card(null)
-				State.set_copied_card(null)
-			}
-
+			State.set_dragged_card(null)
+			State.set_copied_card(null)
 		},
 
 		onDragEnter: (event) => {
@@ -129,9 +126,11 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 
   return (
-    <div style={container_style} {...stack_html5_dnd_attr}>
-      {stack_state.card_arr.map((card, index) => (
+    <div ref={(ele) => register_ref(uuid, ele)} 
+			style={container_style} 
+			{...stack_html5_dnd_attr}>
 
+      {stack_state.card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...card_html5_dnd_attr(card, index)}>
           <Card 
 						uuid={card.uuid}
@@ -140,8 +139,8 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 						opacity={State.dragged_card === card ? '25%' : '100%'}
 					/>
         </div>
-
       ))}
+
     </div>
   )
 }

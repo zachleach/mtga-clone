@@ -1,10 +1,12 @@
 import { createRoot } from 'react-dom/client'
-import { ServerProvider } from './components'
+import { ServerProvider, ClientProvider } from './components'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render( 
 	<ServerProvider>
-		<App />
+		<ClientProvider>
+			<App />
+		</ClientProvider>
 	</ServerProvider>
 )
 
