@@ -29,21 +29,18 @@ export const Row = ({ row_state }) => {
 			const source = event.dataTransfer.getData('source')
 			console.log(`Row onDrop: ${source} -> ${uuid}`)
 
+			const card = State.Card.remove(source)
 			const row_bb = row_ref.current.getBoundingClientRect()
 			const drop_x = event.clientX - row_bb.left
-			console.log(drop_x, row_bb.width)
 
-			const card = State.Card.remove(source)
-
-			/* insert at index 0 */
+			/* drop left if drop_x is less than half the row width */
 			if (drop_x < row_bb.width / 2) {
 				State.Row.insert(uuid, card, 0)
 			}
+			/* otherwise, drop right */
 			else {
 				State.Row.insert(uuid, card, -1)
 			}
-
-
 		},
 		onDragEnter: (event) => {
 			console.log(`Row onDragEnter: ${uuid}`)
