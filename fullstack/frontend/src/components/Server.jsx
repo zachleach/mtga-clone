@@ -64,17 +64,48 @@ export const ServerProvider = ({ children }) => {
 
 			/* create a new stack object containing a card */
 			create: (card_obj) => {
-
-			},
+        return {
+          uuid: uuidv4(),
+          card_arr: [card_obj]
+        }
+      },
 		},
 		Row: {
 			/* add a card to a row at index */
-			insert: (row_id, card_id, index) => {
+			insert: (row_id, card_obj, index) => {
+        const new_game_state = { ...game_state }
+        for (const player_name of Object.keys(new_game_state)) {
+          for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+            const row = new_game_state[player_name][row_name]
+						/* find the row */
+            if (row.uuid === row_id) {
+							/* create the new stack */
+              const new_stack = State.Stack.create(card_obj)
+              
+              if (index !== -1) {
+                row.stacks.splice(index, 0, new_stack)
+              } 
+							else {
+                row.stacks.push(new_stack)
+              }
+              
+              set_game_state(new_game_state)
+              return
+            }
+          }
+        }
+      },
 
-			},
 
 		},
 		Card: {
+			find_row: (card_uuid) => {
+				for (const player_name of Object.keys(game_state)) {
+					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+						return game_state[player_name][row_name].stacks.find(s => s.card_arr.some(c => c.uuid === card_uuid))
+					}
+				}
+			},
 
 			/* identifies the stack_id of a card, and then calls Stack.remove(stack_id, card) */
 			remove: (card_uuid) => {

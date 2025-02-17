@@ -1,12 +1,12 @@
 /* components/Row.jsx */
-import { Stack, Client, Server } from '.'
-import { useContext } from 'react'
+import { Stack, Server } from '.'
+import { useContext, useRef } from 'react'
 
 export const Row = ({ row_state }) => {
 	const uuid = row_state.uuid
 
-	const { notify_server } = useContext(Server)
-	const { register_ref, get_ref } = useContext(Client)
+	const { notify_server, State } = useContext(Server)
+	const row_ref = useRef(null)
 
   const container_style = {
     height: '100%',
@@ -28,7 +28,22 @@ export const Row = ({ row_state }) => {
 			event.preventDefault()
 			const source = event.dataTransfer.getData('source')
 			console.log(`Row onDrop: ${source} -> ${uuid}`)
-			console.log(`Row ref:`, get_ref(uuid))
+
+			const row_bb = row_ref.current.getBoundingClientRect()
+			const drop_x = event.clientX - row_bb.left
+			console.log(drop_x, row_bb.width)
+
+			const card = State.Card.remove(source)
+
+			/* insert at index 0 */
+			if (drop_x < row_bb.width / 2) {
+				State.Row.insert(uuid, card, 0)
+			}
+			else {
+				State.Row.insert(uuid, card, -1)
+			}
+
+
 		},
 		onDragEnter: (event) => {
 			console.log(`Row onDragEnter: ${uuid}`)
@@ -38,10 +53,8 @@ export const Row = ({ row_state }) => {
 		}
 	}
 
-
-
   return (
-    <div ref={(ele) => register_ref(uuid, ele)} style={container_style} {...html5_dnd_attr}>
+    <div ref={row_ref} style={container_style} {...html5_dnd_attr}>
 			{row_state['stacks'].map((stack, idx) => (
 				<Stack key={idx} stack_state={stack} is_hand={row_state.is_hand} />
 			))}

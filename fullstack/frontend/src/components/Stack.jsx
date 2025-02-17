@@ -1,6 +1,6 @@
 /* components/Stack.jsx */
 import { useState, useRef, useEffect, useContext, useCallback } from 'react'
-import { Card, Server, Client } from '.'
+import { Card, Server } from '.'
 
 const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
@@ -8,7 +8,6 @@ const CARD_ASPECT_RATIO = 745 / 1040
 export const Stack = ({ stack_state, is_hand = false }) => {
 
 	const { notify_server, State } = useContext(Server)
-	const { register_ref } = useContext(Client)
 
 	const uuid = stack_state.uuid
 
@@ -38,21 +37,6 @@ export const Stack = ({ stack_state, is_hand = false }) => {
   }
 
 
-	const stack_html5_dnd_attr = {
-
-		/* if you move to a new stack while dragging, remove the copied card from previous stack */
-		onDragLeave: (event) => {
-			if (!event.currentTarget.contains(event.relatedTarget)) {
-				console.log(`Stack Container onDragLeave: ${uuid}`)
-
-				if (State.dragged_card !== null) {
-					State.Stack.remove(uuid, State.copied_card)
-				}
-			}
-		}
-
-
-	}
 
 
 
@@ -68,6 +52,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 			event.preventDefault()
 		},
 
+		/* remove card from source stack, then insert at drop index */
 		onDrop: (event) => {
 			event.stopPropagation()
 			const source = event.dataTransfer.getData('source')
@@ -75,16 +60,6 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 			const card = State.Card.remove(source)
 			State.Stack.insert(uuid, card, index)
-
-			/* remove card from source stack
-			 * insert card at dropped location
-			 *
-			 */
-
-		},
-
-		onDragEnd: (event) => {
-			console.log(`Stack onDragEnd: ${uuid}`, event.dataTransfer.dropEffect)
 		},
 
 		onDragEnter: (event) => {
@@ -103,9 +78,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 
   return (
-    <div ref={(ele) => register_ref(uuid, ele)} 
-			style={container_style} 
-			{...stack_html5_dnd_attr}>
+    <div style={container_style} >
 
       {stack_state.card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...card_html5_dnd_attr(card, index)}>
