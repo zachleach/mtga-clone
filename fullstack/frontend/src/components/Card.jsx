@@ -7,13 +7,6 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 
 	const { notify_server, State } = useContext(Server)
 
-	const handle_click = () => {
-		notify_server({
-			type: 'CardClickEvent',
-			uuid: uuid
-		})
-	}
-
   const container_style = {
     height: '100%',
     aspectRatio: aspect_ratio,
@@ -34,7 +27,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 
 
   return (
-    <div style={container_style} onClick={handle_click} >
+    <div style={container_style}>
       <img 
         src={art_url} 
         alt="Card.jsx failed to load img element" 

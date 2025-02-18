@@ -65,7 +65,8 @@ def generate_card(scryfall_card_json: dict) -> dict:
 def create_stack(cards, mtga_list=None):
     stack = { 
         'uuid': str(uuid.uuid4()),
-        'card_arr': cards
+        'card_arr': cards,
+        'is_tapped': False
     }
 
     if (mtga_list is None):
@@ -151,42 +152,6 @@ def generate_initial_state(mtga_list=None) -> dict:
 
 
 
-'''
-    move the cards from deck at given indices to hand
-'''
-def handle_library_esc(username, indices):
-    library = game_state[username]['library'] 
-    hand = game_state[username]['hand_row'] 
-
-    new_library = []
-    for i, card in enumerate(library):
-        if i not in indices:
-            new_library += [card]
-        else:
-            stack = create_stack([card])
-            game_state[username]['hand_row']['stacks'] += [stack]
-
-    game_state[username]['library'] = new_library
-
-
-
-'''
-    move the card from src to dst
-
-    get the row of src and st
-    remove src from src row
-    add src to dst row at or after dst index (we'll see which looks better)
-
-'''
-def handle_card_drop_event(src, dst):
-    print(src, dst)
-    src_context = identify_card_context_board(src)
-    dst_context = identify_card_context_board(dst)
-    print(src_context, dst_context)
-
-
-def handle_row_drop_event(card, row):
-    pass
 
 
 
@@ -261,8 +226,9 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             decklist = request['payload'] 
 
         await broadcast_json({
-            "type": "game_state",
-            "game_state": game_state
+            "type": "InitialSetup",
+            "game_state": game_state,
+            "sender": 'server',
         })
 
         while True:
@@ -271,12 +237,18 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 continue
 
             match data['type']:
-                case 'library-esc':
-                    handle_library_esc(username, data['cards'])
-                case 'CardDropEvent':
-                    handle_card_drop_event(data['src'], data['dst'])
-                case 'RowDropEvent':
-                    handle_row_drop_event(data['card'], data['row'])
+
+                case 'StackClickEvent':
+                    print('StackClickEvent')
+                    stack_uuid = data['uuid']
+                    for username in game_state:
+                        for row_name in ['hand_row', 'top_row', 'left_row', 'right_row']:
+                            row = game_state[username][row_name]
+                            for stack in row['stacks']:
+                                if stack['uuid'] == stack_uuid:
+                                    stack['is_tapped'] = not stack['is_tapped']
+                                    break
+
                 case _:
                     print(data)
 

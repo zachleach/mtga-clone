@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { ScryfallUtil } from '.'
 
 export const Server = createContext(null)
 
@@ -12,6 +13,10 @@ export const ServerProvider = ({ children }) => {
 
 	/* game state */
 	const [game_state, set_game_state] = useState({})
+
+
+
+
 
 	/* helper functions for modifying game state using uuids */
 	const State = {
@@ -69,6 +74,22 @@ export const ServerProvider = ({ children }) => {
           card_arr: [card_obj]
         }
       },
+
+			tap: (stack_id) => {
+				const new_game_state = structuredClone(game_state)
+				for (const player_name of Object.keys(new_game_state)) {
+					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+						const stack = new_game_state[player_name][row_name].stacks.find(s => s.uuid === stack_id)
+						if (stack) {
+							stack.is_tapped = !stack.is_tapped
+							set_game_state(new_game_state)
+							return
+						}
+					}
+				}
+			},
+
+
 		},
 		Row: {
 			/* add a card to a row at index */
@@ -153,11 +174,14 @@ export const ServerProvider = ({ children }) => {
       set_ws(websocket)
 			set_username(username)
 
-			/* SEND: DECKLIST */
+			/* modify this to send the player state to the server */
+			/* server receives it and then sends back the game state as a whole */
+			/*
 			websocket.send(JSON.stringify({
 				type: "decklist",
 				payload: decklist
 			}))
+			*/
     };
 
 		/** 
@@ -180,10 +204,13 @@ export const ServerProvider = ({ children }) => {
     websocket.onmessage = (event) => {
       const data = JSON.parse(event.data)
 
-			/* RECEIVE: GAME_STATE */
-      if (data.type === 'game_state') {
+			/* RECEIVE: InitialSetup */
+      if (data.type === 'InitialSetup') {
         set_connected_users(Object.keys(data.game_state))
 				set_game_state(data.game_state)
+			}
+			if (data.type === 'GameState') {
+
 			}
     }
     
@@ -208,7 +235,11 @@ export const ServerProvider = ({ children }) => {
 
 	const notify_server = (json_object) => {
 		console.log(json_object)
-		ws.send(JSON.stringify(json_object))
+		/* preprend sender: username */
+		ws.send(JSON.stringify({
+			...json_object,
+			sender: username
+		}))
 	}
 
 
@@ -226,5 +257,11 @@ export const ServerProvider = ({ children }) => {
 			{children}
 		</Server.Provider>
 	)
+
+
+
+
+
+
 }
 

@@ -1,5 +1,5 @@
 import './remove_scrollbars.css'
-import { PlayerBoard, OpponentBoard, CardGridOverlay, Server } from './components'
+import { PlayerBoard, OpponentBoard, CardGridOverlay, Server, ScryfallUtil } from './components'
 import React, { useState, useEffect, useContext } from 'react';
 
 const App = () => {
@@ -19,12 +19,34 @@ const App = () => {
 	} = useContext(Server)
 
 
-  const handle_login_button = () => {
-    event.preventDefault();
+	const query_decklist = async () => {
+		const res = await ScryfallUtil.fetch_deck_data(decklist)
+		console.log(`Total cards: ${res.total_cards}`)
+		res.cards.forEach(card => {
+			console.log(`${card.quantity}x ${card.name}`)
+			console.log(card)
+		})
+				
+		if (res.not_found.length) {
+			console.log("\nNot found:")
+			res.not_found.forEach(card => {
+				console.log(`- ${card.name || 'Unknown card'}`)
+			})
+		}
 
-    if (username.trim()) {
-      ws_connect(username, decklist);
-    }
+		return res.cards
+	}
+
+
+  const handle_login_button = async () => {
+    event.preventDefault();
+		if (!username.trim()) {
+			return
+		}
+
+		const cards = await query_decklist()
+
+		/*ws_connect(username, decklist);*/
   };
 
 

@@ -6,12 +6,21 @@ const TILE_ASPECT_RATIO = 626 / 457
 const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
-
+	const uuid = stack_state.uuid
 	const { notify_server, State } = useContext(Server)
 
-	const uuid = stack_state.uuid
+	const handle_click = () => {
+		console.log('StackClickEvent')
+		State.Stack.tap(uuid)
+
+		notify_server({
+			type: 'StackClickEvent',
+			uuid: uuid
+		})
+	}
 
 	const container_style = {
+		transform: stack_state.is_tapped ? `rotate(6deg)` : null,
 		position: 'relative',
 		height: is_hand === true ? '100%' : '40%',
 		aspectRatio: is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO,
@@ -78,7 +87,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 
   return (
-    <div style={container_style} >
+    <div style={container_style} onClick={handle_click}>
 
       {stack_state.card_arr.map((card, index) => (
         <div key={index} style={get_position_styling(index)} {...card_html5_dnd_attr(card, index)}>
