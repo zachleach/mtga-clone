@@ -35,7 +35,6 @@ const App = () => {
 			}
 		}
 
-		console.log(cards)
 		return cards
 	}
 

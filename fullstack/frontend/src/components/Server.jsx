@@ -13,9 +13,17 @@ export const ServerProvider = ({ children }) => {
 
 	/* game state */
 	const [game_state, set_game_state] = useState({})
+	const [state_update_flag, set_state_update_flag] = useState(false)
 
+	useEffect(() => {
+		if (!ws) return
 
-
+		/* infinite loop */
+		notify_server({
+			type: 'state_update',
+			data: game_state
+		})
+	}, [game_state])
 
 
 	/* helper functions for modifying game state using uuids */
@@ -174,8 +182,6 @@ export const ServerProvider = ({ children }) => {
       set_ws(websocket)
 			set_username(username)
 
-			console.log(deck)
-
 			websocket.send(JSON.stringify({
 				type: "connection",
 				sender: username,
@@ -232,11 +238,10 @@ export const ServerProvider = ({ children }) => {
       const data = JSON.parse(event.data)
 
 			/* RECEIVE: state_update */
-      if (data.type === 'state_update') {
+      if (data.type === 'state_update' && data.sender !== username) {
         set_connected_users(Object.keys(data.game_state))
 				set_game_state(data.game_state)
 			}
-			console.log(data.game_state)
     }
     
     
@@ -260,11 +265,7 @@ export const ServerProvider = ({ children }) => {
 
 	const notify_server = (json_object) => {
 		console.log(json_object)
-		/* preprend sender: username */
-		ws.send(JSON.stringify({
-			...json_object,
-			sender: username
-		}))
+		ws.send(JSON.stringify(json_object))
 	}
 
 

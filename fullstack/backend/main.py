@@ -7,14 +7,9 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from bulk_query import ScryfallDeckUtils
 
-
-active_connections: Dict[str, WebSocket] = {}
-
-async def broadcast_json(payload: Dict):
-    for connection in active_connections.values():
-        await connection.send_json(payload)
-
 app = FastAPI()
+active_connections: Dict[str, WebSocket] = {}
+game_state = {}
 
 # enable CORS for development
 app.add_middleware(
@@ -25,193 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-game_state = {}
-scryfall_utils = ScryfallDeckUtils()
-
-
-
-'''
-    get an array of frontend card objects from an mtga decklist
-
-'''
-def get_cards(decklist):
-    deck_json = scryfall_utils.fetch_deck_data(decklist)
-    card_jsons = deck_json['cards']
-
-    cards = []
-    for card in card_jsons:
-        cards += [generate_card(card)]
-
-    return cards
-
-
-'''
-    get a frontend card object from a scryfall card json object
-
-'''
-def generate_card(scryfall_card_json: dict) -> dict:
-    return {
-        'uuid': str(uuid.uuid4()),
-        'card': scryfall_card_json['image_uris']['large'],
-        'crop': scryfall_card_json['image_uris']['art_crop']
-    }
-
-
-'''
-    create a frontend card stack object that can be stored in a row's `stacks` array
-
-'''
-def create_stack(cards, mtga_list=None):
-    stack = { 
-        'uuid': str(uuid.uuid4()),
-        'card_arr': cards,
-        'is_tapped': False
-    }
-
-    if (mtga_list is None):
-        return stack
-
-    stack['card_arr'] = get_cards(mtga_list)
-    return stack
-
-
-'''
-    hardcode deck state for initial testing purposes
-
-'''
-def generate_initial_state(mtga_list=None) -> dict:
-    decklist = '''
-        1 Abrade (LCI) 131
-        1 Ancestral Vision (TSR) 52
-        1 Blackblade Reforged (DMC) 178
-        1 Cathartic Reunion (2XM) 121
-        1 Doom Blade (IMA) 87
-        1 Feed the Swarm (OTC) 134
-        1 Fleetfeather Sandals (THS) 216
-        1 Glamdring (LTR) 239
-        1 Go for the Throat (MOC) 250
-        1 Illusionist's Bracers (RVR) 260
-        1 Inevitable Betrayal (MH2) 47
-        1 Lightning Greaves (OTC) 260
-        1 Adarkar Wastes (M3C) 316 
-        1 Arcane Sanctum (BRC) 173 
-        1 Arid Mesa (MH2) 244 
-        1 Badlands (VMA) 291 
-        1 Battlefield Forge (M3C) 321 
-        1 Bayou (VMA) 293 
-        1 Blackcleave Cliffs (OTC) 272 
-        1 Blood Crypt (RVR) 292 
-        1 Bloodstained Mire (MH3) 216 
-        1 Blooming Marsh (OTJ) 266 
-        1 Botanical Sanctum (OTJ) 267 
-        1 Breeding Pool (RNA) 246 
-        1 Brushland (M3C) 324 
-        1 Cascade Bluffs (2XM) 313 
-        1 Cascading Cataracts (DMC) 202 
-        1 Caves of Koilos (C20) 262 
-        1 City of Brass (MD1) 15 
-        1 Command Tower (ELD) 333
-        1 Commercial District (MKM) 259 
-        1 Concealed Courtyard (KLD) 245 
-        1 Copperline Gorge (ONE) 249 
-    '''
-
-    deck = get_cards(decklist)
-
-    test = deck[0:4]
-    cards = [create_stack([card]) for card in test]
-
-    return {
-        'uuid': str(uuid.uuid4()),
-        'deck': deck,
-        'library': deck,
-        'graveyard': [],
-        'exile': [],
-        'hand_row': {
-            'uuid': str(uuid.uuid4()),
-            'is_hand': True,
-            'stacks': []
-        },
-        'top_row': {
-            'uuid': str(uuid.uuid4()),
-            'is_hand': False,
-            'stacks': cards
-        },
-        'left_row': {
-            'uuid': str(uuid.uuid4()),
-            'is_hand': False,
-            'stacks': []
-        },
-        'right_row': {
-            'uuid': str(uuid.uuid4()),
-            'is_hand': False,
-            'stacks': []
-        }
-    }
-
-
-
-
-
-
-
-
-
-'''
-    given a card's uuid, returns a dict containing relevant information about the location of a card within the game_state 
-    assumes cards can't exist in two zones at the same time
-
-'''
-def identify_card_context_board(card_uuid):
-    for username, player_state in game_state.items():
-        #   check library 
-        for i, card in enumerate(player_state['library']):
-            if card['uuid'] == card_uuid:
-                return {
-                    'username': username,
-                    'location': 'library',
-                    'index': i
-                }
-                
-        #   check graveyard 
-        for i, card in enumerate(player_state['graveyard']):
-            if card['uuid'] == card_uuid:
-                return {
-                    'username': username,
-                    'location': 'graveyard',
-                    'index': i
-                }
-                
-        #   check exile 
-        for i, card in enumerate(player_state['exile']):
-            if card['uuid'] == card_uuid:
-                return {
-                    'username': username,
-                    'location': 'exile',
-                    'index': i
-                }
-
-        #   check board
-        for row_name in ['hand_row', 'top_row', 'left_row', 'right_row']:
-            row = player_state[row_name]
-            for stack_idx, stack in enumerate(row['stacks']):
-                for card_idx, card in enumerate(stack['card_arr']):
-                    if card['uuid'] == card_uuid:
-                        return {
-                            'username': username,
-                            'location': row_name,
-                            'stack_uuid': stack['uuid'],
-                            'stack_index': stack_idx,
-                            'card_index': card_idx
-                        }
-    
-    return None
-
-
-
-
-
+async def broadcast_json(payload: Dict, sending_connection = None):
+    for connection in active_connections.values():
+        if connection == sending_connection:
+            continue
+        await connection.send_json(payload)
 
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
@@ -228,8 +41,8 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             await broadcast_json({
                 "type": "state_update",
                 "game_state": game_state,
-                "sender": username,
-            })
+                "sender": 'server' + '_username'
+            }, username)
 
         while True:
             data = await websocket.receive_json()
@@ -237,6 +50,15 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 continue
 
             match data['type']:
+                case 'state_update':
+                    game_state.clear()
+                    game_state.update(data['data'])
+                    await broadcast_json({
+                        "type": "state_update",
+                        "game_state": game_state,
+                        "sender": username
+                    }, username)
+
                 case 'StackClickEvent':
                     print('StackClickEvent')
                     stack_uuid = data['uuid']
@@ -264,7 +86,8 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
         del game_state[username]
         await broadcast_json({
             "type": "game_state",
-            "game_state": game_state
+            "game_state": game_state,
+            "sender": username
         })
 
 if __name__ == "__main__":
