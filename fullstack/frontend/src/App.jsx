@@ -1,6 +1,7 @@
 import './remove_scrollbars.css'
 import { PlayerBoard, OpponentBoard, CardGridOverlay, Server, ScryfallUtil } from './components'
 import React, { useState, useEffect, useContext } from 'react';
+import { v4 as uuidv4 } from 'uuid'
 
 const App = () => {
   const [username, set_username] = useState('');
@@ -19,22 +20,23 @@ const App = () => {
 	} = useContext(Server)
 
 
-	const query_decklist = async () => {
+	/* queries scryfall for the card objects then converts into deck array the application can recognize */
+	const query_decklist = async (decklist) => {
 		const res = await ScryfallUtil.fetch_deck_data(decklist)
-		console.log(`Total cards: ${res.total_cards}`)
-		res.cards.forEach(card => {
-			console.log(`${card.quantity}x ${card.name}`)
-			console.log(card)
-		})
-				
-		if (res.not_found.length) {
-			console.log("\nNot found:")
-			res.not_found.forEach(card => {
-				console.log(`- ${card.name || 'Unknown card'}`)
-			})
+
+		const cards = []
+		for (const card_obj of res.cards) {
+			for (let i = 0; i < card_obj.quantity; i++) {
+				cards.push({
+					uuid: uuidv4(),
+					card: card_obj.image_uris.large,
+					crop: card_obj.image_uris.art_crop
+				})
+			}
 		}
 
-		return res.cards
+		console.log(cards)
+		return cards
 	}
 
 
@@ -43,10 +45,18 @@ const App = () => {
 		if (!username.trim()) {
 			return
 		}
+		
+		const temp_decklist = `
+			1 Forest (ELD) 266
+			1 Island (UND) 89
+			1 Mountain (ELD) 262
+			1 Plains (UND) 87
+			1 Swamp (UND) 91
+		`	
 
-		const cards = await query_decklist()
-
-		/*ws_connect(username, decklist);*/
+		/* replace with state decklist */
+		const deck = await query_decklist(temp_decklist)
+		ws_connect(username, deck);
   };
 
 

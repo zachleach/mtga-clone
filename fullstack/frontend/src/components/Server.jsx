@@ -158,7 +158,7 @@ export const ServerProvider = ({ children }) => {
 
 
 
-  const ws_connect = (username, decklist) => {
+  const ws_connect = (username, deck) => {
     const websocket = new WebSocket(`ws://localhost:8000/ws/${username}`)
     
 		/**
@@ -174,15 +174,42 @@ export const ServerProvider = ({ children }) => {
       set_ws(websocket)
 			set_username(username)
 
-			/* modify this to send the player state to the server */
-			/* server receives it and then sends back the game state as a whole */
-			/*
+			console.log(deck)
+
 			websocket.send(JSON.stringify({
-				type: "decklist",
-				payload: decklist
+				type: "connection",
+				sender: username,
+				initial_data: {
+					[username]: {
+						uuid: uuidv4(),
+						deck: deck,
+						library: deck,
+						graveyard: [],
+						exile: [],
+						hand_row: {
+							uuid: uuidv4(),
+							is_hand: true,
+							stacks: []
+						},
+						top_row: {
+							uuid: uuidv4(),
+							is_hand: false,
+							stacks: deck.map(card => State.Stack.create(card))
+						},
+						left_row: {
+							uuid: uuidv4(),
+							is_hand: false,
+							stacks: []
+						},
+						right_row: {
+							uuid: uuidv4(),
+							is_hand: false,
+							stacks: []
+						}
+					}
+				}
 			}))
-			*/
-    };
+		}
 
 		/** 
 		 * ON CLOSE
@@ -204,14 +231,12 @@ export const ServerProvider = ({ children }) => {
     websocket.onmessage = (event) => {
       const data = JSON.parse(event.data)
 
-			/* RECEIVE: InitialSetup */
-      if (data.type === 'InitialSetup') {
+			/* RECEIVE: state_update */
+      if (data.type === 'state_update') {
         set_connected_users(Object.keys(data.game_state))
 				set_game_state(data.game_state)
 			}
-			if (data.type === 'GameState') {
-
-			}
+			console.log(data.game_state)
     }
     
     

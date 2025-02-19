@@ -218,18 +218,18 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
     await websocket.accept()
     active_connections[username] = websocket
 
-    game_state[username] = generate_initial_state()
-    
     try:
         request = await websocket.receive_json()
-        if (request['type'] == 'decklist'):
-            decklist = request['payload'] 
 
-        await broadcast_json({
-            "type": "InitialSetup",
-            "game_state": game_state,
-            "sender": 'server',
-        })
+        if (request['type'] == 'connection'):
+            player_data = request['initial_data'] 
+            game_state[username] = player_data[username]
+
+            await broadcast_json({
+                "type": "state_update",
+                "game_state": game_state,
+                "sender": username,
+            })
 
         while True:
             data = await websocket.receive_json()
@@ -237,7 +237,6 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 continue
 
             match data['type']:
-
                 case 'StackClickEvent':
                     print('StackClickEvent')
                     stack_uuid = data['uuid']
@@ -252,10 +251,12 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 case _:
                     print(data)
 
+            '''
             await broadcast_json({
                 "type": "game_state",
                 "game_state": game_state
             })
+            '''
             
             
     except WebSocketDisconnect:
