@@ -9,7 +9,7 @@ from bulk_query import ScryfallDeckUtils
 
 app = FastAPI()
 active_connections: Dict[str, WebSocket] = {}
-game_state = {}
+game_state = { "version": 0 }
 
 # enable CORS for development
 app.add_middleware(
@@ -20,11 +20,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-async def broadcast_json(payload: Dict, sending_connection = None):
+async def broadcast_state_update():
     for connection in active_connections.values():
-        if connection == sending_connection:
-            continue
-        await connection.send_json(payload)
+        await connection.send_json({
+            "type": "state_update",
+            "game_state": game_state
+        })
+
+
+async def attempt_state_update(state):
+    current_version = game_state["version"]
+    if (current_version != state["version"]):
+        return False
+    game_state.clear()
+    game_state.update(state)
+    game_state["version"] = current_version + 1
+    return True
+
+
+async def add_player(username, initial_data):
+    current_version = game_state["version"]
+    game_state[username] = initial_data
+    game_state["version"] = current_version + 1
+
+
+async def remove_player(username):
+    current_version = game_state["version"]
+    del active_connections[username]
+    del game_state[username]
+    game_state["version"] = current_version + 1
+
 
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
@@ -33,16 +58,9 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
     try:
         request = await websocket.receive_json()
-
         if (request['type'] == 'connection'):
-            player_data = request['initial_data'] 
-            game_state[username] = player_data[username]
-
-            await broadcast_json({
-                "type": "state_update",
-                "game_state": game_state,
-                "sender": 'server' + '_username'
-            }, username)
+            await add_player(username, request['initial_data'])
+            await broadcast_state_update()
 
         while True:
             data = await websocket.receive_json()
@@ -51,14 +69,22 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             match data['type']:
                 case 'state_update':
-                    game_state.clear()
-                    game_state.update(data['data'])
-                    await broadcast_json({
-                        "type": "state_update",
-                        "game_state": game_state,
-                        "sender": username
-                    }, username)
+                    success = await attempt_state_update(data['data'])
+                    await broadcast_state_update()
 
+                case _:
+                    print(data)
+
+    except WebSocketDisconnect:
+        await remove_player(username)
+        await broadcast_state_update()
+
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
+'''
                 case 'StackClickEvent':
                     print('StackClickEvent')
                     stack_uuid = data['uuid']
@@ -70,25 +96,4 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                                     stack['is_tapped'] = not stack['is_tapped']
                                     break
 
-                case _:
-                    print(data)
-
-            '''
-            await broadcast_json({
-                "type": "game_state",
-                "game_state": game_state
-            })
-            '''
-            
-            
-    except WebSocketDisconnect:
-        del active_connections[username]
-        del game_state[username]
-        await broadcast_json({
-            "type": "game_state",
-            "game_state": game_state,
-            "sender": username
-        })
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+'''

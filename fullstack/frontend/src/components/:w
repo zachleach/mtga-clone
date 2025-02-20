@@ -10,10 +10,17 @@ export const ServerProvider = ({ children }) => {
   const [is_connected, set_is_connected] = useState(false)
   const [connected_users, set_connected_users] = useState([])
   const [username, set_username] = useState('')
+	const [version, set_version] = useState(0)
 
 	/* game state */
 	const [game_state, set_game_state] = useState({})
 
+	const push_changes = () => {
+		notify_server({
+			type: 'state_update',
+			data: game_state
+		})
+	}
 
 	/* helper functions for modifying game state using uuids */
 	const State = {
@@ -173,6 +180,7 @@ export const ServerProvider = ({ children }) => {
 
 			websocket.send(JSON.stringify({
 				type: "connection",
+				sender: username,
 				initial_data: {
 					[username]: {
 						uuid: uuidv4(),
@@ -251,12 +259,12 @@ export const ServerProvider = ({ children }) => {
   }, [ws]);
 
 
-	const push_changes = () => {
-		notify_server({
-			type: 'state_update',
-			data: game_state
-		})
+	const notify_server = (json_object) => {
+		console.log(json_object)
+		ws.send(JSON.stringify(json_object))
 	}
+
+
 
 
 	const value = {
@@ -264,7 +272,7 @@ export const ServerProvider = ({ children }) => {
 		is_connected,
 		game_state,
 		connected_users,
-		push_changes,
+		notify_server,
 		State
 	}
 
