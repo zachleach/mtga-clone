@@ -5,7 +5,7 @@ import { useContext, useRef } from 'react'
 export const Row = ({ row_state }) => {
 	const uuid = row_state.uuid
 
-	const { notify_server, State } = useContext(Server)
+	const { State, push_changes } = useContext(Server)
 	const row_ref = useRef(null)
 
   const container_style = {
@@ -41,6 +41,7 @@ export const Row = ({ row_state }) => {
 			else {
 				State.Row.insert(uuid, card, -1)
 			}
+			push_changes()
 		},
 		onDragEnter: (event) => {
 			console.log(`Row onDragEnter: ${uuid}`)

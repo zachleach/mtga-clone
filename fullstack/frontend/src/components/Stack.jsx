@@ -7,16 +7,12 @@ const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
 	const uuid = stack_state.uuid
-	const { notify_server, State } = useContext(Server)
+	const { State, push_changes } = useContext(Server)
 
 	const handle_click = () => {
 		console.log('StackClickEvent')
 		State.Stack.tap(uuid)
-
-		notify_server({
-			type: 'StackClickEvent',
-			uuid: uuid
-		})
+		push_changes()
 	}
 
 	const container_style = {
@@ -69,6 +65,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 			const card = State.Card.remove(source)
 			State.Stack.insert(uuid, card, index)
+			push_changes()
 		},
 
 		onDragEnter: (event) => {
