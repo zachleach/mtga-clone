@@ -9,7 +9,8 @@ from bulk_query import ScryfallDeckUtils
 
 app = FastAPI()
 active_connections: Dict[str, WebSocket] = {}
-game_state = { "version": 0 }
+game_state = {}
+server_version = 0
 
 # enable CORS for development
 app.add_middleware(
@@ -21,10 +22,12 @@ app.add_middleware(
 )
 
 async def broadcast_state_update():
+    global server_version
     for connection in active_connections.values():
         await connection.send_json({
             "type": "state_update",
-            "game_state": game_state
+            "game_state": game_state,
+            "version": server_version
         })
 
 
@@ -34,13 +37,13 @@ async def broadcast_state_update():
         increment version counter
 
 '''
-async def attempt_state_update(state):
-    current_version = game_state["version"]
-    if (current_version != state["version"]):
+async def attempt_state_update(state, client_version):
+    global server_version
+    if (client_version != server_version):
         return 
     game_state.clear()
     game_state.update(state)
-    game_state["version"] = current_version + 1
+    server_version += 1
 
 
 '''
@@ -49,10 +52,9 @@ async def attempt_state_update(state):
 
 '''
 async def add_player(username, initial_data):
-    current_version = game_state["version"]
+    global server_version
     game_state[username] = initial_data
-    game_state["version"] = current_version + 1
-    pprint.pprint(game_state)
+    server_version += 1
 
 
 '''
@@ -61,10 +63,10 @@ async def add_player(username, initial_data):
     
 '''
 async def remove_player(username):
-    current_version = game_state["version"]
+    global server_version
     del active_connections[username]
     del game_state[username]
-    game_state["version"] = current_version + 1
+    server_version += 1
 
 
 @app.websocket("/ws/{username}")
@@ -79,17 +81,17 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             await broadcast_state_update()
 
         while True:
-            data = await websocket.receive_json()
-            if 'type' not in data: 
+            request = await websocket.receive_json()
+            if 'type' not in request: 
                 continue
 
-            match data['type']:
+            match request['type']:
                 case 'state_update':
-                    await attempt_state_update(data['data'])
+                    await attempt_state_update(request['game_state'], request['client_version'])
                     await broadcast_state_update()
 
                 case _:
-                    print(data)
+                    print(request)
 
     except WebSocketDisconnect:
         await remove_player(username)

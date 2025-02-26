@@ -74,7 +74,7 @@ export const ServerProvider = ({ children }) => {
       },
 
 			tap: (stack_id) => {
-				const new_game_state = structuredClone(game_state)
+				const new_game_state = { ...game_state }
 				for (const player_name of Object.keys(new_game_state)) {
 					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
 						const stack = new_game_state[player_name][row_name].stacks.find(s => s.uuid === stack_id)
@@ -92,7 +92,7 @@ export const ServerProvider = ({ children }) => {
 		Row: {
 			/* add a card to a row at index */
 			insert: (row_id, card_obj, index) => {
-        const new_game_state = { ...game_state }
+				const new_game_state = { ...game_state }
         for (const player_name of Object.keys(new_game_state)) {
           for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
             const row = new_game_state[player_name][row_name]
@@ -109,7 +109,6 @@ export const ServerProvider = ({ children }) => {
               }
               
               set_game_state(new_game_state)
-              return
             }
           }
         }
@@ -128,10 +127,9 @@ export const ServerProvider = ({ children }) => {
 
 			/* identifies the stack_id of a card, and then calls Stack.remove(stack_id, card) */
 			remove: (card_uuid) => {
-				const new_game_state = { ...game_state }
-				for (const player_name of Object.keys(new_game_state)) {
+				for (const player_name of Object.keys(game_state)) {
 					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
-						const stack = new_game_state[player_name][row_name].stacks.find(s => 
+						const stack = game_state[player_name][row_name].stacks.find(s => 
 							s.card_arr.some(c => c.uuid === card_uuid)
 						)
 						if (stack) {
@@ -227,11 +225,9 @@ export const ServerProvider = ({ children }) => {
 
 			/* RECEIVE: state_update */
       if (data.type === 'state_update') {
-				const { version, ...game_state} = data.game_state
-
-				set_version(version)
-				set_game_state(game_state)
-        set_connected_users(Object.keys(game_state))
+				set_version(data.version)
+				set_game_state(data.game_state)
+        set_connected_users(Object.keys(data.game_state))
 			}
     }
     
@@ -254,13 +250,14 @@ export const ServerProvider = ({ children }) => {
   }, [ws]);
 
 
+	/* update game_state and then broadcast the changes */
 	const push_changes = () => {
-		notify_server({
+		ws.send(JSON.stringify({
 			type: 'state_update',
-			data: game_state
-		})
+			game_state: game_state,
+			client_version: version
+		}))
 	}
-
 
 	const value = {
 		ws_connect,
