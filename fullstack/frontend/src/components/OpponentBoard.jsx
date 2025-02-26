@@ -2,6 +2,9 @@
 import { Row } from '.'
 
 export const OpponentBoard = ({ uuid, board_state }) => {
+
+	console.log("opponent board", board_state)
+
   return (
     <div style={{ display: 'flex', flex: '0 0 100%', flexDirection: 'column', border: '1pt solid red' }}>
 

@@ -10,6 +10,7 @@ export const ServerProvider = ({ children }) => {
   const [is_connected, set_is_connected] = useState(false)
   const [connected_users, set_connected_users] = useState([])
   const [username, set_username] = useState('')
+	const [version, set_version] = useState(0)
 
 	/* game state */
 	const [game_state, set_game_state] = useState({})
@@ -167,39 +168,37 @@ export const ServerProvider = ({ children }) => {
 		 *
 		 */
     websocket.onopen = () => {
-      set_is_connected(true)
       set_ws(websocket)
 			set_username(username)
+			set_is_connected(true)
 
 			websocket.send(JSON.stringify({
 				type: "connection",
-				initial_data: {
-					[username]: {
+				[username]: {
+					uuid: uuidv4(),
+					deck: deck,
+					library: deck,
+					gravey: [],
+					exile: [],
+					hand_row: {
 						uuid: uuidv4(),
-						deck: deck,
-						library: deck,
-						graveyard: [],
-						exile: [],
-						hand_row: {
-							uuid: uuidv4(),
-							is_hand: true,
-							stacks: []
-						},
-						top_row: {
-							uuid: uuidv4(),
-							is_hand: false,
-							stacks: deck.map(card => State.Stack.create(card))
-						},
-						left_row: {
-							uuid: uuidv4(),
-							is_hand: false,
-							stacks: []
-						},
-						right_row: {
-							uuid: uuidv4(),
-							is_hand: false,
-							stacks: []
-						}
+						is_hand: true,
+						stacks: []
+					},
+					top_row: {
+						uuid: uuidv4(),
+						is_hand: false,
+						stacks: deck.map(card => State.Stack.create(card))
+					},
+					left_row: {
+						uuid: uuidv4(),
+						is_hand: false,
+						stacks: []
+					},
+					right_row: {
+						uuid: uuidv4(),
+						is_hand: false,
+						stacks: []
 					}
 				}
 			}))
@@ -224,16 +223,20 @@ export const ServerProvider = ({ children }) => {
 		 */
     websocket.onmessage = (event) => {
       const data = JSON.parse(event.data)
+			console.log(data)
 
 			/* RECEIVE: state_update */
-      if (data.type === 'state_update' && data.sender !== username) {
-        set_connected_users(Object.keys(data.game_state))
-				set_game_state(data.game_state)
+      if (data.type === 'state_update') {
+				const { version, ...game_state} = data.game_state
+
+				set_version(version)
+				set_game_state(game_state)
+        set_connected_users(Object.keys(game_state))
 			}
     }
     
     
-    return websocket;
+    return websocket
   }
 
   /** 
@@ -245,7 +248,7 @@ export const ServerProvider = ({ children }) => {
   useEffect(() => {
     return () => {
       if (ws) {
-        ws.close();
+        ws.close()
       }
     };
   }, [ws]);

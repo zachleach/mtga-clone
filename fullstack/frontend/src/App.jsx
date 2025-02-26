@@ -39,8 +39,8 @@ const App = () => {
 	}
 
 
-  const handle_login_button = async () => {
-    event.preventDefault();
+  const handle_login_button = async (event) => {
+    event.preventDefault()
 		if (!username.trim()) {
 			return
 		}
@@ -55,7 +55,7 @@ const App = () => {
 
 		/* replace with state decklist */
 		const deck = await query_decklist(temp_decklist)
-		ws_connect(username, deck);
+		ws_connect(username, deck)
   };
 
 
@@ -99,13 +99,11 @@ const App = () => {
     );
   }
 
-
 	const opponents = connected_users.filter(user => user !== username)
 
   /* Render game screen */
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-
 
 
       {/* Opponents Section - 30% height */}
@@ -120,14 +118,12 @@ const App = () => {
       </div>
 
 
-
       {/* Player's Board - 70% height */}
       <div style={{ display: 'flex', flex: '0 0 70%', overflow: 'hidden' }}>
 				{username && game_state[username] && (
 					<PlayerBoard board_state={game_state[username]}/>
 				)}
       </div>
-
 
 
     </div>

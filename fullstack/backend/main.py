@@ -28,22 +28,38 @@ async def broadcast_state_update():
         })
 
 
+'''
+    if client version matches server version:
+        replace state with client version
+        increment version counter
+
+'''
 async def attempt_state_update(state):
     current_version = game_state["version"]
     if (current_version != state["version"]):
-        return False
+        return 
     game_state.clear()
     game_state.update(state)
     game_state["version"] = current_version + 1
-    return True
 
 
+'''
+    add player's initial data to server game state (mutually exclusive operation)
+    increment version counter
+
+'''
 async def add_player(username, initial_data):
     current_version = game_state["version"]
     game_state[username] = initial_data
     game_state["version"] = current_version + 1
+    pprint.pprint(game_state)
 
 
+'''
+    remove player from game_state and active_connections (mutually exclusive operation
+    increment version counter
+    
+'''
 async def remove_player(username):
     current_version = game_state["version"]
     del active_connections[username]
@@ -59,7 +75,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
     try:
         request = await websocket.receive_json()
         if (request['type'] == 'connection'):
-            await add_player(username, request['initial_data'])
+            await add_player(username, request[username])
             await broadcast_state_update()
 
         while True:
@@ -69,7 +85,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             match data['type']:
                 case 'state_update':
-                    success = await attempt_state_update(data['data'])
+                    await attempt_state_update(data['data'])
                     await broadcast_state_update()
 
                 case _:
@@ -78,7 +94,6 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         await remove_player(username)
         await broadcast_state_update()
-
 
 
 if __name__ == "__main__":
