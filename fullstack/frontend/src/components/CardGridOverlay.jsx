@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card } from '.'
 
-const card_width = 220
+const card_width = 250
 const gap = 10
 
 export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
@@ -10,20 +10,14 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 	useEffect(() => {
 		const handler = (event) => {
-
+			console.log(`CardGridOverlay.jsx: ${event.key}`)
 			switch (event.key) {
 				case 'Escape':
-
-					/* send selected_cards to server */
-					if (selected_cards.length > 0) {
-						connection.send(JSON.stringify({
-							type: `${type}-esc`,
-							cards: selected_cards
-						}))
-					}
-
 					/* toggle off */
 					toggle()
+					break
+
+				case 'l':
 					break
 
 				case 't':
@@ -60,24 +54,11 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 	}
 
 
-	const card_img_style = {
-		width: '100%',
-		height: '100%',
-		objectFit: 'cover',
-	}
-
-	const card_Card_attr = (card_obj) => ({
-		style: card_img_style,
-		src: card_obj.card, 
-		alt: "fuck, it's not loading"
-	})
-
-
 	const card_container_style = (is_hovered, is_selected) => ({
 		width: `${card_width}px`,
-		aspectRatio: '0.714',
+		aspectRatio: 754 / 1040,
 		backgroundColor: 'black',
-		borderRadius: '12px',
+		borderRadius: '16px',
 		overflow: 'hidden',
 		outline: is_hovered && is_selected ? '4px solid blue' : (is_hovered ? '4px solid white' : (is_selected ? '4px solid red' : 'none')),
 	})
@@ -115,7 +96,13 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 			<div style={grid_style}>
 				{card_arr.map((card, index) => (
-					<Card key={index} art_url={card.card} />
+
+					<div key={index} {...card_container_attr(index)}>
+						<Card 
+							art_url={card.card} 
+						/>
+					</div>
+
 				))}
 			</div>
 

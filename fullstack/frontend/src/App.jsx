@@ -17,8 +17,9 @@ const App = () => {
 		is_connected,
 		game_state,
 		connected_users
-	} = useContext(Server)
+	} = useContext(Server) 
 
+	
 
 	/* queries scryfall for the card objects then converts into deck array the application can recognize */
 	const query_decklist = async (decklist) => {
@@ -59,6 +60,72 @@ const App = () => {
   }
 
 
+
+	/* toggle effects */
+
+	useEffect(() => {
+		const handler = (event) => {
+			if (!is_connected) return
+			console.log(`App.jsx: ${event.key}`)
+
+
+			switch (event.key) {
+				/* ctrl + l: library */
+				case 'l':
+					if (!event.ctrlKey || scry_counter || is_viewing_exile || is_viewing_graveyard) {
+						return
+					}
+					set_is_viewing_library(prev => !prev)
+					break;
+
+				/* ctrl + e: exile */
+				case 'e':
+					if (!event.ctrlKey || scry_counter || is_viewing_graveyard || is_viewing_library) {
+						return
+					}
+					set_is_viewing_exile(prev => !prev)
+					break;
+
+				/* ctrl + g: graveyard */
+				case 'g':
+					if (!event.ctrlKey || scry_counter || is_viewing_exile || is_viewing_library) {
+						return
+					}
+					set_is_viewing_graveyard(prev => !prev)
+					break;
+
+				/* s: scry */
+				case 's':
+					if (is_viewing_library || is_viewing_exile || is_viewing_graveyard) {
+						return
+					}
+					set_scry_counter(prev => prev + 1)
+					break
+
+				default:
+					break
+			}
+		}
+
+		window.addEventListener('keydown', handler)
+		return () => window.removeEventListener('keydown', handler)
+	})
+
+
+
+
+	const generate_overlay = () => {
+		if (is_viewing_library) {
+			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'} connection={null} toggle={() => set_is_viewing_library(!is_viewing_library)}/>
+		}
+		if (scry_counter > 0) {
+			return <CardGridOverlay card_arr={game_state[username]['library'].slice(0, scry_counter)} type={'scry'} connection={null} toggle={() => set_scry_counter(0)}/>
+		}
+	}
+
+
+
+
   /* render loading screen */
   if (!is_connected) {
     return (
@@ -96,7 +163,7 @@ const App = () => {
         </form>
 
       </div>
-    );
+    )
   }
 
 	const opponents = connected_users.filter(user => user !== username)
@@ -104,6 +171,9 @@ const App = () => {
   /* Render game screen */
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+			{/* library, graveyard, etc */}
+			{generate_overlay()}
 
 
       {/* Opponents Section - 30% height */}
@@ -123,6 +193,7 @@ const App = () => {
 				{username && game_state[username] && (
 					<PlayerBoard board_state={game_state[username]}/>
 				)}
+
       </div>
 
 

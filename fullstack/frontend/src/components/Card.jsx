@@ -22,9 +22,9 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     width: '100%',
     height: '100%',
     display: 'block',
+		objectFit: 'cover',
+
   }
-
-
 
   return (
     <div style={container_style}>
