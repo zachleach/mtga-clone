@@ -56,7 +56,7 @@ const App = () => {
 		/* replace with state decklist */
 		const deck = await query_decklist(temp_decklist)
 		ws_connect(username, deck)
-  };
+  }
 
 
   /* render loading screen */
