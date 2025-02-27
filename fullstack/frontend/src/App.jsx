@@ -68,11 +68,10 @@ const App = () => {
 			if (!is_connected) return
 			console.log(`App.jsx: ${event.key}`)
 
-
 			switch (event.key) {
 				/* ctrl + l: library */
-				case 'l':
-					if (!event.ctrlKey || scry_counter || is_viewing_exile || is_viewing_graveyard) {
+				case 'L':
+					if (scry_counter || is_viewing_exile || is_viewing_graveyard) {
 						return
 					}
 					set_is_viewing_library(prev => !prev)
@@ -80,7 +79,7 @@ const App = () => {
 
 				/* ctrl + e: exile */
 				case 'e':
-					if (!event.ctrlKey || scry_counter || is_viewing_graveyard || is_viewing_library) {
+					if (!event.shiftKey || scry_counter || is_viewing_graveyard || is_viewing_library) {
 						return
 					}
 					set_is_viewing_exile(prev => !prev)
@@ -88,7 +87,7 @@ const App = () => {
 
 				/* ctrl + g: graveyard */
 				case 'g':
-					if (!event.ctrlKey || scry_counter || is_viewing_exile || is_viewing_library) {
+					if (!event.shiftKey || scry_counter || is_viewing_exile || is_viewing_library) {
 						return
 					}
 					set_is_viewing_graveyard(prev => !prev)

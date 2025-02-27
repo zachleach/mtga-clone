@@ -60,7 +60,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		backgroundColor: 'black',
 		borderRadius: '16px',
 		overflow: 'hidden',
-		outline: is_hovered && is_selected ? '4px solid blue' : (is_hovered ? '4px solid white' : (is_selected ? '4px solid red' : 'none')),
+		outline: is_hovered && is_selected ? '2px solid blue' : (is_hovered ? '2px solid white' : (is_selected ? '2px solid red' : 'none')),
 	})
 
 	const card_container_attr = (index) => ({
