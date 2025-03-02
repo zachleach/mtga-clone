@@ -77,17 +77,17 @@ const App = () => {
 					set_is_viewing_library(prev => !prev)
 					break;
 
-				/* ctrl + e: exile */
-				case 'e':
-					if (!event.shiftKey || scry_counter || is_viewing_graveyard || is_viewing_library) {
+				/* shift + e: exile */
+				case 'E':
+					if (scry_counter || is_viewing_graveyard || is_viewing_library) {
 						return
 					}
 					set_is_viewing_exile(prev => !prev)
 					break;
 
-				/* ctrl + g: graveyard */
-				case 'g':
-					if (!event.shiftKey || scry_counter || is_viewing_exile || is_viewing_library) {
+				/* shift + g: graveyard */
+				case 'G':
+					if (scry_counter || is_viewing_exile || is_viewing_library) {
 						return
 					}
 					set_is_viewing_graveyard(prev => !prev)
@@ -116,6 +116,12 @@ const App = () => {
 	const generate_overlay = () => {
 		if (is_viewing_library) {
 			return <CardGridOverlay card_arr={game_state[username]['library']} type={'library'} connection={null} toggle={() => set_is_viewing_library(!is_viewing_library)}/>
+		}
+		if (is_viewing_graveyard) {
+			return <CardGridOverlay card_arr={game_state[username]['graveyard']} type={'graveyard'} connection={null} toggle={() => set_is_viewing_graveyard(!is_viewing_graveyard)}/>
+		}
+		if (is_viewing_exile) {
+			return <CardGridOverlay card_arr={game_state[username]['exile']} type={'exile'} connection={null} toggle={() => set_is_viewing_exile(!is_viewing_exile)}/>
 		}
 		if (scry_counter > 0) {
 			return <CardGridOverlay card_arr={game_state[username]['library'].slice(0, scry_counter)} type={'scry'} connection={null} toggle={() => set_scry_counter(0)}/>

@@ -15,9 +15,74 @@ export const ServerProvider = ({ children }) => {
 	/* game state */
 	const [game_state, set_game_state] = useState({})
 
-
 	/* helper functions for modifying game state using uuids */
 	const State = {
+
+		Library: {
+			/* inserts a card into this player's library at the bottom */
+			push: (card_obj) => {
+				const new_game_state = { ...game_state }
+				new_game_state[username].library.push(card_obj)
+				set_game_state(prev => new_game_state)
+			},
+			/* inserts a card into this player's library */
+			insert: (card_obj, index) => {
+				const new_game_state = { ...game_state }
+				new_game_state[username].library.splice(index, 0, card_obj)
+				set_game_state(new_game_state)
+			},
+			/* removes card object from library, returning the object removed */
+			remove: (card_uuid) => {
+				const new_game_state = { ...game_state }
+				const index = new_game_state[username].library.find(c => c.uuid === card_uuid)
+				if (index === -1) {
+					return null
+				}
+				const card_obj = new_game_state[username].library.splice(index, 1)[0]
+				set_game_state(prev => new_game_state)
+				return card_obj
+			}
+		},
+
+		Graveyard: {
+			/* inserts a card into the library */
+			insert: (card_obj, index) => {
+				const new_game_state = { ...game_state }
+				new_game_state[username].graveyard.splice(index, 0, card_obj)
+				set_game_state(new_game_state)
+			},
+			/* removes card object from graveyard, returning the object removed */
+			remove: (card_uuid) => {
+				const new_game_state = { ...game_state }
+				const index = new_game_state[username].graveyard.find(c => c.uuid === card_uuid)
+				if (index === -1) {
+					return null
+				}
+				const card_obj = new_game_state[username].library.splice(index, 1)[0]
+				set_game_state(prev => new_game_state)
+				return card_obj
+			}
+		},
+
+		Exile: {
+			/* inserts a card into the library */
+			insert: (card_obj, index) => {
+				const new_game_state = { ...game_state }
+				new_game_state[username].exile.splice(index, 0, card_obj)
+				set_game_state(new_game_state)
+			},
+			/* removes card object from exile, returning the object removed */
+			remove: (card_uuid) => {
+				const new_game_state = { ...game_state }
+				const index = new_game_state[username].exile.find(c => c.uuid === card_uuid)
+				if (index === -1) {
+					return null
+				}
+				const card_obj = new_game_state[username].library.splice(index, 1)[0]
+				set_game_state(prev => new_game_state)
+				return card_obj
+			}
+		},
 
 		Stack: {
 			/* insert a card at index */
@@ -116,15 +181,8 @@ export const ServerProvider = ({ children }) => {
 
 
 		},
-		Card: {
-			find_row: (card_uuid) => {
-				for (const player_name of Object.keys(game_state)) {
-					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
-						return game_state[player_name][row_name].stacks.find(s => s.card_arr.some(c => c.uuid === card_uuid))
-					}
-				}
-			},
 
+		Board: {
 			/* identifies the stack_id of a card, and then calls Stack.remove(stack_id, card) */
 			remove: (card_uuid) => {
 				for (const player_name of Object.keys(game_state)) {
@@ -136,6 +194,28 @@ export const ServerProvider = ({ children }) => {
 							return State.Stack.remove(stack.uuid, card_uuid)
 						}
 					}
+				}
+			},
+		},
+
+		Card: {
+			/* identifies where a card is located in game_state and pops it from that location */
+			remove: (card_uuid) => {
+				if (game_state[username].library.find(c => c.uuid === card_uuid)) {
+					console.log('REMOVE LIBRARY')
+					return State.Library.remove(card_uuid)
+				}
+				else if (game_state[username].graveyard.find(c => c.uuid === card_uuid)) {
+					console.log('REMOVE GRAVEYARD')
+					return State.Graveyard.remove(card_uuid)
+				}
+				else if (game_state[username].exile.find(c => c.uuid === card_uuid)) {
+					console.log('REMOVE EXILE')
+					return State.Exile.remove(card_uuid)
+				}
+				else {
+					console.log('REMOVE BOARD')
+					return State.Board.remove(card_uuid)
 				}
 			},
 
@@ -175,8 +255,8 @@ export const ServerProvider = ({ children }) => {
 				[username]: {
 					uuid: uuidv4(),
 					deck: deck,
-					library: deck,
-					gravey: [],
+					library: [],
+					graveyard: [],
 					exile: [],
 					hand_row: {
 						uuid: uuidv4(),

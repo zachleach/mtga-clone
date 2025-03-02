@@ -1,11 +1,13 @@
 /* components/Image.jsx */
 
-import { useContext, useRef } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Server } from '.'
 
 export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity }) => {
 
 	const card_ref = useRef(null)
+	const [is_hovered, set_is_hovered] = useState(false)
+	const { State } = useContext(Server)
 
   const container_style = {
     height: '100%',
@@ -14,7 +16,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     background: 'black',
     border: '2px solid black',
     borderRadius: '8px',
-		outline: `${outline}`,
+		outline: is_hovered ? '1px solid blue' : 'none',
 		opacity: `${opacity}`
   }
 
@@ -31,12 +33,29 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		tabIndex: 0,
 		onMouseEnter: (event) => {
 			card_ref.current.focus()
+			set_is_hovered(prev => true)
 		},
 		onMouseLeave: (event) => {
 			card_ref.current.blur()
+			set_is_hovered(prev => false)
 		},
 		onKeyDown: (event) => {
-			console.log(uuid, event.key)
+			if (event.key === 'g') {
+				const card_obj = State.Card.remove(uuid)
+				State.Graveyard.insert(card_obj, 0)
+			} 
+			else if (event.key === 'e') {
+				const card_obj = State.Card.remove(uuid)
+				State.Exile.insert(card_obj, 0)
+			} 
+			else if (event.key === 't') {
+				const card_obj = State.Card.remove(uuid)
+				State.Library.insert(card_obj, 0)
+			} 
+			else if (event.key === 'b') {
+				const card_obj = State.Card.remove(uuid)
+				State.Library.push(card_obj)
+			}
 		}
 	}
 

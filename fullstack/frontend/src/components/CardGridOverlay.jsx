@@ -25,7 +25,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 				case 'g':
 				case 'e':
 				default:
-					console.log(`CardGridOverlay: event.key === '${event.key}'`)
+					break
 			}
 		}
 
@@ -60,7 +60,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		backgroundColor: 'black',
 		borderRadius: '16px',
 		overflow: 'hidden',
-		outline: is_hovered && is_selected ? '2px solid blue' : (is_hovered ? '2px solid white' : (is_selected ? '2px solid red' : 'none')),
+		outline: is_hovered && is_selected ? '1px solid blue' : (is_hovered ? '1px solid white' : (is_selected ? '1px solid red' : 'none')),
 	})
 
 	const card_container_attr = (index) => ({
@@ -99,6 +99,7 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 
 					<div key={index} {...card_container_attr(index)}>
 						<Card 
+							uuid={card.uuid}
 							art_url={card.card} 
 						/>
 					</div>
