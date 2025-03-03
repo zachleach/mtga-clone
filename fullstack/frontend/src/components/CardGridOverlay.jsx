@@ -1,38 +1,13 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Card } from '.'
+import { useState, useEffect, useContext } from 'react'
+import { Card, Server } from '.'
 
 const card_width = 250
 const gap = 10
 
-export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
+export const CardGridOverlay = ({ card_arr }) => {
 	const [hovered_index, set_hovered_index] = useState(null)
-	const [selected_cards, set_selected_cards] = useState([])
 
-	useEffect(() => {
-		const handler = (event) => {
-			console.log(`CardGridOverlay.jsx: ${event.key}`)
-			switch (event.key) {
-				case 'Escape':
-					/* toggle off */
-					toggle()
-					break
-
-				case 'l':
-					break
-
-				case 't':
-				case 'b':
-				case 'g':
-				case 'e':
-				default:
-					break
-			}
-		}
-
-		window.addEventListener('keydown', handler) 
-		return () => window.removeEventListener('keydown', handler)
-	}, [selected_cards, connection])
-
+	const { State } = useContext(Server)
 
 	const overlay_style = {
 		backgroundColor: 'rgba(0, 0, 0, 0.8)', 
@@ -42,7 +17,6 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		zIndex: '1000',
 		overflow: 'auto',
 	}
-
 
 	const grid_style = {
 		display: 'grid',
@@ -60,32 +34,21 @@ export const CardGridOverlay = ({ card_arr, type, connection, toggle }) => {
 		backgroundColor: 'black',
 		borderRadius: '16px',
 		overflow: 'hidden',
-		outline: is_hovered && is_selected ? '1px solid blue' : (is_hovered ? '1px solid white' : (is_selected ? '1px solid red' : 'none')),
+		outline: is_hovered ? '1px solid blue' : 'none' 
 	})
 
 	const card_container_attr = (index) => ({
-		style: card_container_style(index === hovered_index, selected_cards.includes(index)),
-
+		style: card_container_style(index === hovered_index),
 		onMouseEnter: () => {
 			set_hovered_index(index) 
 		},
-
 		onMouseLeave: () => {
 			set_hovered_index(null)
 		},
-
 		onClick: (event) => {
-			if (type === 'scry') {
-				return
-			}
-
-			/* if not scrying, add clicked card to selected state */
-			set_selected_cards(prev => {
-				if (prev.includes(index)) {
-					return prev.filter(i => i !== index)
-				}
-				return [...prev, index]
-			})
+			event.stopPropagation()
+			const card_obj = State.Card.remove(card_arr[index].uuid)
+			State.Hand.insert(card_obj, -1)
 		},
 	})
 
