@@ -49,7 +49,6 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			else if (event.key === 'd') {
 				event.stopPropagation()
 				const card_obj = State.Card.remove(uuid)
-				console.log(card_obj)
 				State.Hand.insert(card_obj, -1)
 			}
 			else if (event.key === 'e') {

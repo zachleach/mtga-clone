@@ -16,7 +16,8 @@ const App = () => {
 		ws_connect,
 		is_connected,
 		game_state,
-		connected_users
+		connected_users, 
+		State
 	} = useContext(Server) 
 
 	
@@ -62,30 +63,32 @@ const App = () => {
 
 
 	/* toggle effects */
-
 	useEffect(() => {
 		const handler = (event) => {
 			if (!is_connected) return
 			console.log(`App.jsx: ${event.key}`)
 
 			switch (event.key) {
-				/* ctrl + l: library */
+				/* c: library */
 				case 'l':
 					if (scry_counter || is_viewing_exile || is_viewing_graveyard) {
 						return
 					}
+					if (is_viewing_library) {
+						State.Library.shuffle()
+					}
 					set_is_viewing_library(prev => !prev)
 					break;
 
-				/* shift + e: exile */
-				case 'e':
+				/* x: exile */
+				case 'x':
 					if (scry_counter || is_viewing_graveyard || is_viewing_library) {
 						return
 					}
 					set_is_viewing_exile(prev => !prev)
 					break;
 
-				/* shift + g: graveyard */
+				/* g: graveyard */
 				case 'g':
 					if (scry_counter || is_viewing_exile || is_viewing_library) {
 						return
@@ -117,10 +120,13 @@ const App = () => {
 
 
 	const esc_handler = () => {
-		set_is_viewing_library(false)
-		set_is_viewing_graveyard(false)
-		set_is_viewing_exile(false)
-		set_scry_counter(0)
+		if (is_viewing_library) {
+			State.Library.shuffle()
+		}
+		set_is_viewing_library(prev => false)
+		set_is_viewing_graveyard(prev => false)
+		set_is_viewing_exile(prev => false)
+		set_scry_counter(prev => 0)
 	}
 
 

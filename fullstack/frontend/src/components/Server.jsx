@@ -18,7 +18,21 @@ export const ServerProvider = ({ children }) => {
 	/* helper functions for modifying game state using uuids */
 	const State = {
 
+
 		Library: {
+			shuffle: () => {
+				const new_game_state = { ...game_state }
+				const shuffled = [...new_game_state[username].library]
+				for (let i = shuffled.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1))
+					const temp = shuffled[i]
+					shuffled[i] = shuffled[j]
+					shuffled[j] = temp
+				}
+				new_game_state[username].library = shuffled
+				set_game_state(prev => new_game_state)
+			},
+
 			/* inserts a card into this player's library at the bottom */
 			push: (card_obj) => {
 				const new_game_state = { ...game_state }
