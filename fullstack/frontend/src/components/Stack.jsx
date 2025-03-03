@@ -93,6 +93,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 						art_url={is_hand === true ? card.card : card.crop} 
 						aspect_ratio={is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO} 
 						opacity={State.dragged_card === card ? '25%' : '100%'}
+						name={card.name}
 					/>
         </div>
       ))}

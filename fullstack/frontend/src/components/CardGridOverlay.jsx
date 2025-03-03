@@ -45,13 +45,13 @@ export const CardGridOverlay = ({ card_arr }) => {
 		onMouseLeave: () => {
 			set_hovered_index(null)
 		},
+		/* add card to hand on click */
 		onClick: (event) => {
 			event.stopPropagation()
 			const card_obj = State.Card.remove(card_arr[index].uuid)
 			State.Hand.insert(card_obj, -1)
 		},
 	})
-
 
 
 	return (

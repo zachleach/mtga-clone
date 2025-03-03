@@ -32,7 +32,8 @@ const App = () => {
 				cards.push({
 					uuid: uuidv4(),
 					card: card_obj.image_uris.large,
-					crop: card_obj.image_uris.art_crop
+					crop: card_obj.image_uris.art_crop,
+					name: card_obj.name
 				})
 			}
 		}

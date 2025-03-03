@@ -3,7 +3,7 @@
 import { useContext, useRef, useState } from 'react'
 import { Server } from '.'
 
-export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity }) => {
+export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity, name }) => {
 
 	const card_ref = useRef(null)
 	const [is_hovered, set_is_hovered] = useState(false)
@@ -17,7 +17,8 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     border: '2px solid black',
     borderRadius: '8px',
 		outline: is_hovered ? '1px solid blue' : 'none',
-		opacity: `${opacity}`
+		opacity: `${opacity}`,
+		position: 'relative'
   }
 
   const img_style = {
@@ -77,6 +78,11 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
         alt="Card.jsx failed to load img element" 
         style={img_style}
       />
+			
+			<div style={{ position: 'absolute', top: '5.5%', left: '8.5%', color: 'rgba(0, 0, 0, 0)' }}>
+				{name}
+			</div>
+
     </div>
   )
 }
