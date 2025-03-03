@@ -34,7 +34,7 @@ export const ServerProvider = ({ children }) => {
 			/* removes card object from library, returning the object removed */
 			remove: (card_uuid) => {
 				const new_game_state = { ...game_state }
-				const index = new_game_state[username].library.find(c => c.uuid === card_uuid)
+				const index = new_game_state[username].library.findIndex(c => c.uuid === card_uuid)
 				if (index === -1) {
 					return null
 				}
@@ -54,11 +54,11 @@ export const ServerProvider = ({ children }) => {
 			/* removes card object from graveyard, returning the object removed */
 			remove: (card_uuid) => {
 				const new_game_state = { ...game_state }
-				const index = new_game_state[username].graveyard.find(c => c.uuid === card_uuid)
+				const index = new_game_state[username].graveyard.findIndex(c => c.uuid === card_uuid)
 				if (index === -1) {
 					return null
 				}
-				const card_obj = new_game_state[username].library.splice(index, 1)[0]
+				const card_obj = new_game_state[username].graveyard.splice(index, 1)[0]
 				set_game_state(prev => new_game_state)
 				return card_obj
 			}
@@ -74,11 +74,11 @@ export const ServerProvider = ({ children }) => {
 			/* removes card object from exile, returning the object removed */
 			remove: (card_uuid) => {
 				const new_game_state = { ...game_state }
-				const index = new_game_state[username].exile.find(c => c.uuid === card_uuid)
+				const index = new_game_state[username].exile.findIndex(c => c.uuid === card_uuid)
 				if (index === -1) {
 					return null
 				}
-				const card_obj = new_game_state[username].library.splice(index, 1)[0]
+				const card_obj = new_game_state[username].exile.splice(index, 1)[0]
 				set_game_state(prev => new_game_state)
 				return card_obj
 			}
@@ -151,9 +151,8 @@ export const ServerProvider = ({ children }) => {
 					}
 				}
 			},
-
-
 		},
+
 		Row: {
 			/* add a card to a row at index */
 			insert: (row_id, card_obj, index) => {
@@ -166,9 +165,11 @@ export const ServerProvider = ({ children }) => {
 							/* create the new stack */
               const new_stack = State.Stack.create(card_obj)
               
+							/* insert at index */
               if (index !== -1) {
                 row.stacks.splice(index, 0, new_stack)
               } 
+							/* push for index -1 */
 							else {
                 row.stacks.push(new_stack)
               }
@@ -178,8 +179,25 @@ export const ServerProvider = ({ children }) => {
           }
         }
       },
+		},
 
-
+		Hand: {
+			/* add a card to a row at index */
+			insert: (card_obj, index) => {
+				const new_game_state = { ...game_state }
+				const new_stack = State.Stack.create(card_obj)
+				
+				/* insert at index */
+				if (index !== -1) {
+					new_game_state[username]['hand_row'].stacks.splice(index, 0, new_stack)
+				} 
+				/* push for index -1 */
+				else {
+					new_game_state[username]['hand_row'].stacks.push(new_stack)
+				}
+				
+				set_game_state(new_game_state)
+      },
 		},
 
 		Board: {
