@@ -60,14 +60,14 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 				State.Exile.insert(card_obj, 0)
 				push_changes()
 			} 
+			/* deliberately allow propagation to App.jsx for scry counter modification */
 			else if (event.key === 't') {
-				event.stopPropagation()
 				const card_obj = State.Card.remove(uuid)
 				State.Library.insert(card_obj, 0)
 				push_changes()
 			} 
+			/* deliberately allow propagation to App.jsx for scry counter modification */
 			else if (event.key === 'b') {
-				event.stopPropagation()
 				const card_obj = State.Card.remove(uuid)
 				State.Library.push(card_obj)
 				push_changes()

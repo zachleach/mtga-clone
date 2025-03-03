@@ -17,8 +17,6 @@ export const ServerProvider = ({ children }) => {
 
 	/* helper functions for modifying game state using uuids */
 	const State = {
-
-
 		Library: {
 			shuffle: () => {
 				const new_game_state = { ...game_state }
@@ -39,12 +37,14 @@ export const ServerProvider = ({ children }) => {
 				new_game_state[username].library.push(card_obj)
 				set_game_state(prev => new_game_state)
 			},
+
 			/* inserts a card into this player's library */
 			insert: (card_obj, index) => {
 				const new_game_state = { ...game_state }
 				new_game_state[username].library.splice(index, 0, card_obj)
 				set_game_state(new_game_state)
 			},
+
 			/* removes card object from library, returning the object removed */
 			remove: (card_uuid) => {
 				const new_game_state = { ...game_state }
@@ -55,9 +55,20 @@ export const ServerProvider = ({ children }) => {
 				const card_obj = new_game_state[username].library.splice(index, 1)[0]
 				set_game_state(prev => new_game_state)
 				return card_obj
-			}
-		},
+			},
 
+			draw: () => {
+				if (!game_state[username].library.length) {
+					return 
+				}
+				const new_game_state = { ...game_state }
+				const card_obj = new_game_state[username].library.splice(0, 1)[0]
+				const new_stack = State.Stack.create(card_obj)
+				new_game_state[username]['hand_row'].stacks.push(new_stack)
+				set_game_state(prev => new_game_state)
+			}
+
+		},
 		Graveyard: {
 			/* inserts a card into the library */
 			insert: (card_obj, index) => {

@@ -17,7 +17,8 @@ const App = () => {
 		is_connected,
 		game_state,
 		connected_users, 
-		State
+		State,
+		push_changes
 	} = useContext(Server) 
 
 	
@@ -102,8 +103,20 @@ const App = () => {
 					if (is_viewing_library || is_viewing_exile || is_viewing_graveyard) {
 						return
 					}
-					set_scry_counter(prev => prev + 1)
+					set_scry_counter(prev => Math.min(scry_counter + 1, game_state[username].library.length))
 					break
+
+				/* if you bottom a card while scrying, you need to decrease the scry counter */
+				case 'b':
+					if (scry_counter > 0) {
+						set_scry_counter(prev => prev - 1)
+					}
+					break
+				
+				/* draw from library */
+				case 'd':
+					State.Librasy.draw()
+
 
 				case 'Escape':
 					esc_handler()
@@ -144,17 +157,18 @@ const App = () => {
 			if (cards.length === 0) {
 				set_is_viewing_graveyard(prev => false)
 			}
-			return <CardGridOverlay card_arr={cards}  />
+			return <CardGridOverlay card_arr={cards} />
 		}
 		if (is_viewing_exile) {
 			const cards = game_state[username]['exile']
 			if (cards.length === 0) {
 				set_is_viewing_exile(prev => false)
 			}
-			return <CardGridOverlay card_arr={cards}  />
+			return <CardGridOverlay card_arr={cards} />
 		}
-		if (scry_counter > 0) {
-			return <CardGridOverlay card_arr={game_state[username]['library'].slice(0, scry_counter)} />
+		if (scry_counter) {
+			const cards = game_state[username].library.slice(0, scry_counter)
+			return <CardGridOverlay card_arr={cards} />
 		}
 	}
 
