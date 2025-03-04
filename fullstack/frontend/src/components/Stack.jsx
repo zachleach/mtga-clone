@@ -95,6 +95,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 						opacity={State.dragged_card === card ? '25%' : '100%'}
 						name={card.name}
 						card_art={card.card}
+						is_hand={is_hand}
 					/>
         </div>
       ))}

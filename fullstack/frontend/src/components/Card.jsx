@@ -4,7 +4,7 @@ import { useContext, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Server } from '.'
 
-export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity, name, card_art, disable_preview }) => {
+export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity, name, card_art, disable_preview, is_hand }) => {
 
 	const card_ref = useRef(null)
 	const timeout_ref = useRef(null)
@@ -34,21 +34,58 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		objectFit: 'cover',
   }
 
-	const preview_style = () => ({
-		position: 'fixed', 
-		width: '300px',
-		aspectRatio: 745 / 1040,
-		border: '2px solid black',
-		borderRadius: '16px',
-		zIndex: 9999, 
-		...(preview_position === 'left' 
-			? { right: `calc(100% - ${card_ref.current.getBoundingClientRect().left}px + 100px)` } 
-			: { left: `${card_ref.current.getBoundingClientRect().right + 100}px` }),
-		top: `${card_ref.current.getBoundingClientRect().top + card_ref.current.getBoundingClientRect().height / 2}px`,
-		transform: 'translateY(-50%)',
-		boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)',
-		overflow: 'hidden',
-	})
+
+
+	const preview_style = () => {
+		const card_rect = card_ref.current.getBoundingClientRect()
+		
+		if (is_hand === true) {
+			const card_center_x = card_rect.left + (card_rect.width / 2)
+			
+			return {
+				pointerEvents: 'none',
+				position: 'fixed',
+				width: '300px',
+				aspectRatio: 745 / 1040,
+				border: '2px solid black',
+				borderRadius: '16px',
+				zIndex: 9999,
+				left: `${card_center_x}px`,
+				bottom: '100px',
+				transform: 'translateX(-50%)', 
+				boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)',
+				overflow: 'hidden'
+			}
+		} 
+		else {
+			const card_middle_y = card_rect.top + (card_rect.height / 2)
+			const horizontal_position = {}
+
+			if (preview_position === 'left') {
+				horizontal_position.right = `calc(100% - ${card_rect.left}px + 100px)`
+			} 
+			else {
+				horizontal_position.left = `${card_rect.right + 100}px`
+			}
+			
+			return {
+				pointerEvents: 'none',
+				position: 'fixed',
+				width: '300px',
+				aspectRatio: 745 / 1040,
+				border: '2px solid black',
+				borderRadius: '16px',
+				zIndex: 9999,
+				...horizontal_position,
+				top: `${card_middle_y}px`,
+				transform: 'translateY(-50%)',
+				boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)',
+				overflow: 'hidden'
+			}
+		}
+	}
+
+
 
 
 	const on_key_press = (event) => {
@@ -58,7 +95,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			State.Graveyard.insert(card_obj, 0)
 			push_changes()
 		} 
-		else if (event.key === 'd') {
+		else if (event.key === 'd' || event.key === 'h') {
 			event.stopPropagation()
 			const card_obj = State.Card.remove(uuid)
 			State.Hand.insert(card_obj, -1)
