@@ -64,6 +64,7 @@ export const CardGridOverlay = ({ card_arr }) => {
 						<Card 
 							uuid={card.uuid}
 							art_url={card.card} 
+							disable_preview={true}
 						/>
 					</div>
 
