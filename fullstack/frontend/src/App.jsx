@@ -78,6 +78,7 @@ const App = () => {
 					}
 					if (is_viewing_library) {
 						State.Library.shuffle()
+						push_changes()
 					}
 					set_is_viewing_library(prev => !prev)
 					break;
@@ -115,7 +116,8 @@ const App = () => {
 				
 				/* draw from library */
 				case 'd':
-					State.Librasy.draw()
+					State.Library.draw()
+					push_changes()
 
 
 				case 'Escape':
@@ -136,6 +138,7 @@ const App = () => {
 	const esc_handler = () => {
 		if (is_viewing_library) {
 			State.Library.shuffle()
+			push_changes()
 		}
 		set_is_viewing_library(prev => false)
 		set_is_viewing_graveyard(prev => false)
