@@ -1,6 +1,0 @@
-export { default as Tile } from './Tile'
-export { default as Card } from './Card'
-export { default as Stack } from './Stack'
-export { default as Row } from './Row'
-export { default as OpponentBoard } from './OpponentBoard'
-export { default as PlayerBoard } from './PlayerBoard'

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# gen_claude
-# 2024.12.21, by @zachleach
-
-cat components/* App.jsx > Components.jsx
-cat BoardContext.jsx CardOperations.jsx DragDropHandlers.jsx > Logic.jsx
