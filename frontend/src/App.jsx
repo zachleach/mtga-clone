@@ -145,6 +145,7 @@ const App = () => {
 		set_is_viewing_graveyard(prev => false)
 		set_is_viewing_exile(prev => false)
 		set_scry_counter(prev => 0)
+		State.Player.clear_targets()
 	}
 
 
@@ -221,9 +222,21 @@ const App = () => {
 
 	const opponents = connected_users.filter(user => user !== username)
 
+
+	const app_attributes = () => ({
+		onContextMenu: (event) => {
+			event.preventDefault()
+			if (State.Player.is_targetting()) {
+				State.Player.clear_targets() 
+			}
+		}
+	})
+
+
+
   /* Render game screen */
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }} {...app_attributes()}>
 
 			{/* library, graveyard, etc */}
 			{generate_overlay()}

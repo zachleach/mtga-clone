@@ -96,6 +96,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 						name={card.name}
 						card_art={card.card}
 						is_hand={is_hand}
+						outline={State.Card.is_targetted(card.uuid) === true ? '2px solid red' : 'none'}
 					/>
         </div>
       ))}

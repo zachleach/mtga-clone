@@ -271,7 +271,52 @@ export const ServerProvider = ({ children }) => {
 
 				return card_copy
 			},
-		}
+
+			target: (uuid) => {
+				const new_game_state = {...game_state}
+				if (State.Card.is_targetted(uuid)) {
+					new_game_state[username].targets = new_game_state[username].targets.filter(card_id => card_id !== uuid)
+					set_game_state(new_game_state)
+				}
+				else {
+					new_game_state[username].targets = [...new_game_state[username].targets, uuid]
+					set_game_state(new_game_state)
+				}
+			},
+
+			target_source: (uuid) => {
+				const new_game_state = {...game_state}
+				if (State.Card.is_targetted(uuid)) {
+					State.Player.clear_targets()
+				}
+				else if (new_game_state[username].targets.length > 1) {
+					State.Player.clear_targets()
+				}
+				else {
+					new_game_state[username].targets = [uuid]
+					set_game_state(new_game_state)
+				}
+			},
+
+			is_targetted: (uuid) => {
+				return game_state[username].targets.includes(uuid)
+			}
+
+		},
+
+		Player: {
+			is_targetting: () => {
+				return game_state[username].targets.length > 0
+			},
+
+			clear_targets: () => {
+				const new_game_state = {...game_state}
+				new_game_state[username].targets = []
+				set_game_state(new_game_state)
+			},
+
+
+		},
 	}
 
 
@@ -298,6 +343,7 @@ export const ServerProvider = ({ children }) => {
 				[username]: {
 					uuid: uuidv4(),
 					deck: deck,
+					targets: [],
 					library: [],
 					graveyard: [],
 					exile: [],

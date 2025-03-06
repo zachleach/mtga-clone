@@ -1,4 +1,4 @@
-/* components/Image.jsx */
+/* components/Card.jsx */
 
 import { useContext, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -20,9 +20,9 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     aspectRatio: aspect_ratio,
     overflow: 'hidden',
     background: 'black',
-    border: '2px solid black',
-    borderRadius: '8px',
-		outline: is_hovered ? '1px solid blue' : 'none',
+    border: is_hovered ? (State.Player.is_targetting() ? '2px solid red' : '2px solid blue') : '2px solid black',
+    borderRadius: '12px',
+		outline: `${outline}`,
 		opacity: `${opacity}`,
 		position: 'relative'
   }
@@ -34,8 +34,6 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		objectFit: 'cover',
   }
 
-
-
 	const preview_style = () => {
 		const card_rect = card_ref.current.getBoundingClientRect()
 		
@@ -46,10 +44,10 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			return {
 				pointerEvents: 'none',
 				position: 'fixed',
-				width: '300px',
+				width: '500px',
 				aspectRatio: 745 / 1040,
 				border: '2px solid black',
-				borderRadius: '16px',
+				borderRadius: '24px',
 				zIndex: 9999,
 				left: `${card_center_x}px`,
 				bottom: '100px',
@@ -72,10 +70,10 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			return {
 				pointerEvents: 'none',
 				position: 'fixed',
-				width: '300px',
+				width: '500px',
 				aspectRatio: 745 / 1040,
 				border: '2px solid black',
-				borderRadius: '16px',
+				borderRadius: '24px',
 				zIndex: 9999,
 				...horizontal_position,
 				top: `${card_middle_y}px`,
@@ -129,6 +127,22 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		style: container_style,
 		tabIndex: 0,
 
+		onClick: (event) => {
+			if (State.Player.is_targetting()) {
+				State.Card.target(uuid)
+				console.log('onClick is_targetting()')
+				event.stopPropagation()
+			}
+		},
+
+		onContextMenu: (event) => {
+			event.preventDefault()
+			event.stopPropagation()
+			State.Card.target_source(uuid)
+			console.log('onContextMenu target_source()')
+		},
+
+
 		onMouseEnter: (event) => {
 			card_ref.current.focus()
 			set_is_hovered(prev => true)
@@ -141,12 +155,9 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			const card_mid_point = card_ref.current.getBoundingClientRect().left + card_ref.current.getBoundingClientRect().width / 2
 			const is_left = card_mid_point < window.innerWidth / 2 + 50
 			set_preview_position(is_left ? 'right' : 'left')
-			console.log(card_mid_point)
-			console.log(window.innerWidth / 2)
 
 			/* schedule preview in 20 ms */
 			timeout_ref.current = setTimeout(() => {
-				console.log('show_preview')
 				set_show_preview(true)
 			}, 20)
 		},
