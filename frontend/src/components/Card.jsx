@@ -13,7 +13,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 	const [preview_position, set_preview_position] = useState(false)
 	const [show_preview, set_show_preview] = useState(false)
 
-	const { State, push_changes } = useContext(Server)
+	const { State, set_and_sync_state } = useContext(Server)
 
   const container_style = {
     height: '100%',
@@ -88,35 +88,53 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 
 
 	const on_key_press = (event) => {
+		/* move target card to graveyard */
 		if (event.key === 'g') {
 			event.stopPropagation()
-			const card_obj = State.Card.remove(uuid)
-			State.Graveyard.insert(card_obj, 0)
-			push_changes()
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, uuid)
+			const game_state_post_insertion = State.Graveyard.insert(game_state_post_removal, removed_card_obj, 0)
+
+			set_and_sync_state(game_state_post_insertion)
 		} 
+
+		/* move target card to hand */
 		else if (event.key === 'd' || event.key === 'h') {
 			event.stopPropagation()
-			const card_obj = State.Card.remove(uuid)
-			State.Hand.insert(card_obj, -1)
-			push_changes()
+
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, uuid)
+			const game_state_post_insertion = State.Hand.insert(game_state_post_removal, removed_card_obj, -1)
+			set_and_sync_state(game_state_post_insertion)
 		}
+
+		/* move target card to exile */
 		else if (event.key === 'e') {
 			event.stopPropagation()
-			const card_obj = State.Card.remove(uuid)
-			State.Exile.insert(card_obj, 0)
-			push_changes()
+
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, uuid)
+			const game_state_post_insertion = State.Exile.insert(game_state_post_removal, removed_card_obj, 0)
+			set_and_sync_state(game_state_post_insertion)
 		} 
-		/* deliberately allow propagation to App.jsx for scry counter modification */
+
+		/* move card to top of library */
 		else if (event.key === 't') {
-			const card_obj = State.Card.remove(uuid)
-			State.Library.insert(card_obj, 0)
-			push_changes()
+			/* deliberately allow propagation to App.jsx for scry counter modification */
+			// event.stopPropagation()
+
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, uuid)
+			const game_state_post_insertion = State.Library.insert(game_state_post_removal, removed_card_obj, 0)
+
+			set_and_sync_state(game_state_post_insertion)
 		} 
-		/* deliberately allow propagation to App.jsx for scry counter modification */
+
+		/* move card to bottom of library */
 		else if (event.key === 'b') {
-			const card_obj = State.Card.remove(uuid)
-			State.Library.push(card_obj)
-			push_changes()
+			/* deliberately allow propagation to App.jsx for scry counter modification */
+			// event.stopPropagation()
+
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, uuid)
+			const game_state_post_insertion = State.Library.push(State.game_state, removed_card_obj)
+
+			set_and_sync_state(game_state_post_insertion)
 		}
 	}
 
@@ -127,19 +145,23 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		style: container_style,
 		tabIndex: 0,
 
+		/* on click: target if there are other targets set, otherwise tap ?*/
 		onClick: (event) => {
 			if (State.Player.is_targetting()) {
-				State.Card.target(uuid)
-				console.log('onClick is_targetting()')
 				event.stopPropagation()
+
+				const game_state_post_targetting = State.Card.toggle_target(State.game_state, uuid)
+				set_and_sync_state(game_state_post_targetting)
 			}
 		},
 
+		/* on right click: target */
 		onContextMenu: (event) => {
 			event.preventDefault()
 			event.stopPropagation()
-			State.Card.target_source(uuid)
-			console.log('onContextMenu target_source()')
+
+			const game_state_post_targetting = State.Card.target_source(State.game_state, uuid)
+			set_and_sync_state(game_state_post_targetting)
 		},
 
 

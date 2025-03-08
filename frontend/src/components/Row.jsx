@@ -5,7 +5,7 @@ import { useContext, useRef } from 'react'
 export const Row = ({ row_state }) => {
 	const uuid = row_state.uuid
 
-	const { State, push_changes } = useContext(Server)
+	const { State, set_and_sync_state } = useContext(Server)
 	const row_ref = useRef(null)
 
   const container_style = {
@@ -24,31 +24,27 @@ export const Row = ({ row_state }) => {
 		onDragOver: (event) => {
 			event.preventDefault()
 		},
+
 		onDrop: (event) => {
 			event.preventDefault()
-			const source = event.dataTransfer.getData('source')
-			console.log(`Row onDrop: ${source} -> ${uuid}`)
+			const source_card_uuid = event.dataTransfer.getData('source_card_uuid')
 
-			const card = State.Card.remove(source)
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, source_card_uuid)
 			const row_bb = row_ref.current.getBoundingClientRect()
 			const drop_x = event.clientX - row_bb.left
 
 			/* drop left if drop_x is less than half the row width */
 			if (drop_x < row_bb.width / 2) {
-				State.Row.insert(uuid, card, 0)
+				const game_state_post_insertion = State.Row.insert(game_state_post_removal, uuid, removed_card_obj, 0)
+				set_and_sync_state(game_state_post_insertion)
 			}
 			/* otherwise, drop right */
 			else {
-				State.Row.insert(uuid, card, -1)
+				const game_state_post_push = State.Row.insert(game_state_post_removal, uuid, removed_card_obj, -1)
+				set_and_sync_state(game_state_post_push)
 			}
-			push_changes()
 		},
-		onDragEnter: (event) => {
-			console.log(`Row onDragEnter: ${uuid}`)
-		},
-		onDragLeave: (event) => {
-			console.log(`Row onDragLeave: ${uuid}`)
-		}
+
 	}
 
   return (

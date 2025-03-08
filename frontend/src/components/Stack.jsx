@@ -7,13 +7,7 @@ const CARD_ASPECT_RATIO = 745 / 1040
 
 export const Stack = ({ stack_state, is_hand = false }) => {
 	const uuid = stack_state.uuid
-	const { State, push_changes } = useContext(Server)
-
-	const handle_click = () => {
-		console.log('StackClickEvent')
-		State.Stack.tap(uuid)
-		push_changes()
-	}
+	const { State, set_and_sync_state } = useContext(Server)
 
 	const container_style = {
 		transform: stack_state.is_tapped ? `rotate(6deg)` : null,
@@ -41,15 +35,14 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
+	const handle_click = () => {
+		const game_state_after_tapping = State.Stack.tap(State.game_state, uuid)
+		set_and_sync_state(game_state_after_tapping)
+	}
 
-
-
-
-	
-	const card_html5_dnd_attr = (card, index) => ({
+	const card_html5_dnd_attr = (dest_card, dest_card_stack_index) => ({
 		onDragStart: (event) => {
-			console.log(`Stack onDragStart: ${uuid}`)
-			event.dataTransfer.setData('source', card.uuid)
+			event.dataTransfer.setData('source_card_uuid', dest_card.uuid)
 		},
 
 		onDragOver: (event) => {
@@ -60,12 +53,14 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 		/* remove card from source stack, then insert at drop index */
 		onDrop: (event) => {
 			event.stopPropagation()
-			const source = event.dataTransfer.getData('source')
-			console.log(`Stack onDrop: ${source} -> ${uuid}`)
+			const source_card_uuid = event.dataTransfer.getData('source_card_uuid')
+			if (source_card_uuid === dest_card.uuid) {
+				return
+			}
 
-			const card = State.Card.remove(source)
-			State.Stack.insert(uuid, card, index)
-			push_changes()
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, source_card_uuid)
+			const game_state_post_insertion = State.Stack.insert(game_state_post_removal, uuid, removed_card_obj, dest_card_stack_index)
+			set_and_sync_state(game_state_post_insertion)
 		},
 
 		onDragEnter: (event) => {
@@ -96,7 +91,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 						name={card.name}
 						card_art={card.card}
 						is_hand={is_hand}
-						outline={State.Card.is_targetted(card.uuid) === true ? '2px solid red' : 'none'}
+						outline={State.Card.is_targetted(card.uuid) === true ? '4px solid red' : 'none'}
 					/>
         </div>
       ))}

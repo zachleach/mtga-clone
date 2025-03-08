@@ -15,10 +15,23 @@ export const ServerProvider = ({ children }) => {
 	/* game state */
 	const [game_state, set_game_state] = useState({})
 
+
+
+	const set_and_sync_state = (new_game_state) => {
+		set_game_state(new_game_state)	
+		ws.send(JSON.stringify({
+			type: 'state_update',
+			game_state: new_game_state,
+			client_version: version
+		}))
+	}
+
+
 	/* helper functions for modifying game state using uuids */
 	const State = {
+		game_state: game_state,
 		Library: {
-			shuffle: () => {
+			shuffle: (game_state) => {
 				const new_game_state = { ...game_state }
 				const shuffled = [...new_game_state[username].library]
 				for (let i = shuffled.length - 1; i > 0; i--) {
@@ -28,36 +41,40 @@ export const ServerProvider = ({ children }) => {
 					shuffled[j] = temp
 				}
 				new_game_state[username].library = shuffled
-				set_game_state(prev => new_game_state)
+
+				return new_game_state
 			},
 
-			/* inserts a card into this player's library at the bottom */
-			push: (card_obj) => {
+			/* insert a card into this player's library at the bottom */
+			push: (game_state, card_obj) => {
 				const new_game_state = { ...game_state }
 				new_game_state[username].library.push(card_obj)
-				set_game_state(prev => new_game_state)
+
+				return new_game_state
 			},
 
 			/* inserts a card into this player's library */
-			insert: (card_obj, index) => {
+			insert: (game_state, card_obj, index) => {
 				const new_game_state = { ...game_state }
 				new_game_state[username].library.splice(index, 0, card_obj)
-				set_game_state(new_game_state)
+
+				return new_game_state
 			},
 
 			/* removes card object from library, returning the object removed */
-			remove: (card_uuid) => {
+			remove: (game_state, card_uuid) => {
 				const new_game_state = { ...game_state }
 				const index = new_game_state[username].library.findIndex(c => c.uuid === card_uuid)
 				if (index === -1) {
 					return null
 				}
-				const card_obj = new_game_state[username].library.splice(index, 1)[0]
-				set_game_state(prev => new_game_state)
-				return card_obj
+				const removed_card_obj = new_game_state[username].library.splice(index, 1)[0]
+				
+				return { game_state: new_game_state, removed_card_obj }
 			},
 
-			draw: () => {
+			/* removes card object from top of library and adds to hand */
+			draw: (game_state) => {
 				if (!game_state[username].library.length) {
 					return 
 				}
@@ -65,53 +82,59 @@ export const ServerProvider = ({ children }) => {
 				const card_obj = new_game_state[username].library.splice(0, 1)[0]
 				const new_stack = State.Stack.create(card_obj)
 				new_game_state[username]['hand_row'].stacks.push(new_stack)
-				set_game_state(prev => new_game_state)
+
+				return new_game_state
 			}
 
 		},
+
 		Graveyard: {
 			/* inserts a card into the library */
-			insert: (card_obj, index) => {
+			insert: (game_state, card_obj, index) => {
 				const new_game_state = { ...game_state }
 				new_game_state[username].graveyard.splice(index, 0, card_obj)
-				set_game_state(new_game_state)
+
+				return new_game_state
 			},
+
 			/* removes card object from graveyard, returning the object removed */
-			remove: (card_uuid) => {
+			remove: (game_state, card_uuid) => {
+				console.log(card_uuid)
 				const new_game_state = { ...game_state }
 				const index = new_game_state[username].graveyard.findIndex(c => c.uuid === card_uuid)
 				if (index === -1) {
 					return null
 				}
-				const card_obj = new_game_state[username].graveyard.splice(index, 1)[0]
-				set_game_state(prev => new_game_state)
-				return card_obj
+				const removed_card_obj = new_game_state[username].graveyard.splice(index, 1)[0]
+
+				return { game_state: new_game_state, removed_card_obj }
 			}
 		},
 
 		Exile: {
 			/* inserts a card into the library */
-			insert: (card_obj, index) => {
+			insert: (game_state, card_obj, index) => {
 				const new_game_state = { ...game_state }
 				new_game_state[username].exile.splice(index, 0, card_obj)
-				set_game_state(new_game_state)
+
+				return new_game_state
 			},
 			/* removes card object from exile, returning the object removed */
-			remove: (card_uuid) => {
+			remove: (game_state, card_uuid) => {
 				const new_game_state = { ...game_state }
 				const index = new_game_state[username].exile.findIndex(c => c.uuid === card_uuid)
 				if (index === -1) {
 					return null
 				}
-				const card_obj = new_game_state[username].exile.splice(index, 1)[0]
-				set_game_state(prev => new_game_state)
-				return card_obj
+				const removed_card_obj = new_game_state[username].exile.splice(index, 1)[0]
+
+				return { game_state: new_game_state, removed_card_obj }
 			}
 		},
 
 		Stack: {
 			/* insert a card at index */
-			insert: (stack_id, card, index) => {
+			insert: (game_state, stack_id, card, index) => {
 				if (index === undefined) return
 				const new_game_state = { ...game_state }
 				for (const player_name of Object.keys(new_game_state)) {
@@ -119,15 +142,15 @@ export const ServerProvider = ({ children }) => {
 						const stack = new_game_state[player_name][row_name].stacks.find(s => s.uuid === stack_id)
 						if (stack) {
 							stack.card_arr.splice(index, 0, card)
-							set_game_state(new_game_state)
-							return
+
+							return new_game_state
 						}
 					}
 				}
 			},
 
 			/* remove a card from a stack */
-			remove: (stack_id, card_uuid) => {
+			remove: (game_state, stack_id, card_uuid) => {
 				const new_game_state = { ...game_state }
 				for (const player_name of Object.keys(new_game_state)) {
 					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
@@ -139,15 +162,14 @@ export const ServerProvider = ({ children }) => {
 							/* find and remove the card from the stack's card array */
 							const card_index = stack.card_arr.findIndex(c => c.uuid === card_uuid)
 							if (card_index !== -1) {
-								const removed_card = stack.card_arr.splice(card_index, 1)[0]
+								const removed_card_obj = stack.card_arr.splice(card_index, 1)[0]
 								
 								/* if stack is now empty, remove it from the row's stacks array */
 								if (stack.card_arr.length === 0) {
 									new_game_state[player_name][row_name].stacks.splice(stack_index, 1)
 								}
 								
-								set_game_state(new_game_state)
-								return removed_card
+								return { game_state: new_game_state, removed_card_obj } 
 							}
 						}
 					}
@@ -163,15 +185,18 @@ export const ServerProvider = ({ children }) => {
         }
       },
 
-			tap: (stack_id) => {
+			/**
+			 * returns game_state with the given stack tapped 
+			 *
+			 */
+			tap: (game_state, stack_id) => {
 				const new_game_state = { ...game_state }
 				for (const player_name of Object.keys(new_game_state)) {
 					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
 						const stack = new_game_state[player_name][row_name].stacks.find(s => s.uuid === stack_id)
 						if (stack) {
 							stack.is_tapped = !stack.is_tapped
-							set_game_state(new_game_state)
-							return
+							return new_game_state
 						}
 					}
 				}
@@ -179,8 +204,12 @@ export const ServerProvider = ({ children }) => {
 		},
 
 		Row: {
-			/* add a card to a row at index */
-			insert: (row_id, card_obj, index) => {
+			/**
+			 * add a card to a row at some horizontal index
+			 * if index -1 then it pushes 
+			 *
+			 */
+			insert: (game_state, row_id, card_obj, index) => {
 				const new_game_state = { ...game_state }
         for (const player_name of Object.keys(new_game_state)) {
           for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
@@ -199,7 +228,7 @@ export const ServerProvider = ({ children }) => {
                 row.stacks.push(new_stack)
               }
               
-              set_game_state(new_game_state)
+							return new_game_state
             }
           }
         }
@@ -208,7 +237,7 @@ export const ServerProvider = ({ children }) => {
 
 		Hand: {
 			/* add a card to a row at index */
-			insert: (card_obj, index) => {
+			insert: (game_state, card_obj, index) => {
 				const new_game_state = { ...game_state }
 				const new_stack = State.Stack.create(card_obj)
 				
@@ -221,20 +250,18 @@ export const ServerProvider = ({ children }) => {
 					new_game_state[username]['hand_row'].stacks.push(new_stack)
 				}
 				
-				set_game_state(new_game_state)
+				return new_game_state
       },
 		},
 
 		Board: {
 			/* identifies the stack_id of a card, and then calls Stack.remove(stack_id, card) */
-			remove: (card_uuid) => {
+			remove: (game_state, card_uuid) => {
 				for (const player_name of Object.keys(game_state)) {
 					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
-						const stack = game_state[player_name][row_name].stacks.find(s => 
-							s.card_arr.some(c => c.uuid === card_uuid)
-						)
+						const stack = game_state[player_name][row_name].stacks.find(s => s.card_arr.some(c => c.uuid === card_uuid))
 						if (stack) {
-							return State.Stack.remove(stack.uuid, card_uuid)
+							return State.Stack.remove(game_state, stack.uuid, card_uuid)
 						}
 					}
 				}
@@ -243,59 +270,54 @@ export const ServerProvider = ({ children }) => {
 
 		Card: {
 			/* identifies where a card is located in game_state and pops it from that location */
-			remove: (card_uuid) => {
+			remove: (game_state, card_uuid) => {
 				if (game_state[username].library.find(c => c.uuid === card_uuid)) {
-					console.log('REMOVE LIBRARY')
-					return State.Library.remove(card_uuid)
+					return State.Library.remove(game_state, card_uuid)
 				}
 				else if (game_state[username].graveyard.find(c => c.uuid === card_uuid)) {
-					console.log('REMOVE GRAVEYARD')
-					return State.Graveyard.remove(card_uuid)
+					return State.Graveyard.remove(game_state, card_uuid)
 				}
 				else if (game_state[username].exile.find(c => c.uuid === card_uuid)) {
-					console.log('REMOVE EXILE')
-					return State.Exile.remove(card_uuid)
+					return State.Exile.remove(game_state, card_uuid)
 				}
 				else {
-					console.log('REMOVE BOARD')
-					return State.Board.remove(card_uuid)
+					return State.Board.remove(game_state, card_uuid)
 				}
 			},
 
-			/* creates a copy of a card but with a new uuid_4 */
-			copy: (card) => {
-				const card_copy = {
-					...card,
-					uuid: uuidv4()
-				}
-
-				return card_copy
-			},
-
-			target: (uuid) => {
+			/**
+			 * Toggles a card's target state with no condition checks
+			 *
+			 */
+			toggle_target: (game_state, uuid) => {
 				const new_game_state = {...game_state}
 				if (State.Card.is_targetted(uuid)) {
 					new_game_state[username].targets = new_game_state[username].targets.filter(card_id => card_id !== uuid)
-					set_game_state(new_game_state)
 				}
 				else {
 					new_game_state[username].targets = [...new_game_state[username].targets, uuid]
-					set_game_state(new_game_state)
 				}
+
+				return new_game_state
 			},
 
-			target_source: (uuid) => {
+			/**
+			 * If the player has any targets: clears them
+			 * Otherwise: targets the given card
+			 *
+			 * Right click action
+			 *
+			 */
+			target_source: (game_state, uuid) => {
 				const new_game_state = {...game_state}
-				if (State.Card.is_targetted(uuid)) {
-					State.Player.clear_targets()
-				}
-				else if (new_game_state[username].targets.length > 1) {
-					State.Player.clear_targets()
+				if (new_game_state[username].targets.length > 0) {
+					new_game_state[username].targets = []
 				}
 				else {
 					new_game_state[username].targets = [uuid]
-					set_game_state(new_game_state)
 				}
+
+				return new_game_state
 			},
 
 			is_targetted: (uuid) => {
@@ -309,10 +331,11 @@ export const ServerProvider = ({ children }) => {
 				return game_state[username].targets.length > 0
 			},
 
-			clear_targets: () => {
+			clear_targets: (game_state) => {
 				const new_game_state = {...game_state}
 				new_game_state[username].targets = []
-				set_game_state(new_game_state)
+
+				return new_game_state
 			},
 
 
@@ -419,21 +442,12 @@ export const ServerProvider = ({ children }) => {
   }, [ws]);
 
 
-	/* update game_state and then broadcast the changes */
-	const push_changes = () => {
-		ws.send(JSON.stringify({
-			type: 'state_update',
-			game_state: game_state,
-			client_version: version
-		}))
-	}
-
 	const value = {
 		ws_connect,
 		is_connected,
 		game_state,
 		connected_users,
-		push_changes,
+		set_and_sync_state,
 		State
 	}
 
