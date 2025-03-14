@@ -4,7 +4,7 @@ import { useContext, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Server } from '.'
 
-export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity, name, card_art, disable_preview, is_hand }) => {
+export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacity, name, card_art, disable_preview, is_hand, is_tapped }) => {
 
 	const card_ref = useRef(null)
 	const timeout_ref = useRef(null)
@@ -24,7 +24,8 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
     borderRadius: '12px',
 		outline: `${outline}`,
 		opacity: `${opacity}`,
-		position: 'relative'
+		position: 'relative',
+		transform: is_tapped ? `rotate(6deg)` : null,
   }
 
   const img_style = {
@@ -147,10 +148,20 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 
 		/* on click: target if there are other targets set, otherwise tap ?*/
 		onClick: (event) => {
+			console.log('card click event')
+			/* l-click while targetting: toggle target outline */
 			if (State.Player.is_targetting()) {
 				event.stopPropagation()
 				const game_state_post_targetting = State.Card.toggle_target(State.game_state, uuid)
 				set_and_sync_state(game_state_post_targetting)
+				return
+			}
+			/* ctrl + l-click: tap a singular card */
+			if (event.ctrlKey) {
+				event.stopPropagation()
+				const game_state_post_tap = State.Card.toggle_tapped(State.game_state, uuid)
+				set_and_sync_state(game_state_post_tap)
+				return
 			}
 		},
 

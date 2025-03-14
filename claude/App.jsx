@@ -18,14 +18,14 @@ const App = () => {
 		game_state,
 		connected_users, 
 		State,
-		push_changes
+		set_and_sync_state
 	} = useContext(Server) 
-
 	
 
 	/* queries scryfall for the card objects then converts into deck array the application can recognize */
 	const query_decklist = async (decklist) => {
 		const res = await ScryfallUtil.fetch_deck_data(decklist)
+		console.log(res)
 
 		const cards = []
 		for (const card_obj of res.cards) {
@@ -62,28 +62,22 @@ const App = () => {
 		ws_connect(username, deck)
   }
 
-
-
-	/* toggle effects */
+	/* top-level 'keydown' window event listener */
 	useEffect(() => {
 		const handler = (event) => {
 			if (!is_connected) return
 			console.log(`App.jsx: ${event.key}`)
 
 			switch (event.key) {
-				/* c: library */
+				/* l: toggle library overlay */
 				case 'l':
 					if (scry_counter || is_viewing_exile || is_viewing_graveyard) {
 						return
 					}
-					if (is_viewing_library) {
-						State.Library.shuffle()
-						push_changes()
-					}
 					set_is_viewing_library(prev => !prev)
 					break;
 
-				/* x: exile */
+				/* x: toggle exile overlay */
 				case 'x':
 					if (scry_counter || is_viewing_graveyard || is_viewing_library) {
 						return
@@ -91,7 +85,7 @@ const App = () => {
 					set_is_viewing_exile(prev => !prev)
 					break;
 
-				/* g: graveyard */
+				/* g: toggle graveyard overlay */
 				case 'g':
 					if (scry_counter || is_viewing_exile || is_viewing_library) {
 						return
@@ -99,7 +93,7 @@ const App = () => {
 					set_is_viewing_graveyard(prev => !prev)
 					break;
 
-				/* s: scry */
+				/* s: toggle scry overlay */
 				case 's':
 					if (is_viewing_library || is_viewing_exile || is_viewing_graveyard) {
 						return
@@ -107,19 +101,23 @@ const App = () => {
 					set_scry_counter(prev => Math.min(scry_counter + 1, game_state[username].library.length))
 					break
 
-				/* if you bottom a card while scrying, you need to decrease the scry counter */
+				/* card `b` event deliberately propagates up */
 				case 'b':
+					/* if you bottom a card while scrying, you need to decrease the scry counter */
 					if (scry_counter > 0) {
 						set_scry_counter(prev => prev - 1)
 					}
 					break
 				
-				/* draw from library */
+				/* d: draw from library */
 				case 'd':
-					State.Library.draw()
-					push_changes()
+					const game_state_post_draw = State.Library.draw(State.game_state)
+					if (game_state_post_draw) {
+						set_and_sync_state(game_state_post_draw)
+					}
+					break
 
-
+				/* esc: toggle-off / clear everything */
 				case 'Escape':
 					esc_handler()
 					break
@@ -136,14 +134,23 @@ const App = () => {
 
 
 	const esc_handler = () => {
+		/* escape from viewing library will shuffle the deck (but `l` again won't) */
 		if (is_viewing_library) {
-			State.Library.shuffle()
-			push_changes()
+			const game_state_post_library_shuffle = State.Library.shuffle(State.game_state)
+			set_and_sync_state(game_state_post_library_shuffle)
+			set_is_viewing_library(prev => false)
+
+			return
 		}
-		set_is_viewing_library(prev => false)
+
+		/* if not viewing library: just catch all toggle everything off */
 		set_is_viewing_graveyard(prev => false)
 		set_is_viewing_exile(prev => false)
 		set_scry_counter(prev => 0)
+
+		/* clear any tagets */
+		const game_state_post_clear_targets = State.Player.clear_targets(State.game_state)
+		set_and_sync_state(game_state_post_clear_targets)
 	}
 
 
@@ -220,9 +227,25 @@ const App = () => {
 
 	const opponents = connected_users.filter(user => user !== username)
 
+
+	const app_attributes = () => ({
+		/* on right click anywhere at the top-level */
+		onContextMenu: (event) => {
+			event.preventDefault()
+
+			/* clear targets */
+			if (State.Player.is_targetting()) {
+				const game_state_post_clear_targets = State.Player.clear_targets(State.game_state)
+				set_and_sync_state(game_state_post_clear_targets)
+			}
+		}
+	})
+
+
+
   /* Render game screen */
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }} {...app_attributes()}>
 
 			{/* library, graveyard, etc */}
 			{generate_overlay()}

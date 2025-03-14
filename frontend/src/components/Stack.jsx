@@ -10,7 +10,6 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 	const { State, set_and_sync_state } = useContext(Server)
 
 	const container_style = {
-		transform: stack_state.is_tapped ? `rotate(6deg)` : null,
 		position: 'relative',
 		height: is_hand === true ? '100%' : '40%',
 		aspectRatio: is_hand === true ? CARD_ASPECT_RATIO : TILE_ASPECT_RATIO,
@@ -35,8 +34,9 @@ export const Stack = ({ stack_state, is_hand = false }) => {
     }
   }
 
-	const handle_click = () => {
-		const game_state_after_tapping = State.Stack.tap(State.game_state, uuid)
+	const handle_click = (event) => {
+		console.log('stack click event')
+		const game_state_after_tapping = State.Stack.toggle_tapped(State.game_state, uuid)
 		set_and_sync_state(game_state_after_tapping)
 	}
 
@@ -60,6 +60,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, source_card_uuid)
 			const game_state_post_insertion = State.Stack.insert(game_state_post_removal, uuid, removed_card_obj, dest_card_stack_index)
+
 			set_and_sync_state(game_state_post_insertion)
 		},
 
@@ -92,6 +93,7 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 						card_art={card.card}
 						is_hand={is_hand}
 						outline={State.Card.is_targetted(card.uuid) === true ? '4px solid red' : 'none'}
+						is_tapped={card.is_tapped === true && is_hand === false}
 					/>
         </div>
       ))}

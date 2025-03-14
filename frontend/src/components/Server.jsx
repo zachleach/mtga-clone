@@ -174,6 +174,7 @@ export const ServerProvider = ({ children }) => {
 						}
 					}
 				}
+
 				return null
 			},
 
@@ -189,18 +190,37 @@ export const ServerProvider = ({ children }) => {
 			 * returns game_state with the given stack tapped 
 			 *
 			 */
-			tap: (game_state, stack_id) => {
+			toggle_tapped: (game_state, stack_uuid) => {
 				const new_game_state = { ...game_state }
-				for (const player_name of Object.keys(new_game_state)) {
+				const { username, row_name } = State.Stack.find(new_game_state, stack_uuid)
+				const stack = new_game_state[username][row_name].stacks.find(s => s.uuid === stack_uuid)
+
+				stack.is_tapped = !stack.is_tapped
+				console.log('Stack.toggle_tapped: ', stack.is_tapped)
+				stack.card_arr.forEach(card => {
+					card.is_tapped = stack.is_tapped
+				})
+
+				return new_game_state
+			},
+
+			/**
+			 * returns the username and row_name of a given stack 
+			 *
+			 */
+			find: (game_state, stack_uuid) => {
+				for (const player_name of Object.keys(game_state)) {
 					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
-						const stack = new_game_state[player_name][row_name].stacks.find(s => s.uuid === stack_id)
+						const stack = game_state[player_name][row_name].stacks.find(s => s.uuid === stack_uuid)
 						if (stack) {
-							stack.is_tapped = !stack.is_tapped
-							return new_game_state
+							return { username: player_name, row_name }
 						}
 					}
 				}
+
+				return null
 			},
+
 		},
 
 		Row: {
@@ -269,6 +289,76 @@ export const ServerProvider = ({ children }) => {
 		},
 
 		Card: {
+
+
+			find: (game_state, card_uuid) => {
+				for (const player_name of Object.keys(game_state)) {
+					if (game_state[player_name].library.some(card => card.uuid === card_uuid)) {
+						const card_index = game_state[player_name].library.findIndex(card => card.uuid === card_uuid)
+						return { username: player_name, zone: 'library', card_index }
+					}
+					
+					if (game_state[player_name].graveyard.some(card => card.uuid === card_uuid)) {
+						const card_index = game_state[player_name].graveyard.findIndex(card => card.uuid === card_uuid)
+						return { username: player_name, zone: 'graveyard', card_index }
+					}
+					
+					if (game_state[player_name].exile.some(card => card.uuid === card_uuid)) {
+						const card_index = game_state[player_name].exile.findIndex(card => card.uuid === card_uuid)
+						return { username: player_name, zone: 'exile', card_index }
+					}
+					
+					for (const row_name of ['top_row', 'hand_row', 'left_row', 'right_row']) {
+						const stacks = game_state[player_name][row_name].stacks
+						
+						for (let stack_index = 0; stack_index < stacks.length; stack_index++) {
+							const stack = stacks[stack_index]
+							
+							for (let card_index = 0; card_index < stack.card_arr.length; card_index++) {
+								if (stack.card_arr[card_index].uuid === card_uuid) {
+									return {
+										username: player_name,
+										row_name,
+										stack_index,
+										card_index,
+										stack_uuid: stack.uuid,
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				return null 
+			},
+
+
+
+			/**
+			 * returns game state with the card's tapped property toggled
+			 *
+			 */
+			toggle_tapped: (game_state, card_uuid) => {
+				const new_game_state = { ...game_state }
+				const { username, row_name, stack_index, card_index } = State.Card.find(new_game_state, card_uuid)
+
+				const is_tapped = new_game_state[username][row_name].stacks[stack_index].card_arr[card_index].is_tapped
+				new_game_state[username][row_name].stacks[stack_index].card_arr[card_index].is_tapped = !is_tapped
+
+				return new_game_state
+			},
+
+
+			set_tapped: (game_state, card_uuid, tapped_boolean) => {
+				const new_game_state = { ...game_state }
+				const { username, row_name, stack_index, card_index } = State.Card.find(new_game_state, card_uuid)
+				new_game_state[username][row_name].stacks[stack_index].card_arr[card_index].is_tapped = tapped_boolean
+
+				return new_game_state
+			},
+
+
+
 			/* identifies where a card is located in game_state and pops it from that location */
 			remove: (game_state, card_uuid) => {
 				if (game_state[username].library.find(c => c.uuid === card_uuid)) {
@@ -328,7 +418,6 @@ export const ServerProvider = ({ children }) => {
 				}
 				return false 
 			},
-
 		},
 
 		Player: {

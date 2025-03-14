@@ -6,8 +6,7 @@ const gap = 10
 
 export const CardGridOverlay = ({ card_arr }) => {
 	const [hovered_index, set_hovered_index] = useState(null)
-
-	const { State } = useContext(Server)
+	const { State, set_and_sync_state } = useContext(Server)
 
 	const overlay_style = {
 		backgroundColor: 'rgba(0, 0, 0, 0.8)', 
@@ -39,17 +38,22 @@ export const CardGridOverlay = ({ card_arr }) => {
 
 	const card_container_attr = (index) => ({
 		style: card_container_style(index === hovered_index),
+
 		onMouseEnter: () => {
 			set_hovered_index(index) 
 		},
+
 		onMouseLeave: () => {
 			set_hovered_index(null)
 		},
+
 		/* add card to hand on click */
 		onClick: (event) => {
 			event.stopPropagation()
-			const card_obj = State.Card.remove(card_arr[index].uuid)
-			State.Hand.insert(card_obj, -1)
+
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, card_arr[index].uuid)
+			const game_state_post_insertion = State.Hand.insert(game_state_post_removal, removed_card_obj, -1)
+			set_and_sync_state(game_state_post_insertion)
 		},
 	})
 
