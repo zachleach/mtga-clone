@@ -48,17 +48,9 @@ const App = () => {
 		if (!username.trim()) {
 			return
 		}
-		
-		const temp_decklist = `
-			1 Forest (ELD) 266
-			1 Island (UND) 89
-			1 Mountain (ELD) 262
-			1 Plains (UND) 87
-			1 Swamp (UND) 91
-		`	
 
 		/* replace with state decklist */
-		const deck = await query_decklist(temp_decklist)
+		const deck = await query_decklist(decklist)
 		ws_connect(username, deck)
   }
 
