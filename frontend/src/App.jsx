@@ -136,7 +136,7 @@ const App = () => {
 	const esc_handler = () => {
 		/* escape from viewing library will shuffle the deck (but `l` again won't) */
 		if (is_viewing_library) {
-			const game_state_post_library_shuffle = State.Library.shuffle()
+			const game_state_post_library_shuffle = State.Library.shuffle(State.game_state)
 			set_and_sync_state(game_state_post_library_shuffle)
 			set_is_viewing_library(prev => false)
 

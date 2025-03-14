@@ -149,7 +149,6 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		onClick: (event) => {
 			if (State.Player.is_targetting()) {
 				event.stopPropagation()
-
 				const game_state_post_targetting = State.Card.toggle_target(State.game_state, uuid)
 				set_and_sync_state(game_state_post_targetting)
 			}

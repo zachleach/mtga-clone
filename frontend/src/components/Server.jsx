@@ -320,13 +320,22 @@ export const ServerProvider = ({ children }) => {
 				return new_game_state
 			},
 
-			is_targetted: (uuid) => {
-				return game_state[username].targets.includes(uuid)
-			}
+			is_targetted: (card_uuid) => {
+				for (const player_name of Object.keys(game_state)) {
+					if (game_state[player_name].targets.includes(card_uuid)) {
+						return true
+					}
+				}
+				return false 
+			},
 
 		},
 
 		Player: {
+			has_target: (username, card_uuid) => {
+				return game_state[username].targets.includes(card_uuid)
+			},
+
 			is_targetting: () => {
 				return game_state[username].targets.length > 0
 			},
