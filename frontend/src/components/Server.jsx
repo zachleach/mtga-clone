@@ -452,7 +452,8 @@ export const ServerProvider = ({ children }) => {
 
 
   const ws_connect = (username, deck) => {
-    const websocket = new WebSocket(`ws://localhost:8000/ws/${username}`)
+		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		const websocket = new WebSocket(`${protocol}//${window.location.host}/ws/${username}`)
     
 		/**
 		 * ON OPEN

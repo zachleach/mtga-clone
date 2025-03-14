@@ -1,11 +1,14 @@
 import pprint
 import uuid
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from typing import Dict
 import json
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from bulk_query import ScryfallDeckUtils
+import os
 
 app = FastAPI()
 active_connections: Dict[str, WebSocket] = {}
@@ -20,6 +23,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount the dist directory
+app.mount("/assets", StaticFiles(directory="dist/assets"), name="assets")
+
+# Serve the React application for any other routes
+@app.get("/{full_path:path}")
+async def serve_frontend(request: Request, full_path: str):
+    # For any API or WebSocket routes, this handler won't be called
+    # For any other route, serve the index.html
+    return FileResponse("dist/index.html")
 
 async def broadcast_state_update():
     global server_version
@@ -97,20 +110,5 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
         await remove_player(username)
         await broadcast_state_update()
 
-
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-
-'''
-                case 'StackClickEvent':
-                    print('StackClickEvent')
-                    stack_uuid = data['uuid']
-                    for username in game_state:
-                        for row_name in ['hand_row', 'top_row', 'left_row', 'right_row']:
-                            row = game_state[username][row_name]
-                            for stack in row['stacks']:
-                                if stack['uuid'] == stack_uuid:
-                                    stack['is_tapped'] = not stack['is_tapped']
-                                    break
-
-'''
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
