@@ -52,6 +52,11 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 		/* remove card from source stack, then insert at drop index */
 		onDrop: (event) => {
+			/* propagate up to row.jsx if this row is hand row */
+			if (is_hand === true) {
+				return
+			}
+
 			event.stopPropagation()
 			const source_card_uuid = event.dataTransfer.getData('source_card_uuid')
 			if (source_card_uuid === dest_card.uuid) {
@@ -60,7 +65,6 @@ export const Stack = ({ stack_state, is_hand = false }) => {
 
 			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, source_card_uuid)
 			const game_state_post_insertion = State.Stack.insert(game_state_post_removal, uuid, removed_card_obj, dest_card_stack_index)
-
 			set_and_sync_state(game_state_post_insertion)
 		},
 

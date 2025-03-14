@@ -187,7 +187,8 @@ export const ServerProvider = ({ children }) => {
       },
 
 			/**
-			 * returns game_state with the given stack tapped 
+			 * if the entire stack is tapped, untap all cards in the stack
+			 * otherwise, tap the entire stack
 			 *
 			 */
 			toggle_tapped: (game_state, stack_uuid) => {
@@ -195,10 +196,17 @@ export const ServerProvider = ({ children }) => {
 				const { username, row_name } = State.Stack.find(new_game_state, stack_uuid)
 				const stack = new_game_state[username][row_name].stacks.find(s => s.uuid === stack_uuid)
 
-				stack.is_tapped = !stack.is_tapped
-				console.log('Stack.toggle_tapped: ', stack.is_tapped)
+				let amt_tapped = 0
 				stack.card_arr.forEach(card => {
-					card.is_tapped = stack.is_tapped
+					if (card.is_tapped === true) {
+						amt_tapped += 1
+					}
+				})
+
+				/* untap if all cards are tapped, otherwise tap all cards */
+				const set_tapped = (amt_tapped === stack.card_arr.length ? false : true)
+				stack.card_arr.forEach(card => {
+					card.is_tapped = set_tapped
 				})
 
 				return new_game_state
@@ -238,7 +246,7 @@ export const ServerProvider = ({ children }) => {
             if (row.uuid === row_id) {
 							/* create the new stack */
               const new_stack = State.Stack.create(card_obj)
-              
+
 							/* insert at index */
               if (index !== -1) {
                 row.stacks.splice(index, 0, new_stack)

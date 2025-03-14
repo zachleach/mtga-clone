@@ -29,7 +29,13 @@ export const Row = ({ row_state }) => {
 			event.preventDefault()
 			const source_card_uuid = event.dataTransfer.getData('source_card_uuid')
 
-			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(State.game_state, source_card_uuid)
+			/* if a card is tapped and you move it to the hand, moving it to the board will cause it to enter tapped; therefore, unset tapped state when moving a card to hand */ 
+			let game_state = State.game_state
+			if (row_state.is_hand) {
+				game_state = State.Card.set_tapped(State.game_state, source_card_uuid, false)
+			}
+
+			const { game_state: game_state_post_removal, removed_card_obj } = State.Card.remove(game_state, source_card_uuid)
 			const row_bb = row_ref.current.getBoundingClientRect()
 			const drop_x = event.clientX - row_bb.left
 
