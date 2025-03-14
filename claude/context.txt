@@ -1,7 +1,0 @@
-tech stack:
-the frontend is in react
-the backend is in python using fast api 
-
-output requirements:
-use two space indentation for javascript files
-
