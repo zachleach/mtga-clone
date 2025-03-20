@@ -45,7 +45,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			return {
 				pointerEvents: 'none',
 				position: 'fixed',
-				width: '500px',
+				width: '20vw',
 				aspectRatio: 745 / 1040,
 				border: '2px solid black',
 				borderRadius: '24px',
@@ -71,7 +71,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 			return {
 				pointerEvents: 'none',
 				position: 'fixed',
-				width: '500px',
+				width: '20vw',
 				aspectRatio: 745 / 1040,
 				border: '2px solid black',
 				borderRadius: '24px',
