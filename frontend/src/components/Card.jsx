@@ -28,9 +28,20 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 		transform: is_tapped ? `rotate(6deg)` : null,
   }
 
+	const preview_img_style = {
+    width: '100%',
+    display: 'block',
+		objectFit: 'cover',
+	}
+
+	/**
+	 * separate from preview_img_style so cards on board can have growth effect on hover
+	 * otherwise (if they shared the same img_style) the preview would also grow
+	 *
+	 */
   const img_style = {
     width: '100%',
-    height: '100%',
+		transform: is_hovered ? `scale(1.01)` : null,
     display: 'block',
 		objectFit: 'cover',
   }
@@ -252,7 +263,7 @@ export const Card = ({ uuid, art_url, aspect_ratio = 745 / 1040, outline, opacit
 					<img
 						src={card_art} 
 						alt="Card.jsx preview failed to load" 
-						style={img_style}
+						style={preview_img_style}
 					/>
 				</div>, 
 				document.body
