@@ -106,6 +106,7 @@ export const ScryfallUtil = {
     }
     
     const results = await ScryfallUtil.fetch_cards_bulk(identifiers, request_delay)
+		console.log(results)
     
     // Count occurrences of each card
     const card_counts = {}

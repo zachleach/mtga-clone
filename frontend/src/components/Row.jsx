@@ -11,8 +11,8 @@ export const Row = ({ row_state }) => {
   const container_style = {
     height: '100%',
     background: 'white',
-    border: '1px solid green',
     boxSizing: 'border-box',
+		border: '1px solid black',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
