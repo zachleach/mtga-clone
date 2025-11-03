@@ -54,13 +54,13 @@ class ScryfallDeckUtils:
     
     @staticmethod
     def parse_mtga_decklist(decklist_text: str) -> List[Dict[str, str]]:
-        pattern = r'^\s*(\d+)\s+([^(\n]+?)(?:\s+\((\w+)\)\s+(\d+))?\s*(?:#[^\n]*)?$'
+        pattern = r'^\s*(\d+)\s+([^(\n]+?)(?:\s+\((\w+)\)\s+(\d+[★\*]?))?\s*(?:\*F\*)?\s*(?:#[^\n]*)?$'
         identifiers = []
-        
+
         for line in decklist_text.strip().split('\n'):
             if not line.strip() or line.startswith('//'):
                 continue
-                
+
             match = re.match(pattern, line)
             if match:
                 quantity, card_name, set_code, collector_number = match.groups()

@@ -57,16 +57,16 @@ export const ScryfallUtil = {
 
   // Parse MTGA decklist text into card identifiers
   parse_mtga_decklist: (decklist_text) => {
-    const pattern = /^\s*(\d+)\s+([^(\n]+?)(?:\s+\((\w+)\)\s+(\d+))?\s*(?:#[^\n]*)?$/
+    const pattern = /^\s*(\d+)\s+([^(\n]+?)(?:\s+\((\w+)\)\s+(\d+[★\*]?))?\s*(?:\*F\*)?\s*(?:#[^\n]*)?$/
     const identifiers = []
-    
+
     const lines = decklist_text.trim().split('\n')
-    
+
     for (const line of lines) {
       if (!line.trim() || line.startsWith('//')) {
         continue
       }
-      
+
       const match = line.match(pattern)
       if (match) {
         const [_, quantity, card_name, set_code, collector_number] = match
