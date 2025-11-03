@@ -22,9 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# serve static frontend files for production deployment
-app.mount("/", StaticFiles(directory="dist", html=True), name="static")
-
 async def broadcast_state_update():
     global server_version
     for connection in active_connections.values():
@@ -44,7 +41,7 @@ async def broadcast_state_update():
 async def attempt_state_update(state, client_version):
     global server_version
     if (client_version != server_version):
-        return 
+        return
     game_state.clear()
     game_state.update(state)
     server_version += 1
@@ -64,7 +61,7 @@ async def add_player(username, initial_data):
 '''
     remove player from game_state and active_connections (mutually exclusive operation
     increment version counter
-    
+
 '''
 async def remove_player(username):
     global server_version
@@ -100,6 +97,10 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         await remove_player(username)
         await broadcast_state_update()
+
+
+# serve static frontend files for production deployment (must be last - catch-all route)
+app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
 
 if __name__ == "__main__":
