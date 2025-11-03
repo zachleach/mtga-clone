@@ -473,7 +473,7 @@ export const ServerProvider = ({ children }) => {
 					uuid: uuidv4(),
 					deck: deck,
 					targets: [],
-					library: [],
+					library: deck,
 					graveyard: [],
 					exile: [],
 					hand_row: {
@@ -484,7 +484,7 @@ export const ServerProvider = ({ children }) => {
 					top_row: {
 						uuid: uuidv4(),
 						is_hand: false,
-						stacks: deck.map(card => State.Stack.create(card))
+						stacks: []
 					},
 					left_row: {
 						uuid: uuidv4(),

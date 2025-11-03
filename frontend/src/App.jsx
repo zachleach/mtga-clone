@@ -49,16 +49,20 @@ const App = () => {
 			return
 		}
 		
-		const temp_decklist = `
-			1 Forest (ELD) 266
-			1 Island (UND) 89
-			1 Mountain (ELD) 262
-			1 Plains (UND) 87
-			1 Swamp (UND) 91
-		`	
+		// Use user's decklist input if provided, otherwise use temp_decklist for quick testing
+		let decklist_to_use = decklist.trim()
 
-		/* replace with state decklist */
-		const deck = await query_decklist(temp_decklist)
+		if (!decklist_to_use) {
+			decklist_to_use = `
+				1 Forest (ELD) 266
+				1 Island (UND) 89
+				1 Mountain (ELD) 262
+				1 Plains (UND) 87
+				1 Swamp (UND) 91
+			`
+		}
+
+		const deck = await query_decklist(decklist_to_use)
 		ws_connect(username, deck)
   }
 
