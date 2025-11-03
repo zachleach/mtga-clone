@@ -1,6 +1,7 @@
 import pprint
 import uuid
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 from typing import Dict
 import json
 import uvicorn
@@ -20,6 +21,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# serve static frontend files for production deployment
+app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
 async def broadcast_state_update():
     global server_version
