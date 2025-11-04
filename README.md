@@ -8,6 +8,73 @@ A real-time multiplayer Magic: The Gathering game built with React and FastAPI, 
 **Backend**: Python FastAPI with WebSocket support
 **Communication**: WebSocket connections for real-time game state updates
 
+### System Overview
+
+This is a three-tier architecture with a React frontend, FastAPI backend, and Scryfall API integration. The backend maintains an in-memory game state that is synchronized across all connected players using WebSockets. When any player performs an action (drawing a card, moving cards between zones, tapping/untapping), the backend broadcasts the updated state to all clients in real-time.
+
+The system uses version-based optimistic locking to handle concurrent updates—each state change increments a version counter, and clients must send the current version with their updates. This prevents race conditions when multiple players interact simultaneously. Deck data is fetched from the Scryfall API during initial connection, providing card images and metadata.
+
+### Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Frontend["React Frontend (Vite)"]
+        UI[UI Components]
+        WS_CLIENT[WebSocket Client]
+        STATE[Local Game State]
+    end
+
+    subgraph Backend["FastAPI Backend"]
+        WS_SERVER[WebSocket Server]
+        GAME_STATE[In-Memory Game State]
+        STATIC[Static File Server]
+    end
+
+    subgraph External["External Services"]
+        SCRYFALL[Scryfall API]
+    end
+
+    UI <-->|State Updates| STATE
+    STATE <-->|WebSocket Messages| WS_CLIENT
+    WS_CLIENT <-->|ws://localhost:8000/ws| WS_SERVER
+    WS_SERVER <-->|Broadcast Updates| GAME_STATE
+    UI -.->|HTTP: Fetch Cards| SCRYFALL
+    STATIC -.->|Serve Static Files| UI
+
+    style Frontend fill:#e1f5ff
+    style Backend fill:#fff4e1
+    style External fill:#f0f0f0
+```
+
+### State Synchronization Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant OtherClients as Other Players
+
+    Note over User,OtherClients: Initial Connection
+    User->>Frontend: Enter username + decklist
+    Frontend->>Scryfall: Fetch card data
+    Scryfall-->>Frontend: Card images + metadata
+    Frontend->>Backend: WebSocket connect + initial state
+    Backend->>Backend: Add player to game state
+    Backend->>Frontend: Broadcast updated state (v1)
+    Backend->>OtherClients: Broadcast updated state (v1)
+
+    Note over User,OtherClients: In-Game State Update
+    User->>Frontend: Drag card to new zone
+    Frontend->>Frontend: Update local state
+    Frontend->>Backend: state_update (version: 1)
+    Backend->>Backend: Validate version, increment to v2
+    Backend->>Frontend: Broadcast new state (v2)
+    Backend->>OtherClients: Broadcast new state (v2)
+    Frontend->>Frontend: Re-render with new state
+    OtherClients->>OtherClients: Re-render with new state
+```
+
 ## Project Structure
 
 ```
